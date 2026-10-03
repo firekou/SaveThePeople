@@ -1,0 +1,67 @@
+{
+  "_notice": "SYNTHETIC DATA ONLY. 虛構家庭，用於驗證規格；不得與任何真實個案比對。",
+  "is_synthetic": true,
+  "evaluation_date": "2026-10-03",
+  "households": [
+    {
+      "id": "H1",
+      "display_alias": "示範-甲家",
+      "purpose": "T-03 不同家庭口徑：同戶籍 3 人、共同生活 4 人",
+      "facts": {
+        "household.region_code": {"value": "DEMO-A", "confirmation_level": "C1"},
+        "household.recent_hardship_event": {"value": "NONE", "confirmation_level": "C1"},
+        "household.receiving_resources": {"value": [], "confirmation_level": "C1"},
+        "household.movable_property_per_capita": {"unknown": true, "confirmation_level": "C0"}
+      },
+      "persons": [
+        {"id": "H1-P1", "relation_to_primary": "SELF", "age": 35, "in_school": false, "co_residing": "YES", "same_household_registration": "YES", "monthly_earned_income": {"value": 40000, "confirmation_level": "C2"}, "monthly_pension": {"value": 0, "confirmation_level": "C1"}},
+        {"id": "H1-P2", "relation_to_primary": "CHILD", "age": 8, "in_school": true, "co_residing": "YES", "same_household_registration": "YES", "monthly_earned_income": {"value": 0, "confirmation_level": "C1"}, "monthly_pension": {"value": 0, "confirmation_level": "C1"}},
+        {"id": "H1-P3", "relation_to_primary": "CHILD", "age": 3, "in_school": false, "co_residing": "YES", "same_household_registration": "YES", "monthly_earned_income": {"value": 0, "confirmation_level": "C1"}, "monthly_pension": {"value": 0, "confirmation_level": "C1"}},
+        {"id": "H1-P4", "relation_to_primary": "PARENT", "age": 66, "in_school": false, "co_residing": "YES", "same_household_registration": "NO", "monthly_earned_income": {"value": 0, "confirmation_level": "C1"}, "monthly_pension": {"value": 6000, "confirmation_level": "C1"}}
+      ]
+    },
+    {
+      "id": "H2",
+      "display_alias": "示範-乙家",
+      "purpose": "T-01 缺資料：所有題目回答不知道",
+      "facts": {
+        "household.region_code": {"unknown": true, "confirmation_level": "C0"},
+        "household.recent_hardship_event": {"unknown": true, "confirmation_level": "C0"},
+        "household.receiving_resources": {"unknown": true, "confirmation_level": "C0"},
+        "household.movable_property_per_capita": {"unknown": true, "confirmation_level": "C0"}
+      },
+      "persons": []
+    },
+    {
+      "id": "H3",
+      "display_alias": "示範-丙家",
+      "purpose": "T-02 地區不符、T-06 收入自述略高於門檻、T-08 人工裁量、T-09 額滿",
+      "facts": {
+        "household.region_code": {"value": "DEMO-B", "confirmation_level": "C1"},
+        "household.recent_hardship_event": {"value": "ILLNESS", "confirmation_level": "C1"},
+        "household.receiving_resources": {"value": [], "confirmation_level": "C1"},
+        "household.movable_property_per_capita": {"value": 50000, "confirmation_level": "C1"}
+      },
+      "persons": [
+        {"id": "H3-P1", "relation_to_primary": "SELF", "age": 41, "in_school": false, "co_residing": "YES", "same_household_registration": "YES", "monthly_earned_income": {"value": 35500, "confirmation_level": "C1"}, "monthly_pension": {"value": 0, "confirmation_level": "C1"}},
+        {"id": "H3-P2", "relation_to_primary": "SPOUSE", "age": 43, "in_school": false, "co_residing": "YES", "same_household_registration": "YES", "monthly_earned_income": {"value": 20000, "confirmation_level": "C1"}, "monthly_pension": {"value": 0, "confirmation_level": "C1"}},
+        {"id": "H3-P3", "relation_to_primary": "CHILD", "age": 12, "in_school": true, "co_residing": "YES", "same_household_registration": "YES", "monthly_earned_income": {"value": 0, "confirmation_level": "C1"}, "monthly_pension": {"value": 0, "confirmation_level": "C1"}}
+      ]
+    },
+    {
+      "id": "H4",
+      "display_alias": "示範-丁家",
+      "purpose": "T-05 併領排除：已領取家庭生活扶助（已查看核定書）",
+      "facts": {
+        "household.region_code": {"value": "DEMO-A", "confirmation_level": "C1"},
+        "household.recent_hardship_event": {"unknown": true, "confirmation_level": "C0"},
+        "household.receiving_resources": {"value": ["TW-DEMO-LIVING-001"], "confirmation_level": "C2"},
+        "household.movable_property_per_capita": {"unknown": true, "confirmation_level": "C0"}
+      },
+      "persons": [
+        {"id": "H4-P1", "relation_to_primary": "SELF", "age": 29, "in_school": false, "co_residing": "YES", "same_household_registration": "YES", "monthly_earned_income": {"value": 20000, "confirmation_level": "C2"}, "monthly_pension": {"value": 0, "confirmation_level": "C1"}},
+        {"id": "H4-P2", "relation_to_primary": "CHILD", "age": 5, "in_school": false, "co_residing": "YES", "same_household_registration": "YES", "monthly_earned_income": {"value": 0, "confirmation_level": "C1"}, "monthly_pension": {"value": 0, "confirmation_level": "C1"}}
+      ]
+    }
+  ]
+}

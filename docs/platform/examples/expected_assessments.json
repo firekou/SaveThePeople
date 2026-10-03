@@ -1,0 +1,240 @@
+{
+  "_notice": "SYNTHETIC. 由 R4 角色預期的結果（此處由規格作者依規則手算），作為規則引擎驗收基準。",
+  "evaluation_date": "2026-10-03",
+  "expected": {
+    "H1": {
+      "TW-DEMO-LIVING-001": {
+        "result": "INSUFFICIENT_DATA",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "PASS",
+          "C3": "UNKNOWN"
+        },
+        "derived": {
+          "C2": {
+            "members": 3,
+            "income_per_capita": 13333
+          }
+        }
+      },
+      "TW-DEMO-EMERG-002": {
+        "result": "LIKELY_INELIGIBLE",
+        "unconfirmed": true,
+        "criteria": {
+          "C1": "PASS",
+          "C2": "FAIL_UNCONFIRMED",
+          "C3": "HUMAN"
+        },
+        "flags": [
+          "HUMAN_CHECK"
+        ]
+      },
+      "TW-DEMO-EDU-003": {
+        "result": "LIKELY_ELIGIBLE",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "PASS",
+          "C3": "PASS"
+        },
+        "derived": {
+          "C3": {
+            "members": 4,
+            "income_per_capita": 11500
+          }
+        }
+      },
+      "TW-DEMO-CHILD-004": {
+        "result": "LIKELY_ELIGIBLE",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "PASS",
+          "C3": "PASS",
+          "C4": "PASS"
+        },
+        "derived": {
+          "C3": {
+            "members": 4,
+            "income_per_capita": 11500
+          }
+        }
+      },
+      "TW-DEMO-FOOD-005": {
+        "result": "LIKELY_ELIGIBLE",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "HUMAN"
+        },
+        "flags": [
+          "HUMAN_CHECK",
+          "CAPACITY_FULL"
+        ]
+      }
+    },
+    "H2": {
+      "TW-DEMO-LIVING-001": {
+        "result": "INSUFFICIENT_DATA",
+        "criteria": {
+          "C1": "UNKNOWN",
+          "C2": "UNKNOWN",
+          "C3": "UNKNOWN"
+        }
+      },
+      "TW-DEMO-EMERG-002": {
+        "result": "INSUFFICIENT_DATA",
+        "criteria": {
+          "C1": "UNKNOWN",
+          "C2": "UNKNOWN",
+          "C3": "HUMAN"
+        },
+        "flags": [
+          "HUMAN_CHECK"
+        ]
+      },
+      "TW-DEMO-EDU-003": {
+        "result": "INSUFFICIENT_DATA",
+        "criteria": {
+          "C1": "UNKNOWN",
+          "C2": "UNKNOWN",
+          "C3": "UNKNOWN"
+        }
+      },
+      "TW-DEMO-CHILD-004": {
+        "result": "INSUFFICIENT_DATA",
+        "criteria": {
+          "C1": "UNKNOWN",
+          "C2": "UNKNOWN",
+          "C3": "UNKNOWN",
+          "C4": "UNKNOWN"
+        }
+      },
+      "TW-DEMO-FOOD-005": {
+        "result": "INSUFFICIENT_DATA",
+        "criteria": {
+          "C1": "UNKNOWN",
+          "C2": "HUMAN"
+        },
+        "flags": [
+          "HUMAN_CHECK",
+          "CAPACITY_FULL"
+        ]
+      }
+    },
+    "H3": {
+      "TW-DEMO-LIVING-001": {
+        "result": "LIKELY_INELIGIBLE",
+        "unconfirmed": true,
+        "criteria": {
+          "C1": "PASS",
+          "C2": "FAIL_UNCONFIRMED",
+          "C3": "PASS"
+        },
+        "flags": [
+          "HUMAN_CHECK"
+        ],
+        "derived": {
+          "C2": {
+            "members": 3,
+            "income_per_capita": 18500
+          }
+        }
+      },
+      "TW-DEMO-EMERG-002": {
+        "result": "LIKELY_ELIGIBLE",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "PASS",
+          "C3": "HUMAN"
+        },
+        "flags": [
+          "HUMAN_CHECK"
+        ]
+      },
+      "TW-DEMO-EDU-003": {
+        "result": "LIKELY_INELIGIBLE",
+        "unconfirmed": false,
+        "criteria": {
+          "C1": "FAIL",
+          "C2": "PASS",
+          "C3": "PASS"
+        }
+      },
+      "TW-DEMO-CHILD-004": {
+        "result": "LIKELY_ELIGIBLE",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "PASS",
+          "C3": "PASS",
+          "C4": "PASS"
+        }
+      },
+      "TW-DEMO-FOOD-005": {
+        "result": "LIKELY_ELIGIBLE",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "HUMAN"
+        },
+        "flags": [
+          "HUMAN_CHECK",
+          "CAPACITY_FULL"
+        ]
+      }
+    },
+    "H4": {
+      "TW-DEMO-LIVING-001": {
+        "result": "INSUFFICIENT_DATA",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "PASS",
+          "C3": "UNKNOWN"
+        },
+        "flags": [
+          "ALREADY_RECEIVING"
+        ]
+      },
+      "TW-DEMO-EMERG-002": {
+        "result": "INSUFFICIENT_DATA",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "UNKNOWN",
+          "C3": "HUMAN"
+        },
+        "flags": [
+          "HUMAN_CHECK"
+        ]
+      },
+      "TW-DEMO-EDU-003": {
+        "result": "LIKELY_INELIGIBLE",
+        "unconfirmed": false,
+        "criteria": {
+          "C1": "PASS",
+          "C2": "FAIL",
+          "C3": "PASS"
+        }
+      },
+      "TW-DEMO-CHILD-004": {
+        "result": "LIKELY_INELIGIBLE",
+        "unconfirmed": false,
+        "criteria": {
+          "C1": "PASS",
+          "C2": "PASS",
+          "C3": "PASS",
+          "C4": "FAIL"
+        }
+      },
+      "TW-DEMO-FOOD-005": {
+        "result": "LIKELY_ELIGIBLE",
+        "criteria": {
+          "C1": "PASS",
+          "C2": "HUMAN"
+        },
+        "flags": [
+          "HUMAN_CHECK",
+          "CAPACITY_FULL"
+        ]
+      }
+    }
+  },
+  "not_recommended": {
+    "TW-DEMO-RENT-006": "EXPIRED：不得出現在任何家庭的正式推薦（T-04）"
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "_notice": "SYNTHETIC DATA ONLY. 全部為虛構資源，位於虛構的「示範縣」(DEMO)。門檻、名稱、機構皆非真實，不得作為任何真實資格判斷依據。",
+  "is_synthetic": true,
+  "regions": {
+    "DEMO": {"name": "示範縣", "children": ["DEMO-A", "DEMO-B"]},
+    "DEMO-A": {"name": "示範縣甲區", "parent": "DEMO"},
+    "DEMO-B": {"name": "示範縣乙區", "parent": "DEMO"}
+  },
+  "sources": [
+    {"id": "S-0001", "url_or_ref": "https://example.invalid/demo-county/living-assistance-2026", "source_type": "WEB_PAGE", "tier": "S3_LOCAL", "retrieved_at": "2026-10-01T09:00:00+08:00"},
+    {"id": "S-0002", "url_or_ref": "https://example.invalid/demo-county/emergency-relief.pdf", "source_type": "PDF", "tier": "S3_LOCAL", "retrieved_at": "2026-10-01T09:30:00+08:00"},
+    {"id": "S-0003", "url_or_ref": "https://example.invalid/demo-a/school-lunch", "source_type": "WEB_PAGE", "tier": "S4_PUBLIC_AGENCY", "retrieved_at": "2026-10-01T10:00:00+08:00"},
+    {"id": "S-0004", "url_or_ref": "https://example.invalid/demo-county/child-family-allowance", "source_type": "ANNOUNCEMENT", "tier": "S3_LOCAL", "retrieved_at": "2026-10-01T10:30:00+08:00"},
+    {"id": "S-0005", "url_or_ref": "電話確認：示範食物互助協會 服務組 2026-10-02（合成）", "source_type": "PHONE_CONFIRMATION", "tier": "S5_NGO", "retrieved_at": "2026-10-02T14:00:00+08:00"},
+    {"id": "S-0006", "url_or_ref": "https://example.invalid/demo-county/rent-subsidy-2026h1", "source_type": "WEB_PAGE", "tier": "S3_LOCAL", "retrieved_at": "2026-05-01T09:00:00+08:00"}
+  ],
+  "household_scopes": [
+    {
+      "scope_key": "SCOPE-L1",
+      "label_plain": "同戶籍的本人、配偶、子女、父母",
+      "member_inclusion": {"relation_in": ["SELF", "SPOUSE", "CHILD", "PARENT"], "same_household_registration": "YES"},
+      "income_definition": {"items": ["monthly_earned_income", "monthly_pension"], "period": "MONTHLY_AVERAGE"},
+      "source_ref": "S-0001#第2點"
+    },
+    {
+      "scope_key": "SCOPE-CO",
+      "label_plain": "實際共同生活的所有成員",
+      "member_inclusion": {"co_residing": "YES"},
+      "income_definition": {"items": ["monthly_earned_income", "monthly_pension"], "period": "MONTHLY_AVERAGE"},
+      "source_ref": "S-0004#第3點"
+    }
+  ],
+  "resources": [
+    {
+      "resource_key": "TW-DEMO-LIVING-001",
+      "canonical_name": "【合成】示範縣家庭生活扶助",
+      "level": "LOCAL",
+      "categories": ["LIVING"],
+      "risk_tier": "LOW",
+      "version": {
+        "version_label": "2026",
+        "status": "PUBLISHED",
+        "verification_level": "V2",
+        "regions": ["DEMO"],
+        "effective_from": "2026-01-01",
+        "effective_to": "2026-12-31",
+        "application_window": {"type": "ROLLING"},
+        "summary_plain": "收入較低的家庭，每月可申請生活費補助。",
+        "amount_or_service": {"unknown": true, "note": "金額依審核結果"},
+        "how_to_apply": {"channels": ["IN_PERSON"], "where": "居住地區公所", "proxy_allowed": "UNKNOWN"},
+        "capacity_status": "OPEN",
+        "stacking_rules": {"excludes": [], "reduces": [], "requires": []},
+        "source_ids": ["S-0001"]
+      },
+      "rule": {
+        "rule_version": "1.0.0",
+        "combinator": "ALL",
+        "criteria": [
+          {"criterion_id": "C1", "label_plain": "住在示範縣", "operator": "REGION_IN", "input_keys": ["household.region_code"], "threshold": {"value": ["DEMO"]}, "min_confirmation_for_fail": "C1", "on_missing": "INSUFFICIENT", "source_ref": "S-0001#第1點"},
+          {"criterion_id": "C2", "label_plain": "家庭平均每人每月收入不超過 18,000 元", "operator": "LTE", "input_keys": ["derived.income_per_capita"], "scope_key": "SCOPE-L1", "threshold": {"value": 18000}, "min_confirmation_for_fail": "C2", "requires_human_when": ["value_within_5_percent_of_threshold"], "on_missing": "INSUFFICIENT", "source_ref": "S-0001#第2點"},
+          {"criterion_id": "C3", "label_plain": "家庭平均每人動產不超過 80,000 元", "operator": "LTE", "input_keys": ["household.movable_property_per_capita"], "threshold": {"value": 80000}, "min_confirmation_for_fail": "C2", "on_missing": "INSUFFICIENT", "source_ref": "S-0001#第2點"}
+        ],
+        "test_cases": ["H1", "H2", "H3"]
+      },
+      "document_requirements": [
+        {"doc_type_key": "household_registration_transcript", "mandatory": "YES", "applies_to": "household"},
+        {"doc_type_key": "income_proof", "mandatory": "YES", "applies_to": "each_counted_member_18_plus"}
+      ]
+    },
+    {
+      "resource_key": "TW-DEMO-EMERG-002",
+      "canonical_name": "【合成】示範縣急難救助",
+      "level": "LOCAL",
+      "categories": ["EMERGENCY"],
+      "risk_tier": "HIGH",
+      "version": {
+        "version_label": "2026",
+        "status": "PUBLISHED",
+        "verification_level": "V2",
+        "regions": ["DEMO"],
+        "effective_from": "2026-01-01",
+        "effective_to": "2026-12-31",
+        "application_window": {"type": "WITHIN_MONTHS_OF_EVENT", "months": 3},
+        "summary_plain": "近 3 個月內遭遇失業、重病、家人過世或災害，生活陷入困難時，可申請一次性救助。",
+        "amount_or_service": {"unknown": true},
+        "how_to_apply": {"channels": ["IN_PERSON"], "where": "居住地區公所", "proxy_allowed": "UNKNOWN"},
+        "capacity_status": "OPEN",
+        "stacking_rules": {"excludes": [], "reduces": [], "requires": []},
+        "source_ids": ["S-0002"]
+      },
+      "rule": {
+        "rule_version": "1.0.0",
+        "combinator": "ALL",
+        "criteria": [
+          {"criterion_id": "C1", "label_plain": "住在示範縣", "operator": "REGION_IN", "input_keys": ["household.region_code"], "threshold": {"value": ["DEMO"]}, "min_confirmation_for_fail": "C1", "on_missing": "INSUFFICIENT", "source_ref": "S-0002#p1"},
+          {"criterion_id": "C2", "label_plain": "近 3 個月內發生失業、重病、家人過世或災害", "operator": "IN", "input_keys": ["household.recent_hardship_event"], "threshold": {"value": ["JOB_LOSS", "ILLNESS", "DEATH", "DISASTER"]}, "min_confirmation_for_fail": "C2", "on_missing": "INSUFFICIENT", "source_ref": "S-0002#p1"},
+          {"criterion_id": "C3", "label_plain": "生活陷於困境（由承辦評估）", "operator": "HUMAN_JUDGMENT", "input_keys": [], "discretionary": true, "source_ref": "S-0002#p2"}
+        ],
+        "test_cases": ["H1", "H2", "H3"]
+      },
+      "document_requirements": [
+        {"doc_type_key": "hardship_event_proof", "mandatory": "YES", "applies_to": "household"}
+      ]
+    },
+    {
+      "resource_key": "TW-DEMO-EDU-003",
+      "canonical_name": "【合成】示範縣甲區學童午餐補助",
+      "level": "LOCAL",
+      "categories": ["CHILD_YOUTH", "EDUCATION"],
+      "risk_tier": "MEDIUM",
+      "version": {
+        "version_label": "2026-2027學年",
+        "status": "PUBLISHED",
+        "verification_level": "V2",
+        "regions": ["DEMO-A"],
+        "effective_from": "2026-08-01",
+        "effective_to": "2027-07-31",
+        "application_window": {"type": "ROLLING"},
+        "summary_plain": "甲區就讀國小、國中的孩子，家庭收入較低時，可申請學校午餐費補助。",
+        "amount_or_service": {"service": "午餐費全額或部分補助（合成）"},
+        "how_to_apply": {"channels": ["SCHOOL"], "where": "就讀學校", "proxy_allowed": "YES"},
+        "capacity_status": "OPEN",
+        "stacking_rules": {"excludes": [], "reduces": [], "requires": []},
+        "source_ids": ["S-0003"]
+      },
+      "rule": {
+        "rule_version": "1.0.0",
+        "combinator": "ALL",
+        "criteria": [
+          {"criterion_id": "C1", "label_plain": "住在示範縣甲區", "operator": "REGION_IN", "input_keys": ["household.region_code"], "threshold": {"value": ["DEMO-A"]}, "min_confirmation_for_fail": "C1", "on_missing": "INSUFFICIENT", "source_ref": "S-0003#1"},
+          {"criterion_id": "C2", "label_plain": "家中至少 1 位 6～15 歲且在學的孩子", "operator": "COUNT_MEMBERS_WHERE", "input_keys": ["person.age", "person.in_school"], "scope_key": "SCOPE-CO", "threshold": {"where": {"age_between": [6, 15], "in_school": true}, "min_count": 1}, "min_confirmation_for_fail": "C1", "on_missing": "INSUFFICIENT", "source_ref": "S-0003#2"},
+          {"criterion_id": "C3", "label_plain": "家庭平均每人每月收入不超過 25,000 元", "operator": "LTE", "input_keys": ["derived.income_per_capita"], "scope_key": "SCOPE-CO", "threshold": {"value": 25000}, "min_confirmation_for_fail": "C2", "requires_human_when": ["value_within_5_percent_of_threshold"], "on_missing": "INSUFFICIENT", "source_ref": "S-0003#3"}
+        ],
+        "test_cases": ["H1", "H3", "H4"]
+      },
+      "document_requirements": [
+        {"doc_type_key": "application_form_school", "mandatory": "YES", "applies_to": "each_eligible_child"}
+      ]
+    },
+    {
+      "resource_key": "TW-DEMO-CHILD-004",
+      "canonical_name": "【合成】示範縣兒少家庭生活補助",
+      "level": "LOCAL",
+      "categories": ["CHILD_YOUTH", "LIVING"],
+      "risk_tier": "MEDIUM",
+      "version": {
+        "version_label": "2026",
+        "status": "PUBLISHED",
+        "verification_level": "V2",
+        "regions": ["DEMO"],
+        "effective_from": "2026-01-01",
+        "effective_to": "2026-12-31",
+        "application_window": {"type": "ROLLING"},
+        "summary_plain": "家中有未滿 18 歲孩子、收入較低的家庭，可申請每月兒少生活補助。",
+        "amount_or_service": {"unknown": true},
+        "how_to_apply": {"channels": ["IN_PERSON", "MAIL"], "where": "居住地區公所", "proxy_allowed": "CONDITIONAL"},
+        "capacity_status": "OPEN",
+        "stacking_rules": {"excludes": [{"resource_key": "TW-DEMO-LIVING-001", "type": "SAME_PERIOD", "source_ref": "S-0004#第5點"}], "reduces": [], "requires": []},
+        "source_ids": ["S-0004"]
+      },
+      "rule": {
+        "rule_version": "1.0.0",
+        "combinator": "ALL",
+        "criteria": [
+          {"criterion_id": "C1", "label_plain": "住在示範縣", "operator": "REGION_IN", "input_keys": ["household.region_code"], "threshold": {"value": ["DEMO"]}, "min_confirmation_for_fail": "C1", "on_missing": "INSUFFICIENT", "source_ref": "S-0004#第2點"},
+          {"criterion_id": "C2", "label_plain": "家中至少 1 位未滿 18 歲的孩子", "operator": "COUNT_MEMBERS_WHERE", "input_keys": ["person.age"], "scope_key": "SCOPE-CO", "threshold": {"where": {"age_between": [0, 17]}, "min_count": 1}, "min_confirmation_for_fail": "C1", "on_missing": "INSUFFICIENT", "source_ref": "S-0004#第2點"},
+          {"criterion_id": "C3", "label_plain": "家庭平均每人每月收入不超過 22,000 元", "operator": "LTE", "input_keys": ["derived.income_per_capita"], "scope_key": "SCOPE-CO", "threshold": {"value": 22000}, "min_confirmation_for_fail": "C2", "requires_human_when": ["value_within_5_percent_of_threshold"], "on_missing": "INSUFFICIENT", "source_ref": "S-0004#第3點"},
+          {"criterion_id": "C4", "label_plain": "同期間未領取示範縣家庭生活扶助", "operator": "NOT_RECEIVING", "input_keys": ["household.receiving_resources"], "threshold": {"value": ["TW-DEMO-LIVING-001"]}, "min_confirmation_for_fail": "C2", "on_missing": "INSUFFICIENT", "source_ref": "S-0004#第5點"}
+        ],
+        "test_cases": ["H1", "H3", "H4"]
+      },
+      "document_requirements": [
+        {"doc_type_key": "household_registration_transcript", "mandatory": "YES", "applies_to": "household"},
+        {"doc_type_key": "income_proof", "mandatory": "YES", "applies_to": "each_counted_member_18_plus"}
+      ]
+    },
+    {
+      "resource_key": "TW-DEMO-FOOD-005",
+      "canonical_name": "【合成】示範食物互助協會物資箱",
+      "level": "PRIVATE",
+      "categories": ["FOOD_GOODS"],
+      "risk_tier": "HIGH",
+      "version": {
+        "version_label": "2026Q4",
+        "status": "PUBLISHED",
+        "verification_level": "V3",
+        "regions": ["DEMO"],
+        "effective_from": "2026-10-01",
+        "effective_to": null,
+        "effective_unknown": true,
+        "application_window": {"type": "ROLLING"},
+        "summary_plain": "民間協會每月提供物資箱，需經協會評估；目前名額已滿，可登記候補。",
+        "amount_or_service": {"service": "每月物資箱 1 箱（合成）"},
+        "how_to_apply": {"channels": ["REFERRAL"], "where": "由協助員轉介", "proxy_allowed": "YES"},
+        "capacity_status": "FULL",
+        "capacity_confirmed_at": "2026-10-02",
+        "stacking_rules": {"excludes": [], "reduces": [], "requires": []},
+        "source_ids": ["S-0005"]
+      },
+      "rule": {
+        "rule_version": "1.0.0",
+        "combinator": "ALL",
+        "criteria": [
+          {"criterion_id": "C1", "label_plain": "住在示範縣", "operator": "REGION_IN", "input_keys": ["household.region_code"], "threshold": {"value": ["DEMO"]}, "min_confirmation_for_fail": "C1", "on_missing": "INSUFFICIENT", "source_ref": "S-0005"},
+          {"criterion_id": "C2", "label_plain": "由協會評估物資需要", "operator": "HUMAN_JUDGMENT", "input_keys": [], "discretionary": true, "source_ref": "S-0005"}
+        ],
+        "test_cases": ["H1", "H2", "H3"]
+      },
+      "document_requirements": []
+    },
+    {
+      "resource_key": "TW-DEMO-RENT-006",
+      "canonical_name": "【合成】示範縣 2026 上半年租屋補助",
+      "level": "LOCAL",
+      "categories": ["HOUSING"],
+      "risk_tier": "HIGH",
+      "version": {
+        "version_label": "2026H1",
+        "status": "EXPIRED",
+        "verification_level": "V2",
+        "regions": ["DEMO"],
+        "effective_from": "2026-01-01",
+        "effective_to": "2026-06-30",
+        "application_window": {"type": "FIXED", "from": "2026-01-15", "to": "2026-03-31"},
+        "summary_plain": "（已過期）2026 年上半年租屋補助。",
+        "amount_or_service": {"unknown": true},
+        "how_to_apply": {"channels": ["ONLINE", "IN_PERSON"], "where": "縣府", "proxy_allowed": "UNKNOWN"},
+        "capacity_status": "UNKNOWN",
+        "stacking_rules": {"excludes": [], "reduces": [], "requires": []},
+        "source_ids": ["S-0006"]
+      },
+      "rule": {
+        "rule_version": "1.0.0",
+        "combinator": "ALL",
+        "criteria": [
+          {"criterion_id": "C1", "label_plain": "住在示範縣", "operator": "REGION_IN", "input_keys": ["household.region_code"], "threshold": {"value": ["DEMO"]}, "min_confirmation_for_fail": "C1", "on_missing": "INSUFFICIENT", "source_ref": "S-0006"}
+        ],
+        "test_cases": []
+      },
+      "document_requirements": []
+    }
+  ]
+}
