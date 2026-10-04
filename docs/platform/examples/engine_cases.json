@@ -1,0 +1,2354 @@
+{
+ "_notice": "SYNTHETIC. 引擎行為單元案例：組合語意、規則驗證、正式推薦判定、取得成果計數、申請唯一性、回呼處理。預期值由規格手算。",
+ "combinator_cases": [
+  {
+   "id": "ALL-unknown-fail",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "FAIL"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ALL-unknown-failunconf",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "FAIL_UNCONFIRMED"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ALL-unknown-human",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "HUMAN"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ALL-fail-failunconf",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "FAIL_UNCONFIRMED"
+   },
+   "expected": "FAIL"
+  },
+  {
+   "id": "ALL-failunconf-human",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL_UNCONFIRMED",
+    "C2": "HUMAN"
+   },
+   "expected": "FAIL_UNCONFIRMED"
+  },
+  {
+   "id": "ALL-fail-human",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "HUMAN"
+   },
+   "expected": "FAIL"
+  },
+  {
+   "id": "ALL-human-pass",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "HUMAN",
+    "C2": "PASS"
+   },
+   "expected": "HUMAN"
+  },
+  {
+   "id": "ALL-pass-pass",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "PASS"
+   },
+   "expected": "PASS"
+  },
+  {
+   "id": "ANY-pass-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "FAIL"
+   },
+   "expected": "PASS"
+  },
+  {
+   "id": "ANY-pass-unknown",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "UNKNOWN"
+   },
+   "expected": "PASS"
+  },
+  {
+   "id": "ANY-unknown-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "FAIL"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ANY-unknown-human",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "HUMAN"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ANY-human-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "HUMAN",
+    "C2": "FAIL"
+   },
+   "expected": "HUMAN"
+  },
+  {
+   "id": "ANY-fail-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "FAIL"
+   },
+   "expected": "FAIL"
+  },
+  {
+   "id": "ANY-fail-failunconf",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "FAIL_UNCONFIRMED"
+   },
+   "expected": "FAIL_UNCONFIRMED"
+  },
+  {
+   "id": "CUSTOM-all-any-pass",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     {
+      "op": "ANY",
+      "children": [
+       "C2",
+       "C3"
+      ]
+     }
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "FAIL",
+    "C3": "PASS"
+   },
+   "expected": "PASS"
+  },
+  {
+   "id": "CUSTOM-all-any-unknown",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     {
+      "op": "ANY",
+      "children": [
+       "C2",
+       "C3"
+      ]
+     }
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "FAIL",
+    "C3": "UNKNOWN"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "CUSTOM-any-all-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     {
+      "op": "ALL",
+      "children": [
+       "C1",
+       "C2"
+      ]
+     },
+     "C3"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "PASS",
+    "C3": "FAIL"
+   },
+   "expected": "FAIL"
+  }
+ ],
+ "resource_mapping_cases": [
+  {
+   "root": "PASS",
+   "result": "LIKELY_ELIGIBLE",
+   "unconfirmed": null
+  },
+  {
+   "root": "HUMAN",
+   "result": "LIKELY_ELIGIBLE",
+   "unconfirmed": null
+  },
+  {
+   "root": "UNKNOWN",
+   "result": "INSUFFICIENT_DATA",
+   "unconfirmed": null
+  },
+  {
+   "root": "FAIL_UNCONFIRMED",
+   "result": "LIKELY_INELIGIBLE",
+   "unconfirmed": true
+  },
+  {
+   "root": "FAIL",
+   "result": "LIKELY_INELIGIBLE",
+   "unconfirmed": false
+  }
+ ],
+ "invalid_rule_cases": [
+  {
+   "id": "unsupported-combinator-NOT",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "NOT",
+     "children": [
+      "C1",
+      "C2"
+     ]
+    }
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "unsupported-combinator-N_OF_M",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "N_OF_M",
+     "n": 1,
+     "children": [
+      "C1",
+      "C2"
+     ]
+    }
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "unsupported-combinator-name",
+   "rule": {
+    "combinator": "XOR",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "missing-combinator",
+   "rule": {
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "custom-without-expression",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "expression-without-custom",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": [
+      "C1"
+     ]
+    }
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "expression-misses-criterion",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": [
+      "C1"
+     ]
+    }
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "expression-unknown-criterion",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": [
+      "C1",
+      "C9"
+     ]
+    }
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "empty-children",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": []
+    }
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "operator-AGE_BETWEEN",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "AGE_BETWEEN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "operator-DATE_WITHIN",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "DATE_WITHIN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "operator-unknown-name",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "FUZZY_MATCH",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "self-report-cannot-confirm-fail",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "min_confirmation_for_fail": "C1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "human-trigger-unsupported",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "requires_human_when": [
+       "always"
+      ]
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "missing-source-ref",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      }
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "duplicate-criterion-id",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "valid-all",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": null
+  },
+  {
+   "id": "valid-any",
+   "rule": {
+    "combinator": "ANY",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": null
+  },
+  {
+   "id": "valid-custom",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C3",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": [
+      "C1",
+      {
+       "op": "ANY",
+       "children": [
+        "C2",
+        "C3"
+       ]
+      }
+     ]
+    }
+   },
+   "expect": null
+  }
+ ],
+ "recommendation_base": {
+  "resource_key": "TW-DEMO-BASE",
+  "risk_tier": "MEDIUM",
+  "version": {
+   "status": "PUBLISHED",
+   "verification_level": "V2",
+   "conflict_status": "NONE",
+   "source_ids": [
+    "S-1"
+   ],
+   "effective_from": "2026-01-01",
+   "effective_to": "2026-12-31",
+   "application_window": {
+    "type": "ROLLING"
+   },
+   "capacity_status": "OPEN"
+  },
+  "rule": {
+   "status": "PUBLISHED",
+   "combinator": "ALL",
+   "criteria": [
+    {
+     "criterion_id": "C1",
+     "operator": "EQ",
+     "input_keys": [
+      "household.x"
+     ],
+     "threshold": {
+      "value": 1
+     },
+     "source_ref": "S-1#1"
+    }
+   ]
+  }
+ },
+ "recommendation_sources": {
+  "S-1": {
+   "status": "ACTIVE"
+  }
+ },
+ "recommendation_as_of": "2026-10-03",
+ "recommendation_cases": [
+  {
+   "id": "base",
+   "override": {},
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "not-yet-effective",
+   "override": {
+    "version.effective_from": "2027-01-01"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "NOT_YET_EFFECTIVE"
+    ]
+   }
+  },
+  {
+   "id": "period-ended-but-status-not-yet-expired",
+   "override": {
+    "version.effective_to": "2026-09-30"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "PERIOD_ENDED"
+    ]
+   }
+  },
+  {
+   "id": "window-closed",
+   "override": {
+    "version.application_window": {
+     "type": "FIXED",
+     "ranges": [
+      {
+       "from": "2026-01-15",
+       "to": "2026-03-31"
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "WINDOW_CLOSED"
+    ]
+   }
+  },
+  {
+   "id": "window-not-open",
+   "override": {
+    "version.application_window": {
+     "type": "FIXED",
+     "ranges": [
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-30"
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "WINDOW_NOT_OPEN"
+    ]
+   }
+  },
+  {
+   "id": "window-open",
+   "override": {
+    "version.application_window": {
+     "type": "FIXED",
+     "ranges": [
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-31"
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "window-multi-range-second-open",
+   "override": {
+    "version.application_window": {
+     "type": "FIXED",
+     "ranges": [
+      {
+       "from": "2026-01-15",
+       "to": "2026-03-31"
+      },
+      {
+       "from": "2026-09-01",
+       "to": "2026-10-31"
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "period-unknown",
+   "override": {
+    "version.effective_to": null,
+    "version.effective_unknown": true
+   },
+   "expected": {
+    "status": "MANUAL_CHECK_ONLY",
+    "reasons": [
+     "PERIOD_UNKNOWN"
+    ]
+   }
+  },
+  {
+   "id": "window-unknown",
+   "override": {
+    "version.application_window": {
+     "type": "UNKNOWN"
+    }
+   },
+   "expected": {
+    "status": "MANUAL_CHECK_ONLY",
+    "reasons": [
+     "WINDOW_UNKNOWN"
+    ]
+   }
+  },
+  {
+   "id": "period-and-window-unknown",
+   "override": {
+    "version.effective_to": null,
+    "version.effective_unknown": true,
+    "version.application_window": {
+     "type": "UNKNOWN"
+    }
+   },
+   "expected": {
+    "status": "MANUAL_CHECK_ONLY",
+    "reasons": [
+     "PERIOD_UNKNOWN",
+     "WINDOW_UNKNOWN"
+    ]
+   }
+  },
+  {
+   "id": "recheck-low-risk-3-days",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_days": 3
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "recheck-low-risk-15-days",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_days": 15
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_GRACE_EXCEEDED"
+    ]
+   }
+  },
+  {
+   "id": "recheck-high-risk",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_days": 1,
+    "risk_tier": "HIGH"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_HIGH_RISK"
+    ]
+   }
+  },
+  {
+   "id": "suspended",
+   "override": {
+    "version.status": "SUSPENDED"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_SUSPENDED"
+    ]
+   }
+  },
+  {
+   "id": "expired-status",
+   "override": {
+    "version.status": "EXPIRED"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_EXPIRED"
+    ]
+   }
+  },
+  {
+   "id": "superseded",
+   "override": {
+    "version.status": "SUPERSEDED"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_SUPERSEDED"
+    ]
+   }
+  },
+  {
+   "id": "draft",
+   "override": {
+    "version.status": "DRAFT"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_DRAFT"
+    ]
+   }
+  },
+  {
+   "id": "verification-v1",
+   "override": {
+    "version.verification_level": "V1"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERIFICATION_TOO_LOW"
+    ]
+   }
+  },
+  {
+   "id": "verification-v3",
+   "override": {
+    "version.verification_level": "V3"
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "source-conflict",
+   "override": {
+    "version.conflict_status": "OPEN"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "SOURCE_CONFLICT"
+    ]
+   }
+  },
+  {
+   "id": "source-conflict-resolved",
+   "override": {
+    "version.conflict_status": "RESOLVED"
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "source-broken",
+   "override": {},
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "SOURCE_INVALID"
+    ]
+   },
+   "source_status": {
+    "S-1": "BROKEN"
+   }
+  },
+  {
+   "id": "source-moved",
+   "override": {},
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "SOURCE_INVALID"
+    ]
+   },
+   "source_status": {
+    "S-1": "MOVED"
+   }
+  },
+  {
+   "id": "rule-unpublished",
+   "override": {
+    "rule.status": "DRAFT"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_NOT_PUBLISHED"
+    ]
+   }
+  },
+  {
+   "id": "rule-invalid-operator",
+   "override": {
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "AGE_BETWEEN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "multiple-hard-reasons",
+   "override": {
+    "version.status": "SUSPENDED",
+    "version.conflict_status": "OPEN",
+    "version.effective_from": "2027-01-01"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_SUSPENDED",
+     "SOURCE_CONFLICT",
+     "NOT_YET_EFFECTIVE"
+    ]
+   }
+  },
+  {
+   "id": "hard-plus-soft",
+   "override": {
+    "version.effective_from": "2027-01-01",
+    "version.effective_to": null,
+    "version.effective_unknown": true
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "NOT_YET_EFFECTIVE",
+     "PERIOD_UNKNOWN"
+    ]
+   }
+  },
+  {
+   "id": "capacity-full-still-formal",
+   "override": {
+    "version.capacity_status": "FULL"
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  }
+ ],
+ "outcome_scenarios": [
+  {
+   "id": "T-39-status-advance-does-not-lose-count",
+   "outcomes": {
+    "o1": {
+     "household": "HA",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o1",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-05",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-05",
+     "verified_by": "u2",
+     "verified_on": "2026-10-06"
+    },
+    {
+     "id": "e2",
+     "outcome": "o1",
+     "event_type": "PERIOD_CONFIRMED",
+     "occurred_on": "2026-11-05",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-11-05",
+     "verified_by": "u2",
+     "verified_on": "2026-11-05"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-11-30",
+     "expected": {
+      "new_households_in_window": [
+       "HA"
+      ],
+      "cumulative_households": [
+       "HA"
+      ],
+      "resource_items_in_window": [
+       "o1"
+      ],
+      "pending_verification_households": []
+     }
+    },
+    {
+     "window": [
+      "2026-11-01",
+      "2026-11-30"
+     ],
+     "known_at": "2026-11-30",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [
+       "HA"
+      ],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-40-partial-then-full-counts-once",
+   "outcomes": {
+    "o2": {
+     "household": "HB",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o2",
+     "event_type": "PARTIAL_RECEIPT",
+     "occurred_on": "2026-10-10",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-10",
+     "verified_by": "u2",
+     "verified_on": "2026-10-10"
+    },
+    {
+     "id": "e2",
+     "outcome": "o2",
+     "event_type": "FULL_RECEIPT",
+     "occurred_on": "2026-10-20",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-20",
+     "verified_by": "u2",
+     "verified_on": "2026-10-20"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [
+       "HB"
+      ],
+      "cumulative_households": [
+       "HB"
+      ],
+      "resource_items_in_window": [
+       "o2"
+      ],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-40-two-resources-one-household",
+   "outcomes": {
+    "o3": {
+     "household": "HC",
+     "is_new_to_household": true
+    },
+    "o4": {
+     "household": "HC",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o3",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-05",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-05",
+     "verified_by": "u2",
+     "verified_on": "2026-10-05"
+    },
+    {
+     "id": "e2",
+     "outcome": "o4",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-12",
+     "verified_by": "u2",
+     "verified_on": "2026-10-12"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [
+       "HC"
+      ],
+      "cumulative_households": [
+       "HC"
+      ],
+      "resource_items_in_window": [
+       "o3",
+       "o4"
+      ],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-41-unverified-listed-separately",
+   "outcomes": {
+    "o5": {
+     "household": "HD",
+     "is_new_to_household": true
+    },
+    "o6": {
+     "household": "HE",
+     "is_new_to_household": true
+    },
+    "o7": {
+     "household": "HF",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o5",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-12"
+    },
+    {
+     "id": "e2",
+     "outcome": "o6",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u3",
+     "recorded_on": "2026-10-12",
+     "verified_by": "u1",
+     "verified_on": "2026-10-12"
+    },
+    {
+     "id": "e3",
+     "outcome": "o7",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u4",
+     "case_owner": "u3",
+     "recorded_on": "2026-10-12",
+     "verified_by": "u3",
+     "verified_on": "2026-10-12"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": [
+       "HD",
+       "HE",
+       "HF"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-41-verified-later-moves-out-of-pending",
+   "outcomes": {
+    "o8": {
+     "household": "HG",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o8",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-12",
+     "verified_by": "u2",
+     "verified_on": "2026-10-20"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-15",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": [
+       "HG"
+      ]
+     }
+    },
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [
+       "HG"
+      ],
+      "cumulative_households": [
+       "HG"
+      ],
+      "resource_items_in_window": [
+       "o8"
+      ],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-42-duplicate-payment-and-correction",
+   "outcomes": {
+    "o9": {
+     "household": "HH",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o9",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-08",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-08",
+     "verified_by": "u2",
+     "verified_on": "2026-10-08"
+    },
+    {
+     "id": "e2",
+     "outcome": "o9",
+     "event_type": "DUPLICATE_PAYMENT_NOTED",
+     "occurred_on": "2026-10-15",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-15",
+     "verified_by": "u2",
+     "verified_on": "2026-10-15"
+    },
+    {
+     "id": "e3",
+     "outcome": "o9",
+     "event_type": "CORRECTION",
+     "occurred_on": "2026-10-08",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-11-10",
+     "verified_by": "u2",
+     "verified_on": "2026-11-10",
+     "voids": "e1"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-11-05",
+     "expected": {
+      "new_households_in_window": [
+       "HH"
+      ],
+      "cumulative_households": [
+       "HH"
+      ],
+      "resource_items_in_window": [
+       "o9"
+      ],
+      "pending_verification_households": []
+     }
+    },
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-11-30",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-42-not-new-is-renewal-not-counted",
+   "outcomes": {
+    "o10": {
+     "household": "HI",
+     "is_new_to_household": false
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o10",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-08",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-08",
+     "verified_by": "u2",
+     "verified_on": "2026-10-08"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-14-approved-without-receipt-not-counted",
+   "outcomes": {
+    "o11": {
+     "household": "HJ",
+     "is_new_to_household": true
+    }
+   },
+   "events": [],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "event-after-window-end-ignored",
+   "outcomes": {
+    "o12": {
+     "household": "HK",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o12",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-11-02",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-11-02",
+     "verified_by": "u2",
+     "verified_on": "2026-11-02"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-11-30",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  }
+ ],
+ "outcome_invalid_events": [
+  {
+   "id": "missing-evidence-level",
+   "outcomes": {
+    "o13": {
+     "household": "HL",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o13",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-05",
+     "evidence_level": null,
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-05",
+     "verified_by": "u2",
+     "verified_on": "2026-10-05"
+    }
+   ],
+   "expect": "ValidationError"
+  }
+ ],
+ "application_cases": [
+  {
+   "id": "original-first",
+   "existing": [],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "original-after-approved-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026"
+   },
+   "expected": [
+    false,
+    "ORIGINAL_EXISTS_APPROVED"
+   ]
+  },
+  {
+   "id": "original-after-submitted-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "SUBMITTED"
+    }
+   ],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026"
+   },
+   "expected": [
+    false,
+    "ORIGINAL_EXISTS_SUBMITTED"
+   ]
+  },
+  {
+   "id": "original-after-denied-must-be-reapply",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    }
+   ],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026"
+   },
+   "expected": [
+    false,
+    "ORIGINAL_EXISTS_DENIED"
+   ]
+  },
+  {
+   "id": "original-other-period-ok",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2027"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "reapply-after-denied",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "補齊文件後重新申請"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "reapply-needs-reason",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1"
+   },
+   "expected": [
+    false,
+    "RELATION_REQUIRED"
+   ]
+  },
+  {
+   "id": "reapply-after-approved-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "想再申請"
+   },
+   "expected": [
+    false,
+    "RELATED_STATE_INVALID_APPROVED"
+   ]
+  },
+  {
+   "id": "reapply-twice-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "REAPPLY",
+     "status": "PREPARING_DOCS",
+     "related": "a1"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "重複"
+   },
+   "expected": [
+    false,
+    "DUPLICATE_RELATED"
+   ]
+  },
+  {
+   "id": "reapply-after-previous-reapply-denied",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "REAPPLY",
+     "status": "DENIED",
+     "related": "a1"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a2",
+    "reason": "再次申請"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "appeal-after-denied",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    }
+   ],
+   "new": {
+    "kind": "APPEAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "依通知所載管道申復"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "appeal-while-under-review-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "UNDER_REVIEW"
+    }
+   ],
+   "new": {
+    "kind": "APPEAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "x"
+   },
+   "expected": [
+    false,
+    "RELATED_STATE_INVALID_UNDER_REVIEW"
+   ]
+  },
+  {
+   "id": "supplementary-needs-r4",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "補領差額"
+   },
+   "expected": [
+    false,
+    "R4_APPROVAL_REQUIRED"
+   ]
+  },
+  {
+   "id": "supplementary-with-r4",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "補領差額",
+    "approved_by_r4": true
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  }
+ ],
+ "callback_scenarios": [
+  {
+   "id": "T-45-normal",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     true
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-out-of-order",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     false
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-duplicate-event",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     false,
+     true
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-same-message-multiple-events",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     false
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-late-failure-after-delivered",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "FAILED"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     false
+    ],
+    "late_failure": true
+   }
+  },
+  {
+   "id": "T-45-bounce-after-accepted",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "FAILED"
+    }
+   ],
+   "expected": {
+    "state": "FAILED",
+    "applied": [
+     true,
+     true
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-accepted-after-failed-ignored",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "FAILED"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    }
+   ],
+   "expected": {
+    "state": "FAILED",
+    "applied": [
+     true,
+     false
+    ],
+    "late_failure": false
+   }
+  }
+ ]
+}

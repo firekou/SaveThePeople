@@ -1,0 +1,1482 @@
+{
+ "_notice": "狀態機單一事實來源。DATA_MODEL_AND_STATE_MACHINES.md §3 的圖與表由 tools/gen_state_machines.py 產生；請改此檔再重新產生。",
+ "roles": [
+  "R3",
+  "R4",
+  "R5",
+  "R6",
+  "R7",
+  "SYSTEM"
+ ],
+ "machines": {
+  "resource_version": {
+   "entity": "ResourceVersion",
+   "field": "status",
+   "title": "資源有效狀態",
+   "initial": "CANDIDATE",
+   "states": {
+    "CANDIDATE": "候選（僅來源線索）",
+    "DRAFT": "草稿",
+    "IN_REVIEW": "送審／查核中",
+    "PUBLISHED": "已發布",
+    "NEEDS_RECHECK": "需重新查核",
+    "SUSPENDED": "暫停推薦",
+    "SUPERSEDED": "已被新版本取代",
+    "EXPIRED": "已過期",
+    "RETIRED": "已停用（封存）"
+   },
+   "transitions": [
+    {
+     "id": "RV-01",
+     "from": [
+      "CANDIDATE"
+     ],
+     "to": "DRAFT",
+     "kind": "normal",
+     "actors": [
+      "R5"
+     ],
+     "pre": "至少 1 個 Source 已登錄；去重檢查完成",
+     "evidence": "Source 記錄",
+     "revocable": "RV-02",
+     "correction": ""
+    },
+    {
+     "id": "RV-02",
+     "from": [
+      "DRAFT"
+     ],
+     "to": "CANDIDATE",
+     "kind": "undo",
+     "actors": [
+      "R5"
+     ],
+     "pre": "尚未送審",
+     "evidence": "放棄理由",
+     "revocable": "RV-01",
+     "correction": ""
+    },
+    {
+     "id": "RV-03",
+     "from": [
+      "CANDIDATE"
+     ],
+     "to": "RETIRED",
+     "kind": "normal",
+     "actors": [
+      "R5"
+     ],
+     "pre": "重複、不適用或查無資料",
+     "evidence": "理由；重複時連結既有 Resource",
+     "revocable": "no",
+     "correction": "新建候選"
+    },
+    {
+     "id": "RV-04",
+     "from": [
+      "DRAFT"
+     ],
+     "to": "IN_REVIEW",
+     "kind": "normal",
+     "actors": [
+      "R5"
+     ],
+     "pre": "必填欄位完整；每條件有 source_ref；期限與申請期間已填或標 UNKNOWN；規則測試 3 類案例通過",
+     "evidence": "規則測試報告",
+     "revocable": "RV-05",
+     "correction": ""
+    },
+    {
+     "id": "RV-05",
+     "from": [
+      "IN_REVIEW"
+     ],
+     "to": "DRAFT",
+     "kind": "undo",
+     "actors": [
+      "R5"
+     ],
+     "pre": "作者撤回送審，或查核人退回",
+     "evidence": "退回理由",
+     "revocable": "RV-04",
+     "correction": ""
+    },
+    {
+     "id": "RV-06",
+     "from": [
+      "IN_REVIEW"
+     ],
+     "to": "PUBLISHED",
+     "kind": "normal",
+     "actors": [
+      "R5"
+     ],
+     "pre": "查核人≠作者；發布人≠查核人；verification_level≥V2；來源衝突=0；regions 無 UNKNOWN",
+     "evidence": "VerificationRecord",
+     "revocable": "no",
+     "correction": "暫停（RV-10）或建立 patch／新版本"
+    },
+    {
+     "id": "RV-07",
+     "from": [
+      "PUBLISHED"
+     ],
+     "to": "NEEDS_RECHECK",
+     "kind": "normal",
+     "actors": [
+      "SYSTEM",
+      "R5"
+     ],
+     "pre": "來源雜湊變動、到期需查核、使用者或承辦回報",
+     "evidence": "觸發事件 ID",
+     "revocable": "RV-08",
+     "correction": ""
+    },
+    {
+     "id": "RV-08",
+     "from": [
+      "NEEDS_RECHECK"
+     ],
+     "to": "PUBLISHED",
+     "kind": "normal",
+     "actors": [
+      "R5"
+     ],
+     "pre": "新 VerificationRecord 確認未變；發布人≠查核人",
+     "evidence": "VerificationRecord",
+     "revocable": "RV-07",
+     "correction": ""
+    },
+    {
+     "id": "RV-09",
+     "from": [
+      "NEEDS_RECHECK"
+     ],
+     "to": "SUSPENDED",
+     "kind": "normal",
+     "actors": [
+      "SYSTEM",
+      "R5",
+      "R4",
+      "R7"
+     ],
+     "pre": "risk_tier=HIGH 者立即；其他超過 14 天未完成查核，或查核發現問題",
+     "evidence": "理由；系統觸發時為逾期紀錄",
+     "revocable": "no",
+     "correction": "RV-11 恢復為 PUBLISHED（需新查核）"
+    },
+    {
+     "id": "RV-10",
+     "from": [
+      "PUBLISHED"
+     ],
+     "to": "SUSPENDED",
+     "kind": "normal",
+     "actors": [
+      "R5",
+      "R4",
+      "R7"
+     ],
+     "pre": "來源失效、衝突、期限不明、額滿或發現錯誤",
+     "evidence": "理由",
+     "revocable": "RV-11",
+     "correction": ""
+    },
+    {
+     "id": "RV-11",
+     "from": [
+      "SUSPENDED"
+     ],
+     "to": "PUBLISHED",
+     "kind": "normal",
+     "actors": [
+      "R5"
+     ],
+     "pre": "問題解除；新 VerificationRecord；仍在有效期間；發布人≠查核人",
+     "evidence": "VerificationRecord",
+     "revocable": "RV-10",
+     "correction": ""
+    },
+    {
+     "id": "RV-12",
+     "from": [
+      "PUBLISHED",
+      "NEEDS_RECHECK",
+      "SUSPENDED"
+     ],
+     "to": "SUPERSEDED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "同一 Resource 的新版本發布",
+     "evidence": "新版本 ID",
+     "revocable": "no",
+     "correction": "新版有誤時暫停新版，並以 patch 版本重新發布舊內容"
+    },
+    {
+     "id": "RV-13",
+     "from": [
+      "PUBLISHED",
+      "NEEDS_RECHECK",
+      "SUSPENDED"
+     ],
+     "to": "EXPIRED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "effective_to 已過",
+     "evidence": "每日排程紀錄",
+     "revocable": "no",
+     "correction": "effective_to 登錄錯誤時，建立 patch 版本更正並重新查核發布"
+    },
+    {
+     "id": "RV-14",
+     "from": [
+      "SUSPENDED",
+      "EXPIRED"
+     ],
+     "to": "RETIRED",
+     "kind": "normal",
+     "actors": [
+      "R5",
+      "R7"
+     ],
+     "pre": "雙人確認；方案停辦或長期無效",
+     "evidence": "停辦證據或查核紀錄",
+     "revocable": "no",
+     "correction": "新建候選"
+    }
+   ]
+  },
+  "assessment": {
+   "entity": "Assessment",
+   "field": "status",
+   "title": "資格評估狀態",
+   "initial": "COLLECTING",
+   "states": {
+    "COLLECTING": "蒐集輸入",
+    "EVALUATED": "已評估",
+    "EVALUATION_FAILED": "評估失敗（整體錯誤）",
+    "REVIEW_REQUIRED": "待人工複核",
+    "REVIEWED": "已複核",
+    "STALE": "已過時",
+    "SUPERSEDED": "已被新評估取代"
+   },
+   "transitions": [
+    {
+     "id": "AS-01",
+     "from": [
+      "COLLECTING"
+     ],
+     "to": "EVALUATED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "輸入快照與版本清單已固定",
+     "evidence": "input_hash、資源版本與規則版本清單",
+     "revocable": "no",
+     "correction": "重新評估（新 Assessment）"
+    },
+    {
+     "id": "AS-02",
+     "from": [
+      "COLLECTING"
+     ],
+     "to": "EVALUATION_FAILED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "引擎整體錯誤（單一資源錯誤改為該資源 HUMAN，不在此）",
+     "evidence": "錯誤紀錄",
+     "revocable": "AS-03",
+     "correction": ""
+    },
+    {
+     "id": "AS-03",
+     "from": [
+      "EVALUATION_FAILED"
+     ],
+     "to": "COLLECTING",
+     "kind": "normal",
+     "actors": [
+      "SYSTEM",
+      "R3"
+     ],
+     "pre": "錯誤已修復或重試",
+     "evidence": "重試紀錄",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "AS-04",
+     "from": [
+      "EVALUATED"
+     ],
+     "to": "REVIEW_REQUIRED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "human_check_points 非空、Fact 矛盾，或併領需擇一比較",
+     "evidence": "觸發的人工確認點清單",
+     "revocable": "no",
+     "correction": "R4 以 AS-05 結案"
+    },
+    {
+     "id": "AS-05",
+     "from": [
+      "REVIEW_REQUIRED"
+     ],
+     "to": "REVIEWED",
+     "kind": "normal",
+     "actors": [
+      "R4"
+     ],
+     "pre": "複核人≠案件承辦",
+     "evidence": "ReviewDecision（結論與理由）",
+     "revocable": "no",
+     "correction": "AS-07 追加複核"
+    },
+    {
+     "id": "AS-06",
+     "from": [
+      "EVALUATED"
+     ],
+     "to": "REVIEWED",
+     "kind": "normal",
+     "actors": [
+      "R4"
+     ],
+     "pre": "被抽樣；複核人≠案件承辦",
+     "evidence": "ReviewDecision（kind=SAMPLE_AUDIT）",
+     "revocable": "no",
+     "correction": "AS-07 追加複核"
+    },
+    {
+     "id": "AS-07",
+     "from": [
+      "REVIEWED"
+     ],
+     "to": "REVIEWED",
+     "kind": "normal",
+     "actors": [
+      "R4"
+     ],
+     "pre": "追加複核（另一位 R4 或補充意見）",
+     "evidence": "新的 ReviewDecision",
+     "revocable": "no",
+     "correction": "再追加 ReviewDecision"
+    },
+    {
+     "id": "AS-08",
+     "from": [
+      "EVALUATED",
+      "REVIEW_REQUIRED",
+      "REVIEWED"
+     ],
+     "to": "STALE",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "事實更新、資源版本變動或暫停、規則版本變動",
+     "evidence": "觸發事件 ID",
+     "revocable": "no",
+     "correction": "重新評估"
+    },
+    {
+     "id": "AS-09",
+     "from": [
+      "STALE"
+     ],
+     "to": "SUPERSEDED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "新 Assessment 完成",
+     "evidence": "新 Assessment ID",
+     "revocable": "no",
+     "correction": ""
+    }
+   ]
+  },
+  "application": {
+   "entity": "Application",
+   "field": "status",
+   "title": "申請審查狀態",
+   "initial": "CANDIDATE",
+   "states": {
+    "CANDIDATE": "候選（已列入行動清單）",
+    "AWAITING_CLIENT_DECISION": "待本人決定",
+    "PREPARING_DOCS": "準備文件",
+    "READY_TO_SUBMIT": "可送件",
+    "SUBMITTED": "已送件",
+    "UNDER_REVIEW": "審查中",
+    "SUPPLEMENT_REQUESTED": "待補件",
+    "APPROVED": "已核准（尚未等於取得）",
+    "DENIED": "不核准",
+    "LAPSED": "機關認定失效",
+    "WITHDRAWN": "已撤回",
+    "ON_HOLD": "暫緩"
+   },
+   "transitions": [
+    {
+     "id": "AP-01",
+     "from": [
+      "CANDIDATE"
+     ],
+     "to": "AWAITING_CLIENT_DECISION",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "資源目前可正式推薦，或 R4 同意以人工查核項處理",
+     "evidence": "行動清單項目",
+     "revocable": "AP-02",
+     "correction": ""
+    },
+    {
+     "id": "AP-02",
+     "from": [
+      "AWAITING_CLIENT_DECISION"
+     ],
+     "to": "CANDIDATE",
+     "kind": "undo",
+     "actors": [
+      "R3"
+     ],
+     "pre": "—",
+     "evidence": "理由",
+     "revocable": "AP-01",
+     "correction": ""
+    },
+    {
+     "id": "AP-03",
+     "from": [
+      "CANDIDATE"
+     ],
+     "to": "WITHDRAWN",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "本人不申請",
+     "evidence": "本人表示（方式、時間）與原因",
+     "revocable": "no",
+     "correction": "重新建立 Application"
+    },
+    {
+     "id": "AP-04",
+     "from": [
+      "AWAITING_CLIENT_DECISION"
+     ],
+     "to": "PREPARING_DOCS",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "本人或代理人確認要申請；代理需有效 Consent.proxy",
+     "evidence": "確認紀錄（方式、時間）",
+     "revocable": "AP-05",
+     "correction": ""
+    },
+    {
+     "id": "AP-05",
+     "from": [
+      "PREPARING_DOCS"
+     ],
+     "to": "AWAITING_CLIENT_DECISION",
+     "kind": "undo",
+     "actors": [
+      "R3"
+     ],
+     "pre": "尚未確認內容",
+     "evidence": "理由",
+     "revocable": "AP-04",
+     "correction": ""
+    },
+    {
+     "id": "AP-06",
+     "from": [
+      "PREPARING_DOCS"
+     ],
+     "to": "READY_TO_SUBMIT",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "必要文件皆 READY 或 NOT_APPLICABLE（附理由）；申請內容已由本人或代理人逐項確認；再檢查資源仍可正式推薦且版本為最新（否則升版並重評）；無同鍵進行中或已核准申請",
+     "evidence": "Application.confirmed_content_hash 等確認欄位",
+     "revocable": "AP-07",
+     "correction": ""
+    },
+    {
+     "id": "AP-07",
+     "from": [
+      "READY_TO_SUBMIT"
+     ],
+     "to": "PREPARING_DOCS",
+     "kind": "undo",
+     "actors": [
+      "R3"
+     ],
+     "pre": "尚未送出；內容變更時清除本人確認",
+     "evidence": "理由",
+     "revocable": "AP-06",
+     "correction": ""
+    },
+    {
+     "id": "AP-08",
+     "from": [
+      "READY_TO_SUBMIT"
+     ],
+     "to": "SUBMITTED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "送件為人工動作；冪等鍵；本人確認與同意仍有效",
+     "evidence": "收件憑據（類型與號碼，或對方姓名職稱與時間）",
+     "revocable": "no",
+     "correction": "AP-19（R4 更正登錄錯誤）"
+    },
+    {
+     "id": "AP-09",
+     "from": [
+      "SUBMITTED"
+     ],
+     "to": "UNDER_REVIEW",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "承辦確認收件或受理，或 R3 向承辦查詢後確認審查中（無自動轉換）",
+     "evidence": "承辦回覆紀錄（對象職稱、日期）",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "AP-10",
+     "from": [
+      "SUBMITTED",
+      "UNDER_REVIEW"
+     ],
+     "to": "SUPPLEMENT_REQUESTED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "收到補件通知；建立補件任務與期限",
+     "evidence": "補件通知（內容、期限）",
+     "revocable": "no",
+     "correction": "通知內容登錄錯誤時由 R4 更正欄位"
+    },
+    {
+     "id": "AP-11",
+     "from": [
+      "SUPPLEMENT_REQUESTED"
+     ],
+     "to": "UNDER_REVIEW",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "補件已送出",
+     "evidence": "補件送出證據（收件憑據）",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "AP-12",
+     "from": [
+      "SUBMITTED",
+      "UNDER_REVIEW"
+     ],
+     "to": "APPROVED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R4"
+     ],
+     "pre": "取得核准證據 A1～A3（A1 本人告知須標記待確認）；核准不等於取得",
+     "evidence": "核准證據（類型、日期、查看人）",
+     "revocable": "no",
+     "correction": "AP-22（R4 更正）"
+    },
+    {
+     "id": "AP-13",
+     "from": [
+      "SUBMITTED",
+      "UNDER_REVIEW",
+      "SUPPLEMENT_REQUESTED"
+     ],
+     "to": "DENIED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R4"
+     ],
+     "pre": "取得不核准通知或承辦回覆",
+     "evidence": "通知或回覆；理由摘要",
+     "revocable": "no",
+     "correction": "AP-23（R4 更正）"
+    },
+    {
+     "id": "AP-14",
+     "from": [
+      "SUPPLEMENT_REQUESTED"
+     ],
+     "to": "LAPSED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R4"
+     ],
+     "pre": "須有機關書面通知或承辦確認申請因未補件而失效或駁回；不得僅因內部補件期限已過；R4 確認",
+     "evidence": "機關通知（類型、日期、查看人）；R4 確認紀錄",
+     "revocable": "no",
+     "correction": "AP-20（機關後續受理補件時 R4 更正）"
+    },
+    {
+     "id": "AP-15",
+     "from": [
+      "AWAITING_CLIENT_DECISION",
+      "PREPARING_DOCS",
+      "READY_TO_SUBMIT"
+     ],
+     "to": "WITHDRAWN",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "本人表示撤回",
+     "evidence": "本人表示（方式、時間）與原因",
+     "revocable": "no",
+     "correction": "重新建立 Application"
+    },
+    {
+     "id": "AP-16",
+     "from": [
+      "SUBMITTED",
+      "UNDER_REVIEW",
+      "SUPPLEMENT_REQUESTED"
+     ],
+     "to": "WITHDRAWN",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "本人表示撤回，且已向承辦提出撤件（撤件任務完成後才可標記）",
+     "evidence": "撤件收件憑據或承辦確認",
+     "revocable": "no",
+     "correction": "重新建立 Application（kind=REAPPLY，連結原件）"
+    },
+    {
+     "id": "AP-17",
+     "from": [
+      "AWAITING_CLIENT_DECISION",
+      "PREPARING_DOCS",
+      "READY_TO_SUBMIT"
+     ],
+     "to": "ON_HOLD",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "原因：LOST_CONTACT／CAPACITY_FULL／RESOURCE_SUSPENDED／WINDOW_NOT_OPEN／OTHER；記錄 held_from",
+     "evidence": "原因紀錄",
+     "revocable": "AP-18",
+     "correction": ""
+    },
+    {
+     "id": "AP-18",
+     "from": [
+      "ON_HOLD"
+     ],
+     "to": [
+      "AWAITING_CLIENT_DECISION",
+      "PREPARING_DOCS",
+      "READY_TO_SUBMIT"
+     ],
+     "kind": "undo",
+     "actors": [
+      "R3"
+     ],
+     "pre": "目標須等於 held_from；原因已解除；重新檢查可正式推薦",
+     "evidence": "解除紀錄",
+     "revocable": "AP-17",
+     "correction": ""
+    },
+    {
+     "id": "AP-19",
+     "from": [
+      "SUBMITTED"
+     ],
+     "to": "READY_TO_SUBMIT",
+     "kind": "correction",
+     "actors": [
+      "R4"
+     ],
+     "pre": "登錄為已送件但實際尚未送出",
+     "evidence": "更正理由；原收件憑據標記作廢",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "AP-20",
+     "from": [
+      "LAPSED"
+     ],
+     "to": "SUPPLEMENT_REQUESTED",
+     "kind": "correction",
+     "actors": [
+      "R4"
+     ],
+     "pre": "機關確認仍受理補件",
+     "evidence": "機關回覆",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "AP-21",
+     "from": [
+      "ON_HOLD"
+     ],
+     "to": "WITHDRAWN",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "失聯滿 90 天或本人表示不再申請",
+     "evidence": "聯絡嘗試紀錄或本人表示",
+     "revocable": "no",
+     "correction": "重新建立 Application"
+    },
+    {
+     "id": "AP-22",
+     "from": [
+      "APPROVED"
+     ],
+     "to": "UNDER_REVIEW",
+     "kind": "correction",
+     "actors": [
+      "R4"
+     ],
+     "pre": "核准為誤登錄，或機關更正結果",
+     "evidence": "更正理由；對應 OutcomeEvent 以 CORRECTION 作廢",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "AP-23",
+     "from": [
+      "DENIED"
+     ],
+     "to": "UNDER_REVIEW",
+     "kind": "correction",
+     "actors": [
+      "R4"
+     ],
+     "pre": "不核准為誤登錄，或機關更正結果",
+     "evidence": "更正理由",
+     "revocable": "no",
+     "correction": ""
+    }
+   ]
+  },
+  "referral": {
+   "entity": "Referral",
+   "field": "status",
+   "title": "轉介受理狀態",
+   "initial": "DRAFT",
+   "states": {
+    "DRAFT": "草稿",
+    "CONSENT_CHECKED": "同意已檢查",
+    "SENT": "已送出",
+    "ACKNOWLEDGED": "對方已收到",
+    "ACCEPTED": "已受理",
+    "WAITLISTED": "候補中",
+    "DECLINED": "不受理",
+    "NO_RESPONSE": "逾期未回覆",
+    "ESCALATED": "已升級",
+    "CLOSED": "已結束",
+    "CANCELLED": "已取消"
+   },
+   "transitions": [
+    {
+     "id": "RF-01",
+     "from": [
+      "DRAFT"
+     ],
+     "to": "CONSENT_CHECKED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "有效 Consent 含 REFERRAL_SHARE 且對象相符；shared_fields 為同意資料類別的子集",
+     "evidence": "Consent ID",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-02",
+     "from": [
+      "CONSENT_CHECKED"
+     ],
+     "to": "SENT",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "送出前再次檢查同意；冪等鍵；機構容量 FULL 時須確認候補",
+     "evidence": "送出紀錄（管道、時間、內容雜湊或電話對象）",
+     "revocable": "no",
+     "correction": "送錯對象時以 RF-17 取消並通知"
+    },
+    {
+     "id": "RF-03",
+     "from": [
+      "SENT"
+     ],
+     "to": "ACKNOWLEDGED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R6"
+     ],
+     "pre": "對方確認收到",
+     "evidence": "對方回覆紀錄",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-04",
+     "from": [
+      "SENT",
+      "ACKNOWLEDGED"
+     ],
+     "to": "ACCEPTED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R6"
+     ],
+     "pre": "對方表示受理",
+     "evidence": "回覆內容（對象職稱、日期）",
+     "revocable": "no",
+     "correction": "RF-18（R4 更正）"
+    },
+    {
+     "id": "RF-05",
+     "from": [
+      "SENT",
+      "ACKNOWLEDGED"
+     ],
+     "to": "WAITLISTED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R6"
+     ],
+     "pre": "對方表示候補",
+     "evidence": "回覆內容與預計時間",
+     "revocable": "no",
+     "correction": "RF-18（R4 更正）"
+    },
+    {
+     "id": "RF-06",
+     "from": [
+      "SENT",
+      "ACKNOWLEDGED"
+     ],
+     "to": "DECLINED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R6"
+     ],
+     "pre": "對方表示不受理",
+     "evidence": "回覆內容與理由",
+     "revocable": "no",
+     "correction": "RF-18（R4 更正）"
+    },
+    {
+     "id": "RF-07",
+     "from": [
+      "WAITLISTED"
+     ],
+     "to": "ACCEPTED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R6"
+     ],
+     "pre": "候補轉正",
+     "evidence": "回覆內容",
+     "revocable": "no",
+     "correction": "RF-18（R4 更正）"
+    },
+    {
+     "id": "RF-08",
+     "from": [
+      "WAITLISTED"
+     ],
+     "to": "DECLINED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R6"
+     ],
+     "pre": "候補未成",
+     "evidence": "回覆內容與理由",
+     "revocable": "no",
+     "correction": "RF-18（R4 更正）"
+    },
+    {
+     "id": "RF-09",
+     "from": [
+      "SENT"
+     ],
+     "to": "NO_RESPONSE",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "response_due 已過",
+     "evidence": "逾期紀錄",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-10",
+     "from": [
+      "NO_RESPONSE"
+     ],
+     "to": "SENT",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "重送或改用其他管道（重試，累計上限 3 次）",
+     "evidence": "新的送出紀錄",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-11",
+     "from": [
+      "NO_RESPONSE"
+     ],
+     "to": "ESCALATED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "第二次逾期或累計 2 次送出仍無回覆；建立 R4 任務",
+     "evidence": "升級紀錄",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-12",
+     "from": [
+      "ESCALATED"
+     ],
+     "to": "SENT",
+     "kind": "normal",
+     "actors": [
+      "R4"
+     ],
+     "pre": "R4 聯絡機構窗口主管後重送",
+     "evidence": "新的送出紀錄",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-13",
+     "from": [
+      "ESCALATED"
+     ],
+     "to": "CLOSED",
+     "kind": "normal",
+     "actors": [
+      "R4"
+     ],
+     "pre": "本人同意改採其他資源，或機構確認無法受理（close_reason=NO_RESPONSE_FINAL）",
+     "evidence": "理由與替代方案",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-14",
+     "from": [
+      "ACCEPTED",
+      "DECLINED"
+     ],
+     "to": "CLOSED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "R6"
+     ],
+     "pre": "服務結束、本人不再需要或轉介週期完成（實際取得另見 Outcome）",
+     "evidence": "結案理由",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-15",
+     "from": [
+      "WAITLISTED"
+     ],
+     "to": "CLOSED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "本人不再需要或候補逾期",
+     "evidence": "本人表示或機構回覆",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-16",
+     "from": [
+      "DRAFT",
+      "CONSENT_CHECKED"
+     ],
+     "to": "CANCELLED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "尚未送出",
+     "evidence": "取消理由",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "RF-17",
+     "from": [
+      "SENT",
+      "ACKNOWLEDGED",
+      "NO_RESPONSE",
+      "ESCALATED",
+      "WAITLISTED",
+      "ACCEPTED"
+     ],
+     "to": "CANCELLED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "SYSTEM"
+     ],
+     "pre": "本人撤回、同意撤銷或送錯對象；必須建立「通知對方停止使用」任務",
+     "evidence": "本人表示或撤回紀錄；停止使用通知任務 ID",
+     "revocable": "no",
+     "correction": "重新建立 Referral"
+    },
+    {
+     "id": "RF-18",
+     "from": [
+      "ACCEPTED",
+      "DECLINED",
+      "WAITLISTED"
+     ],
+     "to": "ACKNOWLEDGED",
+     "kind": "correction",
+     "actors": [
+      "R4"
+     ],
+     "pre": "回覆登錄錯誤",
+     "evidence": "更正理由",
+     "revocable": "no",
+     "correction": ""
+    }
+   ]
+  },
+  "outcome": {
+   "entity": "Outcome",
+   "field": "receipt_status",
+   "title": "實際取得狀態",
+   "initial": "PENDING_DELIVERY",
+   "creation": "Application 進入 APPROVED 或 Referral 進入 ACCEPTED 時由系統建立，初始為 PENDING_DELIVERY。",
+   "states": {
+    "PENDING_DELIVERY": "待取得",
+    "PARTIALLY_RECEIVED": "部分取得",
+    "RECEIVED": "已取得",
+    "ONGOING": "持續取得中",
+    "ENDED": "已結束",
+    "NOT_RECEIVED": "未取得"
+   },
+   "transitions": [
+    {
+     "id": "OC-01",
+     "from": [
+      "PENDING_DELIVERY"
+     ],
+     "to": "PARTIALLY_RECEIVED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "實際取得部分給付或服務",
+     "evidence": "OutcomeEvent(PARTIAL_RECEIPT)，取得證據 E1～E3",
+     "revocable": "no",
+     "correction": "OC-09（R4 更正）"
+    },
+    {
+     "id": "OC-02",
+     "from": [
+      "PENDING_DELIVERY",
+      "PARTIALLY_RECEIVED",
+      "NOT_RECEIVED"
+     ],
+     "to": "RECEIVED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "實際取得給付或服務",
+     "evidence": "OutcomeEvent(FIRST_RECEIPT 或 FULL_RECEIPT)，取得證據 E1～E3",
+     "revocable": "no",
+     "correction": "OC-08（R4 更正）"
+    },
+    {
+     "id": "OC-03",
+     "from": [
+      "RECEIVED"
+     ],
+     "to": "ONGOING",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "週期性給付或服務持續",
+     "evidence": "OutcomeEvent(PERIOD_CONFIRMED)",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "OC-04",
+     "from": [
+      "PARTIALLY_RECEIVED",
+      "RECEIVED",
+      "ONGOING"
+     ],
+     "to": "ENDED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "給付或服務結束",
+     "evidence": "結束日期與原因",
+     "revocable": "no",
+     "correction": "結束不抹除歷史成果事件"
+    },
+    {
+     "id": "OC-05",
+     "from": [
+      "PENDING_DELIVERY",
+      "PARTIALLY_RECEIVED"
+     ],
+     "to": "NOT_RECEIVED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "未能取得",
+     "evidence": "not_received_reason 與說明",
+     "revocable": "no",
+     "correction": "OC-06／OC-07 恢復"
+    },
+    {
+     "id": "OC-06",
+     "from": [
+      "NOT_RECEIVED"
+     ],
+     "to": "PENDING_DELIVERY",
+     "kind": "undo",
+     "actors": [
+      "R3"
+     ],
+     "pre": "機構重新安排或原因解除（未取得後恢復）",
+     "evidence": "恢復理由與機構回覆",
+     "revocable": "OC-05",
+     "correction": ""
+    },
+    {
+     "id": "OC-07",
+     "from": [
+      "NOT_RECEIVED"
+     ],
+     "to": "PARTIALLY_RECEIVED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "後續取得部分給付或服務",
+     "evidence": "OutcomeEvent(PARTIAL_RECEIPT)",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "OC-08",
+     "from": [
+      "RECEIVED"
+     ],
+     "to": "PENDING_DELIVERY",
+     "kind": "correction",
+     "actors": [
+      "R4"
+     ],
+     "pre": "取得為誤登錄",
+     "evidence": "更正理由；以 OutcomeEvent(CORRECTION) 作廢原事件",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "OC-09",
+     "from": [
+      "PARTIALLY_RECEIVED"
+     ],
+     "to": "PENDING_DELIVERY",
+     "kind": "correction",
+     "actors": [
+      "R4"
+     ],
+     "pre": "部分取得為誤登錄",
+     "evidence": "更正理由；以 OutcomeEvent(CORRECTION) 作廢原事件",
+     "revocable": "no",
+     "correction": ""
+    }
+   ]
+  },
+  "notification": {
+   "entity": "Notification",
+   "field": "status",
+   "title": "提醒送達狀態",
+   "initial": "SCHEDULED",
+   "states": {
+    "SCHEDULED": "已排程",
+    "SENDING": "發送中",
+    "ACCEPTED_BY_PROVIDER": "供應商已受理",
+    "DELIVERED": "供應商回報送達",
+    "ACKNOWLEDGED": "本人已知悉",
+    "FAILED": "失敗",
+    "RETRY_SCHEDULED": "已排程重試",
+    "FALLBACK_REQUIRED": "需改用其他方式",
+    "MANUAL_HANDLED": "已人工處理",
+    "CANCELLED": "已取消"
+   },
+   "transitions": [
+    {
+     "id": "NF-01",
+     "from": [
+      "SCHEDULED"
+     ],
+     "to": "SENDING",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "Consent 含用途且通道有效；非靜默時段；任務仍開啟",
+     "evidence": "worker 租約紀錄",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-02",
+     "from": [
+      "SCHEDULED"
+     ],
+     "to": "CANCELLED",
+     "kind": "normal",
+     "actors": [
+      "SYSTEM",
+      "R3"
+     ],
+     "pre": "任務完成、同意撤回或 R3 取消",
+     "evidence": "取消理由",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-03",
+     "from": [
+      "SENDING"
+     ],
+     "to": "ACCEPTED_BY_PROVIDER",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "供應商同步回應成功",
+     "evidence": "provider_message_id",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-04",
+     "from": [
+      "SENDING"
+     ],
+     "to": "DELIVERED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "送達回呼先於同步回應抵達（亂序）",
+     "evidence": "provider_event_id",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-05",
+     "from": [
+      "SENDING",
+      "ACCEPTED_BY_PROVIDER"
+     ],
+     "to": "FAILED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "錯誤回應、退信，或逾時；結果未知時 error_class=UNKNOWN_OUTCOME",
+     "evidence": "錯誤碼或 provider_event_id",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-06",
+     "from": [
+      "ACCEPTED_BY_PROVIDER"
+     ],
+     "to": "DELIVERED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "供應商送達回呼（通道支援時）",
+     "evidence": "provider_event_id",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-07",
+     "from": [
+      "ACCEPTED_BY_PROVIDER",
+      "DELIVERED"
+     ],
+     "to": "ACKNOWLEDGED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "SYSTEM"
+     ],
+     "pre": "本人回覆或有後續行動紀錄（電話通知由 R3 撥打後登錄）",
+     "evidence": "回覆內容或 Interaction",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-08",
+     "from": [
+      "FAILED"
+     ],
+     "to": "RETRY_SCHEDULED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "attempts<3 且錯誤可重試；UNKNOWN_OUTCOME 須先以供應商冪等鍵查詢結果，查不到才重試",
+     "evidence": "重試排程",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-09",
+     "from": [
+      "RETRY_SCHEDULED"
+     ],
+     "to": "SENDING",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "到達重試時間；重新檢查同意與靜默時段",
+     "evidence": "worker 租約紀錄",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-10",
+     "from": [
+      "RETRY_SCHEDULED"
+     ],
+     "to": "CANCELLED",
+     "kind": "normal",
+     "actors": [
+      "SYSTEM",
+      "R3"
+     ],
+     "pre": "任務完成、同意撤回或 R3 取消",
+     "evidence": "取消理由",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-11",
+     "from": [
+      "FAILED"
+     ],
+     "to": "FALLBACK_REQUIRED",
+     "kind": "system",
+     "actors": [
+      "SYSTEM"
+     ],
+     "pre": "永久錯誤或重試用盡；建立 NOTIFY_FALLBACK 任務",
+     "evidence": "任務 ID",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-12",
+     "from": [
+      "FALLBACK_REQUIRED"
+     ],
+     "to": "MANUAL_HANDLED",
+     "kind": "normal",
+     "actors": [
+      "R3"
+     ],
+     "pre": "R3 改用其他同意的管道聯絡",
+     "evidence": "Interaction 紀錄",
+     "revocable": "no",
+     "correction": ""
+    },
+    {
+     "id": "NF-13",
+     "from": [
+      "FALLBACK_REQUIRED"
+     ],
+     "to": "CANCELLED",
+     "kind": "normal",
+     "actors": [
+      "R3",
+      "SYSTEM"
+     ],
+     "pre": "同意撤回，或已由其他方式聯絡且任務完成",
+     "evidence": "取消理由",
+     "revocable": "no",
+     "correction": ""
+    }
+   ]
+  }
+ }
+}

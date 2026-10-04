@@ -1,5 +1,5 @@
 # 技術架構
-work_id：STP-PLATFORM-PLAN-001｜版本：v0.2-draft｜2026-10-03
+work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-04
 前提：尚未取得政府介接、MyData 資格、LINE 官方帳號或正式部署環境；本文件是建議目標架構，不代表已部署。
 
 ## 1. 設計限制
@@ -95,7 +95,7 @@ flowchart TB
   AIG --> EXT2
 ```
 主要資料流：
-1. **匿名初篩**：P2 答案存 ScreeningSession（24 小時）→ `eligibility.evaluate()` 讀已發布版本 → 結果頁；未要求聯絡則到期刪除。
+1. **免姓名免帳號初篩**：P2 答案存 ScreeningSession（24 小時）→ `eligibility.evaluate()` 讀已發布版本 → 結果頁；未要求聯絡則到期刪除。
 2. **建案**：協助員建立 Household／ServiceCase／Consent → 匯入 session 答案為 Fact（C1）→ Assessment。
 3. **申請**：Application 狀態轉換經 `casework.transition()`（檢查權限、狀態、證據、冪等鍵）→ 寫 AuditEvent → 產生 Task。
 4. **通知**：Task 到期 → worker 建 Notification（檢查 Consent 與靜默時段）→ 供應商 → 回呼更新狀態 → 失敗建立人工任務。
@@ -108,59 +108,89 @@ flowchart TB
 | catalog | Organization、Source、Resource、ResourceVersion、DocumentRequirement、HouseholdScopeDefinition、VerificationRecord | `publish_version`、`suspend`、`search_public` | 不讀個案資料 |
 | eligibility | EligibilityRule；純函式引擎 | `evaluate(facts_snapshot, versions) -> results` | 無副作用、不呼叫 AI、不寫資料庫（由 intake/casework 寫 Assessment） |
 | intake | ScreeningSession、HelpRequest | `start_session`、`answer`、`request_help` | 不存未同意的聯絡資料 |
-| casework | Household、Person、Fact、ServiceCase、Assessment、Application、Referral、Outcome、Interaction、ActionPlan | `transition_*`、`record_outcome`、`merge_households` | 不直接寄通知（交給 tasks） |
-| documents | DocumentRecord、檔案 | `create_upload_intent`、`confirm_upload`、`download_url`、`purge` | 不把檔案傳給 AI（除非 F-26 啟用且同意） |
+| casework | Household、Person、Fact、FactKeyDefinition、ServiceCase、Assessment、ReviewDecision、Application、Referral、Outcome、OutcomeEvent、Interaction、ActionPlan | `transition(machine, id, transition_id, evidence)`、`record_outcome_event`、`verify_outcome_event`、`merge_households` | 不直接寄通知（交給 tasks）；不接受直接指定目標狀態 |
+| documents | DocumentRecord、檔案 | `create_upload_intent`、`confirm_upload`、`download_url`、`purge`、（試點後）`extract_local` | 不把檔案或其辨識文字傳給外部 AI；本機辨識只在同一私有環境內執行（F-26） |
 | tasks | Task | `create_or_get(dedup_key)`、`escalate` | — |
-| notifications | Notification、供應商設定 | `schedule`、`handle_callback` | 不判斷業務狀態 |
-| access | StaffUser、角色、Consent 檢查 | `can(actor, action, obj)`、`require_consent(purpose, target)` | — |
-| audit | AuditEvent | `record(...)` | 不可修改 |
-| reporting | 彙總表 | `funnel(period, org)` | 不輸出個案層級給 R8 |
-| ai_gateway | AI 呼叫紀錄（不含原文或只含去識別化文字） | `draft_resource_fields`、`plain_explain`、`summarize` | 不寫入已發布資料 |
+| notifications | Notification、NotificationEvent、Outbox、供應商設定 | `schedule`、`handle_callback` | 不判斷業務狀態 |
+| access | StaffUser、角色、Consent、AccessGrant、ReviewNote | `can(actor, action, obj)`、`require_consent(purpose, target)`、`grant_access`、`approve_grant` | 管理者無一般個案存取；BG／REVIEW_SAMPLE 不可擴大範圍 |
+| audit | AuditEvent、PurgeRecord | `record(...)` | 應用程式不可修改或刪除；清除只經專用 `audit_purge` 排程 |
+| retention | DeletionLedger、副本清冊設定 | `revoke_cleanup(consent)`、`purge_expired()`、`reapply_deletions()`（備份還原後） | 不讀取內容；只處理物件參照 |
+| reporting | 彙總表、ReportRun | `funnel(period, org, metric_spec_version)` | 不輸出個案層級；排除合成資料 |
+| ai_gateway | AI 呼叫紀錄（不含原文或只含去識別化文字） | `draft_resource_fields`、`plain_explain`、`summarize` | 不寫入已發布資料；不接受個案資料（MVP）；不接受文件影像或其文字 |
 
 依賴方向：Web/API → 各模組服務函式 → 資料；模組之間只透過服務函式呼叫，以 import-linter 類工具在 CI 檢查。
 
 ## 6. 主要 API
 共同規則：
 - 錯誤格式：RFC 9457 Problem Details（`type`、`title`、`detail`、`errors[]`），使用者訊息另提供白話版。
-- 冪等：所有會產生外部效果或建立紀錄的 POST 需 `Idempotency-Key` 標頭；伺服器存 24 小時（key＋請求雜湊＋回應），相同 key 不同內容回 422。
-- 併發：狀態轉換需帶 `expected_row_version`，不符回 409。
-- 權限：未登入 401；無權限 403（不透露物件是否存在時回 404）。
-- 稽核：所有個案讀取與寫入寫入 AuditEvent。
+- **權限**：「權限」欄使用 [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md) §4 的角色與範圍代碼（ASG、SITE-REV、REF、OWN、GRANT、SAMPLE、BG、AGG、INT、ALL-PUB）。未登入 401；無權限 403；不透露物件是否存在時回 404。權限矩陣每格都有自動化測試。
+- **狀態轉換一律以 `transition_id` 呼叫**（[DATA_MODEL_AND_STATE_MACHINES.md](DATA_MODEL_AND_STATE_MACHINES.md) §3，來源 `state_machines.json`）：請求帶 `transition_id`、`evidence`、`expected_row_version`；伺服器檢查目前狀態、操作者、前置條件與必要證據；不接受直接指定目標狀態；`SYSTEM` 轉換不能由 API 呼叫。
+- **冪等**：所有會建立紀錄或產生外部效果的 POST 需 `Idempotency-Key`。伺服器以 `(actor_id, key)` 存 IdempotencyRecord（24 小時）：首次→處理；相同 key＋相同請求內容→回傳原結果（replay）；相同 key＋不同內容→422；相同 key 仍在處理中→409 `IN_PROGRESS`。
+- **併發**：狀態轉換與欄位更新帶 `expected_row_version`，不符回 409。
+- **稽核**：所有個案讀取與寫入寫入 AuditEvent；經 AccessGrant 的存取帶 `access_grant_id`。
 
 | API | 用途 | 輸入 | 輸出 | 權限 | 錯誤與重複防護 |
 |---|---|---|---|---|---|
-| `GET /api/public/resources` | 公開查詢 | region、category、q、page | 已發布資源摘要 | 公開 | 速率限制；只回 PUBLISHED |
-| `GET /api/public/resources/{key}` | 資源詳情 | key | 版本內容、來源、查核日期 | 公開 | 暫停者回狀態與原因 |
-| `POST /api/screenings` | 開始匿名初篩 | 無 | session token | 公開 | 速率限制、機器人防護（不要求帳號） |
-| `PUT /api/screenings/{token}/answers` | 儲存答案 | 題號→答案 | 下一題、是否急迫 | token 持有者 | 驗證題號與值；急迫回傳 J5 指示 |
-| `POST /api/screenings/{token}/evaluate` | 初篩 | — | 結果（三分類＋理由） | token 持有者 | 引擎錯誤 → 該資源 HUMAN，不整體失敗 |
-| `POST /api/help-requests` | 請人聯絡 | token、聯絡方式、時段、同意 | HelpRequest id | 公開 | Idempotency-Key；同 token 只建一筆 |
-| `POST /api/cases` | 建案 | 管道、household 基本、consent | case id、可能重複清單 | R3 | Idempotency-Key；指紋相符時回 409 附候選（需確認合併或強制新建並寫理由） |
-| `POST /api/cases/{id}/consents` | 建立同意 | 用途、對象、方式、代理 | consent id | R3 | 同意書版本必填 |
-| `POST /api/consents/{id}/revoke` | 撤回 | 撤回用途、管道 | 受影響項目清單 | R1/R2（試點後）、R3 | 冪等；觸發取消排程通知、刪除排程 |
-| `PUT /api/cases/{id}/facts` | 更新事實 | fact_key、value、confirmation_level | 新 Fact 版本 | R3（指派） | 樂觀鎖；保留歷史 |
-| `POST /api/cases/{id}/assessments` | 評估 | 觸發原因 | Assessment | R3、R4 | 相同 input_hash＋版本 60 秒內重複 → 回既有結果 |
-| `POST /api/assessments/{id}/reviews` | 複核 | 結論、理由 | Review | R4（非承辦） | 版本已變 → 409 要求重評 |
-| `POST /api/cases/{id}/applications` | 建立申請 | resource、benefit_period_key | Application | R3 | Idempotency-Key；partial unique index → 409 回既有申請 |
-| `POST /api/applications/{id}/transitions` | 狀態轉換 | to_status、evidence、expected_row_version | 新狀態 | R3、R4 | 非法轉換 422；證據缺漏 422；版本 409；SUBMITTED 必附收件憑據 |
-| `POST /api/cases/{id}/referrals` | 建立轉介 | org、service、shared_fields | Referral | R3 | 同意檢查失敗 403＋原因；重複 409 |
-| `POST /api/referrals/{id}/transitions` | 轉介狀態 | to_status、evidence | 新狀態 | R3、R6（試點後） | 同上 |
-| `POST /api/documents/upload-intents` | 申請上傳 | requirement、person、MIME、size | 簽章上傳 URL（5 分鐘） | R3、R1（試點後） | 需 DOCUMENT_STORAGE 同意；大小與類型白名單 |
+| `GET /api/public/resources` | 公開查詢 | region、category、q、page | `catalog_visibility` 列表內的資源摘要 | ALL-PUB | 速率限制；不回暫停／過期／草稿 |
+| `GET /api/public/resources/{key}` | 資源詳情 | key | 版本內容、來源、查核日期；暫停者回狀態與原因 | ALL-PUB | — |
+| `POST /api/screenings` | 開始初篩工作階段 | 無 | session token | 公開 | 速率限制；不記 IP 只記雜湊與計數；僅限符合 AS-1～AS-6 的環境啟用（[BUILD_PLAN_AND_ACCEPTANCE.md](BUILD_PLAN_AND_ACCEPTANCE.md) §3.2） |
+| `PUT /api/screenings/{token}/answers` | 儲存答案（含成員簡表） | 題號→答案；成員列 | 下一題、是否急迫 | token 持有者 | 驗證題號與值；急迫回傳 J5 指示 |
+| `POST /api/screenings/{token}/evaluate` | 初篩 | — | 只含 `FORMAL` 資源的結果（三分類＋理由＋確認路徑） | token 持有者 | 單一資源引擎錯誤 → 該資源需人工，不整體失敗；不回 `MANUAL_CHECK_ONLY`／`NOT_RECOMMENDED` |
+| `POST /api/help-requests` | 請人聯絡 | token、聯絡方式、時段、CONTACT 同意 | HelpRequest id | 公開 | Idempotency-Key；同 token 只建一筆 |
+| `POST /api/cases` | 建案 | 管道、household 基本、consent | case id、可能重複清單 | R3 | Idempotency-Key；指紋相符回 409 附候選（需確認合併或強制新建並寫理由） |
+| `POST /api/cases/{id}/consents` | 建立同意 | 用途、對象、方式、代理 | consent id | VE·ASG | 同意書版本必填 |
+| `POST /api/consents/{id}/revoke` | 撤回 | 撤回用途、管道、撤回人 | 受影響項目清單、cleanup 任務 | R1／R2（試點後）、R3·ASG | 冪等；同一交易內：寫撤回欄位、取消排程通知、REFERRAL_SHARE 轉介走 RF-17、建立清除任務與 DeletionLedger 項目 |
+| `PUT /api/cases/{id}/facts` | 更新事實 | `fact_key`（須在 FactKeyDefinition）、value、confirmation_level、source | 新 Fact 版本 | VE·ASG | 樂觀鎖；保留歷史；未登錄字彙拒絕 |
+| `POST /api/cases/{id}/assessments` | 評估 | 觸發原因、`as_of` | Assessment（含每資源 `recommendation`） | R3·ASG、R4·SITE-REV | 相同 `(case, input_hash, 版本清單, as_of)` 60 秒內回既有結果；R3／R4 才可見 `MANUAL_CHECK_ONLY` |
+| `POST /api/assessments/{id}/reviews` | 複核（ReviewDecision） | decision、kind、reason | ReviewDecision | R4（≠承辦，SITE-REV） | 版本已變 → 409 要求重評；理由必填 |
+| `POST /api/cases/{id}/applications` | 建立申請 | resource、benefit_period_key、`kind`、`related_application_id`、`relation_reason` | Application | VE·ASG（SUPPLEMENTARY 另需 R4 核可） | Idempotency-Key；違反唯一約束 → 409 附既有申請與可行的 kind（`ORIGINAL_EXISTS_*`、`RELATED_STATE_INVALID_*`、`DUPLICATE_RELATED`…） |
+| `POST /api/applications/{id}/transitions` | 申請狀態轉換 | `transition_id`、evidence、expected_row_version | 新狀態 | 依轉換定義（R3／R4） | 非法轉換 422；證據缺漏 422；版本 409；AP-08 必附收件憑據且 Idempotency-Key；AP-14 需 R4 確認 |
+| `POST /api/cases/{id}/referrals` | 建立轉介 | org、service、shared_fields | Referral（RF-01 自動） | VES·ASG | 同意檢查失敗 403＋原因；重複 409 |
+| `POST /api/referrals/{id}/transitions` | 轉介狀態 | `transition_id`、evidence | 新狀態 | 依轉換定義（R3、R4、R6·REF） | 同上；RF-17 自動建立 STOP_USE_NOTICE 任務 |
+| `POST /api/documents/upload-intents` | 申請上傳 | requirement、person、MIME、size | 簽章上傳 URL（5 分鐘） | R3·ASG、R1·OWN（試點後） | 需 DOCUMENT_STORAGE 同意；大小與類型白名單 |
 | `POST /api/documents/{id}/confirm` | 確認上傳 | 雜湊 | 掃描排程 | 同上 | 雜湊不符拒絕；掃描失敗隔離 |
-| `GET /api/documents/{id}/download` | 下載 | 用途 | 短效 URL | 依矩陣 | 每次寫 AuditEvent |
-| `POST /api/cases/{id}/outcomes` | 登錄取得 | receipt_status、evidence_level、內容 | Outcome | R3 登錄；R4 驗證 | 未 APPROVED/ACCEPTED 不可建立 |
-| `POST /api/tasks` / `PATCH /api/tasks/{id}` | 任務 | 類型、期限、指派 | Task | R3～R5 | dedup_key 重複回既有 |
-| `POST /api/notifications/callbacks/{provider}` | 供應商回呼 | 供應商格式 | 200 | 簽章驗證 | 以 provider_message_id 冪等；未知 id 記錄並忽略 |
-| `POST /api/admin/resources/{id}/versions` | 建立版本 | 欄位 | 草稿 | R5 | 驗證必填與 UNKNOWN 標記 |
-| `POST /api/admin/versions/{id}/submit` / `verify` / `publish` / `suspend` | 版本生命週期 | 查核紀錄、理由 | 新狀態＋影響分析 | R5（分權）、R4、R7 | 同人限制 403；發布冪等 |
-| `GET /api/reports/funnel` | 漏斗 | 期間、據點 | 彙總（n<5 遮蔽） | R8、R7、R4 | 排除合成資料 |
-| `GET /api/audit-events` | 稽核查詢 | 物件、期間 | 事件 | R7 | 查詢本身也稽核 |
+| `GET /api/documents/{id}/download` | 下載 | 用途 | 短效 URL | V·ASG、V·SITE-REV；R7 不可 | 每次寫 AuditEvent |
+| `POST /api/documents/{id}/extract` | 本機文字辨識（試點後，F-26） | 方法 `LOCAL_OCR` | extraction（`confirmed=false`） | R3·ASG | 需 DOCUMENT_EXTRACTION 同意；影像與文字不離開私有環境；失敗回人工登錄；**不存在外部 AI 版本** |
+| `POST /api/outcomes/{id}/events` | 登錄取得事件 | event_type、occurred_on、evidence_level、description | OutcomeEvent | E·ASG、E·REF（R6 僅 E2 服務確認） | 缺 evidence_level 422；`voids_event_id` 僅 R4 |
+| `POST /api/outcome-events/{id}/verify` | 驗證取得事件 | 驗證說明 | `verified_by`／`verified_at` | R4·SITE-REV 或另一位非責任人、非登錄人的 R3 | 驗證人＝登錄人或責任人 → 403；冪等 |
+| `POST /api/outcomes/{id}/transitions` | 取得狀態轉換 | `transition_id`、evidence | 新狀態 | 依轉換定義（R3；更正 R4） | 未 APPROVED／ACCEPTED 的 Outcome 不存在；OC-08／09 只限 R4 |
+| `POST /api/tasks` / `PATCH /api/tasks/{id}` | 任務 | 類型、期限、指派 | Task | R3·ASG、R4·SITE-REV、R5·INT | `dedup_key` 重複回既有 |
+| `POST /api/notifications/{id}/transitions` | 人工通知處理 | `transition_id`（NF-02、NF-07、NF-12、NF-13） | 新狀態 | R3·ASG | 同上 |
+| `POST /api/notifications/callbacks/{provider}` | 供應商回呼 | 供應商格式 | 200 | 供應商簽章驗證 | 事件先寫 NotificationEvent，以 `(provider, provider_event_id)` 去重；依狀態機只前進，亂序或重複事件 `applied=false`；DELIVERED 後的失敗設 `late_failure` 並建立任務；未知 id 記錄並忽略 |
+| `POST /api/admin/resources/{id}/versions` | 建立版本 | 欄位 | 草稿 | R5·INT | 驗證必填與 UNKNOWN 標記 |
+| `POST /api/admin/versions/{id}/transitions` | 版本生命週期 | `transition_id`、VerificationRecord／理由 | 新狀態＋影響分析（RV-12／RV-13 為系統轉換） | R5（分權）、R4、R7 | 同人限制 403；發布冪等；暫停時回受影響案件清單 |
+| `GET /api/admin/versions/{id}/recommendation` | 正式推薦判定與原因碼 | as_of | `FORMAL`／`MANUAL_CHECK_ONLY`／`NOT_RECOMMENDED`＋原因 | R5·INT、R4、R9 | — |
+| `POST /api/access-grants` | 申請例外存取 | grant_type、purpose、scope、期限 | AccessGrant（待核准） | R7（BREAK_GLASS）；R4·SITE-REV／負責人核發（REVIEW_SAMPLE） | 期限上限（BG ≤4 小時、REVIEW ≤14 天）；範圍不可事後擴大 |
+| `POST /api/access-grants/{id}/approve` | 核准 | — | 已核准 | 核准人≠申請人（BG 雙人） | 自己核准 403；審批寫 AuditEvent |
+| `POST /api/access-grants/{id}/revoke` | 撤銷 | 理由 | — | 核發者、R7 | 冪等 |
+| `POST /api/review-notes` | 獨立覆核意見 | 對象、意見 | ReviewNote | R9·SAMPLE | 只能寫意見，不能修改被覆核資料 |
+| `GET /api/reports/funnel` | 漏斗報表 | 期間、據點、`metric_spec_version` | ReportRun＋彙總（n<5 遮蔽） | R8、R7、R4、R9：AGG；R3：自身據點 AGG | 排除合成資料；回傳所用版本與參數；不提供個案下鑽或匯出 |
+| `GET /api/audit-events` | 稽核查詢 | 物件、期間 | 事件 metadata（不含敏感值） | R7（INT）；R9（彙總） | 查詢本身也稽核；不可 UPDATE／DELETE |
 
 ### 6.1 外部失敗可見與人工接管
-- 所有外部呼叫（簡訊、Email、AI、來源抓取）經 outbox 表：`pending → sent → confirmed | failed`；失敗顯示在 P10 與管理頁「外部失敗」清單。
+- 所有外部呼叫（簡訊、Email、來源抓取，試點後的本機辨識）經 outbox 表：`pending → sent → confirmed | failed`；失敗顯示在 P10 與管理頁「外部失敗」清單。
 - 重試：指數退避（1 分、5 分、30 分），最多 3 次；永久錯誤（號碼無效、退信）不重試。
 - 人工接管：每筆失敗有「改由人工處理」按鈕，建立任務並記錄處理結果；接管後系統不再自動重試。
 - 申請與轉介因無外部 API，系統永遠不自動送出；「送件」是人工動作的紀錄，避免重複送件的風險集中在資料庫唯一約束與送件前檢查。
+
+### 6.2 交易一致性、重複與亂序處理
+**狀態轉換（單一資料庫交易）**：
+1. 以 `UPDATE … WHERE id=? AND row_version=?` 做樂觀鎖並寫入新狀態（0 列受影響→409）；
+2. 寫入 AuditEvent（雜湊鏈：同一 `chain_id` 以 `SELECT … FOR UPDATE` 鎖住鏈尾列後附加，避免分叉）；
+3. 建立後續 Task（`INSERT … ON CONFLICT (dedup_key) WHERE status IN (OPEN, IN_PROGRESS, ESCALATED) DO NOTHING`）；
+4. 寫入 IdempotencyRecord 的完成結果；
+5. 需要外部效果者寫入 Outbox（同一交易）；
+6. 提交。任何一步失敗全部回滾，不會出現「狀態已改但稽核或任務缺漏」。
+**外部效果**：worker 以 `FOR UPDATE SKIP LOCKED` 領取 Outbox，對供應商使用冪等鍵（`Notification.idempotency_key`）；至少一次傳遞＋接收端冪等＝效果恰一次。回應逾時而結果未知時標記 `UNKNOWN_OUTCOME`，先以冪等鍵向供應商查詢，不盲目重送（NF-08）。
+**回呼**：以 NotificationEvent 去重（事件 ID）並依狀態機單向前進（訊息 ID 與事件 ID 分開：一則訊息可有多個事件）；亂序、重複、同訊息多事件的行為見 `engine_cases.json` 的 `callback_scenarios`（T-45）。
+**重複與併發建立**：Application 與 Referral 以 §2.13／§2.14 的唯一約束保證；兩個不同 Idempotency-Key 的並發請求只有一個成功，另一個得到 409 與既有紀錄（T-46）；送件相關任務以 `dedup_key` 唯一。
+**資料庫約束優先於應用檢查**：所有唯一性、必填、外鍵、狀態與轉換合法性最終由資料庫約束或單一轉換函式保證，不依賴前端或呼叫順序。
+
+### 6.3 技術表
+| 表 | 內容 | 保存 |
+|---|---|---|
+| IdempotencyRecord | `actor_id`、`key`、`request_hash`、`state(IN_PROGRESS／DONE)`、`response`、`created_at`；`unique(actor_id, key)` | 24 小時 |
+| Outbox | `id`、`effect_type`、`payload`（不含敏感全文，僅參照 ID）、`status`、`attempts`、`next_attempt_at`、`idempotency_key`、`last_error` | 完成後 30 天 |
 
 ## 7. 成本來源與擴充
 成本來源（金額見 [OPERATIONS_AND_PRIVACY.md](OPERATIONS_AND_PRIVACY.md) §3）：容器運算、受管資料庫（最大固定成本）、物件儲存、KMS、日誌、網域與憑證、Email／簡訊用量、AI token、錯誤追蹤服務、備份、開發與維運工時。

@@ -12,7 +12,7 @@
 - [服務流程與營運責任](docs/SERVICE_MODEL.md)
 - [資料、資格規則與系統規格](docs/DATA_AND_PRODUCT_SPEC.md)
 
-### 平台規劃（STP-PLATFORM-PLAN-001，v0.2-draft，待獨立覆核）
+### 平台規劃（STP-PLATFORM-PLAN-001，v0.3-draft（R1 修正），待獨立覆核）
 承接上列基線，細化為可直接開發的規格；與 90 天計畫的對照見各文件。
 - [產品需求、角色權限與成果口徑](docs/platform/PRODUCT_REQUIREMENTS.md)
 - [服務流程與頁面規格](docs/platform/USER_JOURNEYS_AND_SCREENS.md)
@@ -22,12 +22,15 @@
 - [資料保護、營運與成本](docs/platform/OPERATIONS_AND_PRIVACY.md)
 - [開發工作包、試點閘門與測試情境](docs/platform/BUILD_PLAN_AND_ACCEPTANCE.md)
 - [決策、外部待確認事項與基線缺口](docs/platform/DECISIONS_AND_UNKNOWNS.md)
+- [第一開發批次執行包（本輪不開工）](docs/platform/BATCH1_EXECUTION_PACK.md)
+- [第一輪覆核（CHANGES_REQUESTED）修正對照 R1](docs/platform/revisions/R1_RESPONSE.md)
 - [合成範例資料與檢查程式](docs/platform/examples/README.md)
 
 ## 當前狀態
 2026-10-03：建立專案規劃基線 v0.1。尚未建立產品、部署服務、確認合作機構或服務真實家庭。
 90 天由試點啟動日計算，不代表已有外部合作承諾。
-2026-10-03：完成平台規劃 v0.2-draft（docs/platform/），待獨立覆核；仍未建置產品或部署，範例皆為合成資料。
+2026-10-03：完成平台規劃 v0.2-draft（docs/platform/）；第一輪獨立覆核 verdict 為 CHANGES_REQUESTED。
+2026-10-04：完成 R1 修正（v0.3-draft），待獨立覆核；仍未建置產品或部署，範例皆為合成資料。四份原始基線文件未修改，基線調整只以待決提案列於 DECISIONS_AND_UNKNOWNS。
 
 ## 第一階段範圍
 以台灣一個縣市、兩個合作據點、經濟困難且有兒少的家庭為試點。
