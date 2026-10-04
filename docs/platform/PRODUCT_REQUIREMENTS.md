@@ -1,5 +1,5 @@
 # 平台產品需求（PRD）
-work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-04｜狀態：待獨立覆核
+work_id：STP-PLATFORM-PLAN-001｜版本：v0.4-draft（R2 修正）｜2026-10-04｜狀態：待獨立覆核
 承接：[專案藍圖](../PROJECT_BLUEPRINT.md)、[90 天計畫](../EXECUTION_PLAN.md)、[服務模型](../SERVICE_MODEL.md)、[資料與產品規格](../DATA_AND_PRODUCT_SPEC.md)（基線 commit `9a7bd12`）
 
 > 本文件是規劃規格，不代表產品已建置、已部署或已有合作機構。所有示範資料皆為合成資料。
@@ -64,49 +64,64 @@ work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-0
 
 ### 4.1 動作與範圍代碼
 動作：V＝查看；E＝新增或修改；S＝分享或匯出給他人；A＝核准或發布；「—」＝不可。
+<!-- BEGIN GENERATED:permission_scopes (來源：permissions.json，請勿手改) -->
 | 範圍代碼 | 意義 |
 |---|---|
 | ALL-PUB | 所有已發布的公開資訊 |
-| INT | 內部資料（資源草稿、查核、任務等，不含個案內容） |
-| OWN | 本人所屬家庭（Household） |
-| GRANT | 同意書 `Consent.proxy` 所列的範圍與有效期間（VIEW／EDIT／CONTACT／ACCOMPANY_SUBMIT） |
-| ASG | 該協助員為責任人或備援的案件 |
-| SITE-REV | 同一合作據點、同意書允許該據點存取，且案件進入複核佇列或被抽樣 |
-| REF | 轉介給該提供機構、且 Referral 同意有效的那一筆轉介，只含其 `shared_fields` |
-| SAMPLE | 獨立覆核授權（AccessGrant `REVIEW_SAMPLE`）所列的抽樣案件，預設去識別化，期限 ≤14 天 |
-| AGG | 匿名彙總（單一儲存格 n<5 遮蔽） |
-| BG | break-glass 例外存取（AccessGrant `BREAK_GLASS`：雙人核可、限定用途與案件、≤4 小時） |
+| INT | 內部資料（不含個案內容） |
+| OWN | 本人所屬家庭 |
+| GRANT | Consent.proxy 授權範圍與期間 |
+| ASG | 責任人或備援案件 |
+| SITE-REV | 同據點、同意書允許，且在複核佇列或抽樣範圍 |
+| REF | 轉介給該機構且同意有效的那一筆，僅 shared_fields |
+| SAMPLE | AccessGrant REVIEW_SAMPLE 抽樣案件（去識別化，≤14 天） |
+| AGG | 匿名彙總（n<5 遮蔽） |
+| BG | AccessGrant BREAK_GLASS（雙人核可、≤4 小時） |
+| TOKEN | 本次初篩工作階段 token |
+| VERIFY | 被指派驗證的單筆 OutcomeEvent 摘要（不含家庭、成員、文件；驗證人≠登錄人≠責任人） |
+| SELF | 本人自己的授權或存取紀錄 |
+| OWN-RES | 自身提供的資源 |
+| OWN-ORG | 自身機構的容量資料 |
+<!-- END GENERATED:permission_scopes -->
 
 ### 4.2 矩陣
 欄位＝角色（R1 本人、R2 代理人、R3 協助員、R4 社工複核、R5 資源維護、R6 提供機構、R7 管理者、R8 報告檢視者、R9 獨立覆核者）。
+<!-- BEGIN GENERATED:permission_matrix (來源：permissions.json，請勿手改) -->
 | 資料類別 | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 |
 |---|---|---|---|---|---|---|---|---|---|
 | 公開資源資訊（已發布版本） | V·ALL-PUB | V·ALL-PUB | V·ALL-PUB | V·ALL-PUB | VE·ALL-PUB | V·ALL-PUB | V·ALL-PUB | V·ALL-PUB | V·ALL-PUB |
-| 資源草稿、查核紀錄、來源快照 | — | — | V·INT | V·INT | VEA·INT（查核人≠發布人） | — | V·INT | — | V·INT |
-| 資格規則（已發布） | V·白話版 | V·白話版 | V·ALL-PUB | V·ALL-PUB | VEA·INT | V·自身資源 | V·ALL-PUB | — | V·ALL-PUB |
-| 匿名初篩工作階段（去連結化，非匿名保證） | VE·本次 token | VE·本次 token | VE·代填（ASG） | — | — | — | — | AGG | — |
-| 家庭與成員概況 | VE·OWN | VE·GRANT | VE·ASG | VE·SITE-REV | — | V·REF | BG | — | V·SAMPLE（去識別化） |
-| 敏感事實（所得、財產、健康、身障、證件號） | VE·OWN | V·GRANT | VE·ASG（用途限評估與申請） | V·SITE-REV | — | V·REF（僅 shared_fields 內） | BG | — | V·SAMPLE（遮蔽原始值，只見確認程度與判斷結果） |
-| 安全旗標（家暴、兒少保護、不可家中聯絡） | —（口頭告知） | — | VE·ASG | V·SITE-REV | — | — | — | — | — |
-| 同意與代理授權 | V·OWN，可撤回 | V·自身授權 | VE·ASG（建立、記錄撤回） | V·SITE-REV | — | V·REF（該轉介的同意摘要） | BG | — | V·SAMPLE |
-| 評估結果與理由 | V·OWN | V·GRANT | VE·ASG（加註） | VE·SITE-REV（複核結論） | —（規則品質分析由 R4 提供去識別化的錯漏案例） | — | BG | AGG | V·SAMPLE |
-| 申請紀錄與狀態 | V·OWN | V·GRANT | VE·ASG | VE·SITE-REV | — | V·REF（僅該轉介對應的服務） | BG | AGG | V·SAMPLE |
-| 轉介內容 | V·OWN | V·GRANT | VES·ASG（依 share_targets） | VES·SITE-REV | — | VE·REF（受理狀態、服務回覆） | BG | AGG | V·SAMPLE |
-| 文件需求清單 | V·OWN | V·GRANT | VE·ASG | VE·SITE-REV | VE·INT（DocumentRequirement 範本） | — | — | — | V·SAMPLE |
-| 文件檔案（私有儲存） | VE·OWN（自身上傳） | V·GRANT | V·ASG（限申請用途，下載留紀錄） | V·SITE-REV（複核中） | — | —（試點初期；試點後僅單次短效、經同意、不可下載之檢視） | —（只可執行刪除作業，看不到內容） | — | — |
-| 任務、提醒、通知紀錄 | V·OWN（給自己的） | V·GRANT（給自己的） | VE·ASG | VE·SITE-REV | VE·INT（查核任務） | V·REF（給自己的） | V·INT（不含 rendered_summary） | AGG | V·SAMPLE |
-| 成果事件（OutcomeEvent） | VE·OWN（回報取得，E1） | VE·GRANT（E1） | VE·ASG（登錄） | VEA·SITE-REV（驗證） | — | E·REF（服務開始／完成確認，E2） | BG | AGG | V·SAMPLE |
+| 資源草稿、查核紀錄、來源快照 | — | — | V·INT | VE·INT（僅限暫停轉換 RV-09、RV-10，不可編輯內容） | VEA·INT（查核人≠發布人） | — | VE·INT（僅限暫停／停用轉換 RV-09、RV-10、RV-14，不可編輯內容） | — | V·INT |
+| 資源查核任務 | — | — | — | V·INT | VE·INT | — | V·INT | — | V·INT |
+| 資格規則（已發布） | V·ALL-PUB（白話版） | V·ALL-PUB（白話版） | V·ALL-PUB | V·ALL-PUB | VEA·INT | V·OWN-RES（自身提供的資源） | V·ALL-PUB | — | V·ALL-PUB |
+| 文件需求範本（DocumentRequirement，隨資源版本） | V·ALL-PUB | V·ALL-PUB | V·ALL-PUB | V·ALL-PUB | VE·INT | V·ALL-PUB | V·ALL-PUB | V·ALL-PUB | V·ALL-PUB |
+| 機構與服務容量資料（不含個案） | V·ALL-PUB（僅公開的容量狀態） | V·ALL-PUB（僅公開的容量狀態） | VE·INT（電話或書面確認後登錄確認方式與日期） | VE·INT（電話或書面確認後登錄確認方式與日期） | VE·INT（電話或書面確認後登錄確認方式與日期） | VE·OWN-ORG（試點後；試點初期由 R3 代為登錄） | V·INT | — | V·INT |
+| 初篩工作階段（免姓名免帳號；去連結化，非匿名保證） | VE·TOKEN（本次 token） | VE·TOKEN（本次 token） | VE·ASG（代填） | — | — | — | — | V·AGG | — |
+| 家庭與成員概況 | VE·OWN | VE·GRANT | VE·ASG | VE·SITE-REV | — | V·REF（僅 shared_fields） | VE·BG（依 AccessGrant 用途與範圍） | — | V·SAMPLE（去識別化） |
+| 敏感事實（所得、財產、健康、身障、證件號） | VE·OWN | V·GRANT | VE·ASG（用途限評估與申請） | V·SITE-REV | — | V·REF（僅 shared_fields 內） | VE·BG（依 AccessGrant 用途與範圍） | — | V·SAMPLE（遮蔽原始值，只見確認程度與判斷結果） |
+| 安全旗標（家暴、兒少保護、不可家中聯絡） | — | — | VE·ASG | V·SITE-REV | — | — | — | — | — |
+| 同意與代理授權 | VE·OWN（可查看與撤回自己的同意） | VE·SELF（查看與撤回自身授權） | VE·ASG（建立、記錄撤回） | V·SITE-REV | — | V·REF（該轉介的同意摘要） | V·BG | — | V·SAMPLE |
+| 評估結果與理由（含複核） | V·OWN | V·GRANT | VE·ASG（加註；含 MANUAL_CHECK_ONLY 人工查核項） | VE·SITE-REV（複核結論；含 MANUAL_CHECK_ONLY 人工查核項） | — | — | V·BG | V·AGG | V·SAMPLE |
+| 行動清單 | VE·OWN（勾選自己的步驟） | VE·GRANT（勾選自己的步驟） | VE·ASG | V·SITE-REV | — | — | V·BG | — | V·SAMPLE |
+| 申請紀錄與狀態 | V·OWN | V·GRANT | VE·ASG | VE·SITE-REV（含更正轉換） | — | V·REF（僅該轉介對應的服務） | V·BG | V·AGG | V·SAMPLE |
+| 個案轉介內容與清單 | V·OWN | V·GRANT | VES·ASG（依 share_targets） | VES·SITE-REV | — | VE·REF（受理狀態、服務回覆；只含轉介給自己的那一筆） | V·BG | V·AGG | V·SAMPLE |
+| 個案文件需求與準備進度 | V·OWN | V·GRANT | VE·ASG | VE·SITE-REV | — | — | — | — | V·SAMPLE |
+| 文件檔案（私有儲存） | VE·OWN（自身上傳） | V·GRANT | VE·ASG（代為上傳與確認；限申請用途，下載留紀錄） | V·SITE-REV（複核中） | — | — | — | — | — |
+| 案件任務、提醒、通知紀錄 | V·OWN（給自己的） | V·GRANT（給自己的） | VE·ASG | VE·SITE-REV | — | V·REF（給自己的） | V·BG | V·AGG | V·SAMPLE |
+| 成果事件（OutcomeEvent） | VE·OWN（回報取得，E1） | VE·GRANT（E1） | VE·ASG（登錄；不可驗證自己登錄或自己負責的事件）；VA·VERIFY（驗證另一位 R3 負責、非自己登錄、且被指派驗證的單筆事件；只可見事件摘要（類型、日期、取得證據、描述），不含家庭、成員與文件） | VEA·SITE-REV（驗證與更正） | — | E·REF（服務開始／完成確認，E2） | V·BG | V·AGG | V·SAMPLE |
+| 外部失敗與背景作業 metadata（不含個案內容） | — | — | — | V·INT | — | — | V·INT（外部失敗清單、背景作業狀態；不含 rendered_summary 與個案內容） | — | — |
 | 稽核事件 | V·OWN（自身存取紀錄摘要，經 R3 提供） | V·GRANT（同左） | — | — | — | — | V·INT（metadata，不含敏感值） | — | V·INT（彙總與抽樣） |
-| 例外存取授權（AccessGrant） | — | — | — | EA·SITE-REV（核發 REVIEW_SAMPLE，需負責人同意） | — | — | EA·INT（申請與核准 BREAK_GLASS；申請人≠核准人，雙人） | — | V·自身授權 |
+| 例外存取授權（AccessGrant） | — | — | — | VEA·SITE-REV（核發 REVIEW_SAMPLE，需負責人同意） | — | — | VEA·INT（申請與核准 BREAK_GLASS；申請人≠核准人，雙人） | — | V·SELF（自身授權） |
+| 獨立覆核意見（ReviewNote） | — | — | — | V·SITE-REV | — | — | — | — | VE·SAMPLE（只寫意見，不改被覆核資料） |
 | 匿名彙總報表 | — | — | V·AGG（自身據點） | V·AGG | V·AGG（資源成效） | V·AGG（自身資源，n≥5） | V·AGG | VS·AGG | V·AGG |
 | 帳號與角色管理 | — | — | — | — | — | — | VE·INT | — | — |
+<!-- END GENERATED:permission_matrix -->
 
 ### 4.3 各角色的限制與例外（驗收依據）
 | 角色 | 可做 | 明確不可做 |
 |---|---|---|
 | R1 本人 | 查看與更正自己的資料、撤回同意、回報取得（E1）、要求查閱存取紀錄 | 看到內部專業註記（`restricted_note`）、安全旗標；看到其他家庭資料 |
 | R2 代理人 | 僅限 Consent.proxy 範圍與期間內查看／修改／聯絡／陪同送件 | 超出範圍、授權過期後的任何存取；撤回本人的同意（除非授權明列）；看安全旗標 |
-| R3 協助員 | 責任人或備援案件的查看與修改、依同意分享轉介、登錄成果（驗證另需第二人） | 非指派案件；驗證自己登錄或自己負責案件的取得事件；發布資源；匯出個案資料 |
+| R3 協助員 | 責任人或備援案件的查看與修改、依同意分享轉介、登錄成果；以 VERIFY 範圍驗證**另一位 R3 負責**、非自己登錄、且被指派的單筆事件摘要（§4.5） | 非指派案件；驗證自己登錄或自己負責案件的取得事件；發布資源；匯出個案資料 |
 | R4 社工 | 複核佇列與抽樣案件、成果驗證、更正（AP-19～23、RF-18、OC-08／09）、核發 REVIEW_SAMPLE | 複核自己承辦的案件；跨據點存取（除非同意書允許）；越過 AccessGrant 看非複核案件 |
 | R5 資源維護 | 資源、來源、規則、查核；發布（發布人≠查核人） | 任何個案內容；發布自己查核的版本 |
 | R6 提供機構 | 僅處理「轉介給自己」且同意有效的轉介：看 `shared_fields`、回覆受理狀態、容量與服務開始／完成確認 | 其他轉介、其他家庭、文件下載、跨機構資料；試點初期不設帳號，由 R3 代為登錄 |
@@ -124,7 +139,13 @@ work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-0
 | 稽核 | 每次存取寫 AuditEvent（含 `access_grant_id`）；事後通知資料責任人；月度檢視 | 同左；覆核意見留於 ReviewNote |
 | 匯出 | 不可（刪除或更正在系統內完成） | 不可 |
 
-### 4.5 分享、匯出與兼任規則
+### 4.5 其他 R3 驗證成果事件（VERIFY 範圍）
+- 對象：驗證人由 R4 或負責人**指派**的單筆 OutcomeEvent；驗證人必須≠登錄人、≠該案責任人與備援，且在系統中不是該案任何承辦。
+- 可見內容：事件摘要（類型、日期、取得證據等級與描述）。**不含**家庭、成員、文件、聯絡方式、其他事實；VERIFY 不提供任何一般案件讀取，也不能列出未被指派的案件。
+- 動作：只有 V 與 A（驗證）；不能 E。驗證後寫 AuditEvent（含驗證人與事件 id）。
+- 矩陣是唯一依據：API（`GET /api/outcome-events/pending-verification`、`POST /api/outcome-events/{id}/verify`）、P7「待我驗證」與測試（T-50）都引用同一份 `permissions.json`；工具 `gen_permissions.py` 的政策檢查會在 VERIFY 被擴大或 API 授權超出矩陣時失敗（這是文件政策檢查，不是產品授權行為測試）。
+
+### 4.6 分享、匯出與兼任規則
 - 任何對外分享（轉介、提供機構、代理人）必須對應一筆有效 Consent 的用途與對象，系統在送出前檢查；分享內容限於 `shared_fields`。
 - 匯出個案資料（CSV、列印）預設關閉；需 R4 核可並記錄用途；R7、R8、R9 不得匯出個案資料。列印行動清單給本人本身不屬於匯出，但會寫入 ActionPlan 交付紀錄。
 - R8 與資助方溝通只用匿名彙總；不得提供名單、聯絡方式或可辨識案例。
@@ -278,7 +299,7 @@ work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-0
 | PR-04 | 取得需第二人驗證 | 是 | 推薦且可逆 | D-105 | §7.2.1 |
 | PR-05 | 報表小數格遮蔽門檻 | n<5 | 推薦且可逆 | D-205 | §4、P12 |
 | PR-06 | 品質抽查比例 | 20%（至少 1 案／週） | 暫行 | — | §7.5 |
-| PR-07 | 停滯天數門檻 | 21 天 | 暫行（待與據點約定） | D-309 | §7.5 |
+| PR-07 | 停滯天數門檻 | 21 天 | 暫行（待與據點約定） | D-310 | §7.5 |
 | PR-08 | 接近門檻的人工確認範圍 | ±5% | 暫行 | — | 引擎 §5.1 |
 `metric_spec_version` 初始為 `M1-draft`；PR-01、PR-02 經負責人決定後升為 `M1`。任何參數變動即新版本；報表頁（P12）與 ReportRun 顯示所用版本。未經決定的暫行值不得在對外報告中寫成既定標準。
 

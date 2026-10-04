@@ -1,5 +1,5 @@
 # 資源蒐集更新系統與資格規則引擎
-work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-04
+work_id：STP-PLATFORM-PLAN-001｜版本：v0.4-draft（R2 修正）｜2026-10-04
 資料欄位見 [DATA_MODEL_AND_STATE_MACHINES.md](DATA_MODEL_AND_STATE_MACHINES.md)；合成範例見 [examples/](examples/README.md)。
 
 基本立場：
@@ -23,12 +23,12 @@ work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-0
 輸入：ResourceVersion、已發布的 EligibilityRule、其引用的 Source、`risk_tier`、評估基準日 `as_of`。輸出：`FORMAL`、`MANUAL_CHECK_ONLY`、`NOT_RECOMMENDED` 三者之一，加上全部原因碼。判定順序與結果：
 | # | 檢查 | 不通過時 |
 |---|---|---|
-| 1 | 有已發布、結構有效的 EligibilityRule | NOT_RECOMMENDED：`RULE_NOT_PUBLISHED`／`RULE_INVALID` |
-| 2 | 版本狀態 | PUBLISHED 通過；NEEDS_RECHECK：`risk_tier=HIGH` 為 `RECHECK_HIGH_RISK`（不推薦），其他風險在進入 NEEDS_RECHECK 後 14 天內可推薦並加「查核中」標記、超過為 `RECHECK_GRACE_EXCEEDED`（不推薦，且依 RV-09 轉暫停）；SUSPENDED／EXPIRED／SUPERSEDED／RETIRED／CANDIDATE／DRAFT／IN_REVIEW 一律 NOT_RECOMMENDED：`STATUS_<狀態>` |
+| 1 | 有已發布、**完整驗證通過**的 EligibilityRule（驗證流程見 §5.4：先完整結構驗證，再範圍參照驗證；兩階段都必須完成並通過，驗證未完成或中途例外一律視為不合法） | NOT_RECOMMENDED：`RULE_MISSING`（無規則）、`RULE_STATUS_MISSING`（缺 `rule.status`；**不得預設為已發布**）、`RULE_NOT_PUBLISHED`（`status` 不是 PUBLISHED）、`RULE_INVALID`（任何位置的非法條件、未支援的運算子或組合、非法 CUSTOM 運算式、未知或未支援的口徑範圍鍵、引用不存在的口徑） |
+| 2 | 版本狀態 | PUBLISHED 通過；NEEDS_RECHECK：`risk_tier=HIGH` 為 `RECHECK_HIGH_RISK`（不推薦）；其他風險在進入 NEEDS_RECHECK 後 14 天內（OP-08 暫行）可推薦並加「查核中」標記，超過為 `RECHECK_GRACE_EXCEEDED`（不推薦，且依 RV-09 轉暫停）。**起算資料**：`ResourceVersion.recheck_started_at`（RV-07 寫入觸發時間、RV-08 清除；DATA_MODEL §2.4.1）；已過天數＝`as_of` 日期 − `recheck_started_at` 日期（日曆天，Asia/Taipei），缺少為 `RECHECK_START_MISSING`、格式不合或晚於 `as_of` 為 `RECHECK_START_INVALID`（都不推薦）；SUSPENDED／EXPIRED／SUPERSEDED／RETIRED／CANDIDATE／DRAFT／IN_REVIEW 一律 NOT_RECOMMENDED：`STATUS_<狀態>` |
 | 3 | `verification_level` ≥ V2 | NOT_RECOMMENDED：`VERIFICATION_TOO_LOW` |
 | 4 | `conflict_status` ≠ OPEN | NOT_RECOMMENDED：`SOURCE_CONFLICT` |
 | 5 | 所引用 Source 皆為 ACTIVE | NOT_RECOMMENDED：`SOURCE_INVALID`（BROKEN／MOVED／SUPERSEDED，需重新查核並引用新來源） |
-| 6 | 生效期間 | `as_of < effective_from`：NOT_RECOMMENDED `NOT_YET_EFFECTIVE`；`as_of > effective_to`：NOT_RECOMMENDED `PERIOD_ENDED`；`effective_to` 未知（`effective_unknown`）：**MANUAL_CHECK_ONLY** `PERIOD_UNKNOWN` |
+| 6 | 生效期間 | `as_of < effective_from`：NOT_RECOMMENDED `NOT_YET_EFFECTIVE`；`as_of > effective_to`：NOT_RECOMMENDED `PERIOD_ENDED`；`effective_to` 未知（`effective_unknown=true`）：**MANUAL_CHECK_ONLY** `PERIOD_UNKNOWN`；`effective_unknown` 必須與 `effective_to` 是否為空一致，不一致為 NOT_RECOMMENDED `VERSION_INVALID`（同樣，缺少必要欄位也是 `VERSION_INVALID`）|
 | 7 | 申請期間 | `FIXED`：`as_of` 在所有區間之前 NOT_RECOMMENDED `WINDOW_NOT_OPEN`（顯示開放日）、之後 `WINDOW_CLOSED`；`UNKNOWN`：**MANUAL_CHECK_ONLY** `WINDOW_UNKNOWN`；`ROLLING` 通過；`WITHIN_MONTHS_OF_EVENT` 由條件判斷 |
 結果彙總：任一檢查為 NOT_RECOMMENDED → NOT_RECOMMENDED；否則任一為 MANUAL_CHECK_ONLY → MANUAL_CHECK_ONLY；否則 FORMAL。
 - **期限不明依原基線處理**（[DATA_AND_PRODUCT_SPEC.md](../DATA_AND_PRODUCT_SPEC.md) §5「期限不明…暫停自動推薦」）：不進正式推薦，保留人工查核入口。是否放寬（例如私有資源有 V3 確認與近 30 天容量確認時）是**待負責人決定的提案**，見 [DECISIONS_AND_UNKNOWNS.md](DECISIONS_AND_UNKNOWNS.md) D-311，未核准前不啟用。
@@ -123,12 +123,15 @@ flowchart LR
 - `operator` 必須在 §5.2 的受控清單內；`scope_key` 若有則必須存在；每個條件必須有 `source_ref`；
 - `requires_human_when` 目前只支援 `value_within_5_percent_of_threshold`（5% 為暫行參數）。
 
+- `rule.status` 必填且只有 `PUBLISHED` 可推薦；`combinator=CUSTOM` 時 `expression` 必填且依 §5.5 的結構；`ALL`／`ANY` 不得帶 `expression`；
+- 條件與規則的鍵是封閉集合，未知的鍵一律報錯（不默默忽略）。
+
 ### 5.2 運算子（受控清單）
 | 運算子 | 說明 | 參考 runner（`examples/check_examples.py`） |
 |---|---|---|
 | `EQ`、`NEQ`、`LT`、`LTE`、`GT`、`GTE`、`BETWEEN`、`IN`、`NOT_IN`、`EXISTS` | 比較；`IN` 的值為清單 | 支援 |
 | `REGION_IN` | 行政區（含上層行政區展開） | 支援 |
-| `COUNT_MEMBERS_WHERE` | 依 scope 計數符合條件的成員 | 支援（條件限 `age_between`、`in_school`） |
+| `COUNT_MEMBERS_WHERE` | 依 scope 計數符合條件的成員 | 支援；`threshold` 只允許 `where` 與 `min_count`（整數 ≥1）；`where` 必須含 `age_between`（`[最小, 最大]` 兩個整數且 0 ≤ 最小 ≤ 最大），可加 `in_school`（布林）；其他鍵（含 `relation_in`、`co_residing`、`same_household_registration`）一律報錯，不得忽略 |
 | `NOT_RECEIVING` | 併領排除，見 §7 | 支援 |
 | `HUMAN_JUDGMENT` | 不自動判斷，必定進人工 | 支援 |
 | `AGE_BETWEEN`（依基準日計歲） | 以生日計算 | **不支援，runner 報錯**（正式實作需支援） |
@@ -142,6 +145,25 @@ flowchart LR
 3. 依 income_definition 從 Fact 彙總（只彙總該定義列出的所得項目與期間），產生衍生值（例：`derived.income_per_capita`）。
 4. 衍生值保留計算過程（成員清單、各項金額、公式），寫入 criteria_results 供解釋。
 同一家庭對 A 方案計 4 人、對 B 方案計 3 人是正常結果，畫面需顯示「此方案的家庭人數算法」。
+
+**口徑定義的支援範圍（F-02）**：參考 runner 只實作下表；表外的鍵、型別不符或不支援的組合**一律報錯**（`scope_problems`），不得默默忽略——否則規格上寫了「年齡 0～17」卻實際計入所有成員，會算出錯誤人數與錯誤的推薦。
+| 位置 | 已支援 | 已知但**未支援**（出現即報錯） | 其他鍵 |
+|---|---|---|---|
+| 口徑頂層 | `scope_key`、`label_plain`、`member_inclusion`、`income_definition`、`property_definition`、`source_ref` | — | 未知鍵報錯 |
+| `member_inclusion` | `relation_in`（清單，值須在關係列舉內）、`same_household_registration`（`YES`／`NO`）、`co_residing`（`YES`／`NO`） | `age_between`、`in_school`、`military_service`、`exclusions` | 未知鍵報錯 |
+| `income_definition` | `items`（`monthly_earned_income`、`monthly_pension`）、`period`（`MONTHLY_AVERAGE`） | `ANNUAL`／`ANNUAL_AVERAGE` 期間、`include_imputed_income`／`imputed_income`（工作能力推估所得） | 未知鍵或項目報錯 |
+未支援的能力是**正式實作要補的項目**（WP-04），補完前，使用到它們的規則在 runner 與正式推薦都是 `RULE_INVALID`，不得推薦。成員資料未知時仍遵守上述第 2 點：不排除該成員，結果為 UNKNOWN。
+
+### 5.4 規則驗證流程（兩階段，缺一不可）
+1. **完整結構驗證**：整份規則（所有條件、`combinator`、`expression`、`status`、鍵與型別）逐項檢查並**收集全部問題**，不在第一個問題停止；結果與條件出現的順序無關（非法條件在第一個或最後一個，結論相同）。
+2. **範圍參照驗證**：必須提供**完整的口徑表**；每個被引用的 `scope_key` 必須存在，且該口徑通過 §5.3 的支援範圍檢查。引用不存在的口徑是驗證錯誤；呼叫端不可用空表略過這一步（缺少口徑表視為程式錯誤，不是合法）。
+3. 任一階段發現問題或**未能完成**（例外、缺輸入）→ 規則不合法，`recommendation_status` 為 `NOT_RECOMMENDED` 加 `RULE_INVALID`。**驗證未完成不得視為通過。**
+參考實作：`ref_engine.rule_problems`／`validate_rule`／`recommendation_status`；案例：`engine_cases.json` 的 `illegal_criterion_variants`、`illegal_expression_variants`、`scope_cases`、`criterion_shape_cases`、`recommendation_cases`；順序獨立測試：`check_examples.py` 的 `test_rule_validation_order_independence`（T-57、T-58）。
+
+### 5.5 CUSTOM 運算式（`expression`）
+- 型別：節點是條件 ID 字串，或 `{"op": "ALL"｜"ANY", "children": [節點…]}`（`children` 非空）；只支援巢狀 ALL／ANY，`NOT`、`N_OF_M` 等報錯（T-30）。
+- 約束：運算式必須**恰好引用每個已定義的 `criterion_id` 一次**，不得引用不存在或重複的條件。
+- 單一事實來源：`schemas/eligibility_rule.schema.json` 描述結構；引用完整性由 `validate_rule` 驗證（結構驗證器不能表達）。
 
 ## 6. 評估演算法與結果
 ### 6.1 單條件結果
@@ -214,6 +236,9 @@ resource_version_id、rule_version、engine_version、`as_of`、input_snapshot�
 - 規則原文模糊（例：「其他同性質補助」未列舉）→ 一律 HUMAN_JUDGMENT，不由系統或模型推論。
 
 ## 8. 變動監測、頻率與對既有案件的影響
+### 8.0 複查寬限的起算資料
+`NEEDS_RECHECK` 的寬限天數必須由**可稽核的時間**計算，不得由「版本曾經被標記」之類的旗標推斷：RV-07 轉換時寫入 `recheck_started_at`（等於觸發事件時間，隨轉換的 AuditEvent 可稽核）、RV-08 回到 PUBLISHED 時清除；`recommendation_status` 以 `as_of` 與 `recheck_started_at` 計算已過日曆天數（§0.2 第 2 項）。見 DATA_MODEL §2.4.1。
+
 ### 8.1 查核頻率
 | 風險等級 | 定義 | 例行頻率 | 事件觸發 |
 |---|---|---|---|

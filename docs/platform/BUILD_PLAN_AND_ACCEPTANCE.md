@@ -1,5 +1,5 @@
 # 開發工作包與驗收計畫
-work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-04
+work_id：STP-PLATFORM-PLAN-001｜版本：v0.4-draft（R2 修正）｜2026-10-04
 工時為工程人日區間（估算），不含資源查核與個案服務人力（見 [OPERATIONS_AND_PRIVACY.md](OPERATIONS_AND_PRIVACY.md) §3）。
 
 ## 1. 路線總覽與 90 天計畫對照
@@ -38,38 +38,39 @@ flowchart LR
 |---|---|---|---|---|---|---|---|---|
 | WP-00 | repo 防護與合成資料規範 | — | CI 秘密掃描、個資樣式掃描、PR 範本、合成資料命名規範；CI 執行 `check_examples.py`、`gen_state_machines.py --check`、`check_docs.py` | repo | 2～3 | 含假身分證號格式的測試 PR 被 CI 擋下；文件檢查失敗時 CI 失敗 | 誤判過多 | WP-01 |
 | WP-01 | 專案骨架 | WP-00 | Django 專案、Docker Compose、CI（lint、test、遷移檢查）、staging 部署腳本、import 邊界檢查；載入 `state_machines.json` 的轉換函式骨架 | 全部 | 4～6 | `make test` 全綠；staging 可部署合成資料 | 雲端帳號未定（U-06） | WP-02 |
-| WP-02 | 資源目錄資料模型與後台 | WP-01 | Organization、Source（含狀態）、Resource、ResourceVersion（含 `conflict_status`、`application_window` 類型、`effective_unknown`）、DocumentRequirement、HouseholdScopeDefinition、VerificationRecord；`recommendation_status` 所需欄位 | catalog | 7～10 | 可由 admin 建立合成資源版本；UNKNOWN 欄位可標記；發布檢查生效 | 欄位過多影響輸入效率 | WP-03、WP-04 |
+| WP-02 | 資源目錄資料模型與後台 | WP-01 | Organization、Source（含狀態）、Resource、ResourceVersion（含 `conflict_status`、`application_window` 類型、`effective_unknown`、`recheck_started_at`）、DocumentRequirement、HouseholdScopeDefinition、VerificationRecord；`recommendation_status` 所需欄位；[schemas/](schemas/) 的結構驗證（DATA_MODEL §2.4.1） | catalog | 8～11 | 可由 admin 建立合成資源版本；UNKNOWN 欄位可標記；發布檢查生效 | 欄位過多影響輸入效率 | WP-03、WP-04 |
 | WP-03 | 合成資源目錄與公開查詢 P1 | WP-02 | 匯入 [examples/synthetic_resources.json](examples/synthetic_resources.json)；P1 頁與 `GET /api/public/resources`（依 `catalog_visibility`） | catalog | 3～5 | T-04、T-21；行動裝置 360px；首屏 ≤300KB | — | WP-05 |
-| WP-04 | 規則引擎與正式推薦判定 | WP-02 | criteria 驗證（JSON Schema；拒絕不支援的運算子與組合）、運算子、口徑計算（成員事實未知→UNKNOWN）、ALL／ANY／CUSTOM 組合語意、自述不符與確認路徑旗標、`recommendation_status`（FORMAL／MANUAL_CHECK_ONLY／NOT_RECOMMENDED） | eligibility | 9～13 | `check_examples.py` 全部對照案例（`engine_cases.json`、`expected_assessments.json`）以產品實作重現；重算一致；T-21～T-31 | 口徑表達不足；組合語意與規格不一致 | WP-06 |
-| WP-05 | 需求問答 P2＋急迫轉人工 | WP-03 | 免姓名免帳號 session、題庫（固定題 ≤15＋成員簡表）、代填模式、J5 畫面與任務 | intake | 5～7 | T-01、T-12、T-17 | 題目用語需實地測試 | WP-06 |
+| WP-04 | 規則引擎與正式推薦判定 | WP-02 | criteria 驗證（JSON Schema；拒絕不支援的運算子與組合）、運算子、口徑計算（成員事實未知→UNKNOWN）、ALL／ANY／CUSTOM 組合語意、自述不符與確認路徑旗標、`recommendation_status`（FORMAL／MANUAL_CHECK_ONLY／NOT_RECOMMENDED；**先做完整結構驗證、再做範圍參照驗證，驗證未完成不得視為合法，缺 `status` 不可推薦**）、口徑範圍鍵白名單（未知或未支援的鍵一律報錯）、複查寬限日數自可稽核時間計算 | eligibility | 10～14 | `check_examples.py` 全部對照案例（`engine_cases.json`、`expected_assessments.json`）以產品實作重現；重算一致；T-21～T-31 | 口徑表達不足；組合語意與規格不一致 | WP-06 |
+| WP-05 | 需求問答 P2＋急迫轉人工 | WP-03 | 免姓名免帳號 session、題庫（固定題 ≤15＋成員簡表）、代填模式、J5 畫面與任務、伺服器端草稿與「清除並離開」（瀏覽器端不做內容持久化，CP-25） | intake | 5～8 | T-01、T-12、T-17、T-56 | 題目用語需實地測試 | WP-06 |
 | WP-06 | 結果解釋 P3＋行動清單 P4 | WP-04、WP-05 | 結果頁（只顯示 FORMAL、已知不符、確認路徑）、逐條理由、缺漏、列印大字版行動清單、R3／R4 的人工查核項頁籤 | intake、casework | 5～7 | T-02、T-03、T-05、T-06、T-26～T-28；列印 A4 一頁 | 解釋文字可讀性 | WP-07 |
 | WP-07 | 協助員工作台 P7（合成） | WP-06 | ServiceCase、Household、Person、Fact、Interaction、ActionPlan、Task（基本，含自述確認任務）；建案、匯入 session、責任人／備援、每日檢查 | casework、tasks | 7～10 | 每案必有責任人＋下一步＋期限；T-15（基本升級） | 範圍膨脹 | WP-08a |
 | WP-08a | 基本角色與稽核（第一批次） | WP-07 | R3／R4／R5／R7 角色、指派案件可見性、AuditEvent（只新增） | access、audit | 3～4 | T-19（基本）；稽核表禁止 UPDATE | — | 第一批次驗收 |
-| WP-08 | 完整權限、MFA、稽核、例外存取 | WP-08a | 物件層級權限（含 R6／R8／R9）、權限矩陣自動測試、MFA、AccessGrant（BREAK_GLASS、REVIEW_SAMPLE）、ReviewNote、存取紀錄查詢 | access、audit | 4～7 | 矩陣每格有測試；T-19、T-32～T-35 | 權限規則複雜 | G1 |
-| WP-09 | 同意、代理與撤回清除 | WP-08 | Consent 全欄位（含撤回欄位）、用途檢查函式、撤回流程（取消通知、RF-17、清除任務）、副本清冊對應的 `retention` 設定、DeletionLedger、`reapply_deletions()` | access、casework、retention | 5～8 | T-13、T-36、T-37 | 同意書內容未定（WP-16） | G2 |
+| WP-08 | 完整權限、MFA、稽核、例外存取 | WP-08a | 物件層級權限（含 R6／R8／R9）、權限矩陣自動測試、MFA、AccessGrant（BREAK_GLASS、REVIEW_SAMPLE）、ReviewNote、存取紀錄查詢；以 `permissions.json` 為唯一來源的授權表與 VERIFY 範圍（單筆事件摘要） | access、audit | 5～8 | 矩陣每格有測試；T-19、T-32～T-35、T-50、T-51 | 權限規則複雜 | G1 |
+| WP-09 | 同意、代理與撤回清除 | WP-08 | Consent 全欄位（含撤回欄位）、用途檢查函式、撤回流程（取消通知、RF-17、清除任務）、副本清冊對應的 `retention` 設定、先寫的外部控制紀錄（ControlRecord）與寫入確認／失敗處理、水位與隔離、`reapply_controls()` | access、casework、retention | 7～11 | T-13、T-36、T-37、T-52～T-54 | 同意書內容未定（WP-16） | G2 |
 | WP-10 | 資源維護流程 P9 | WP-02、WP-08a | 送審／查核／發布分權（轉換 RV-xx）、版本差異、暫停、影響分析與 REASSESS 任務、查核頻率排程、`recommendation_status` 檢視 | catalog、tasks | 5～8 | T-07、T-20、T-24、T-25 | — | P1 資源建置 |
-| WP-11 | 申請、轉介、成果 P6 | WP-07、WP-09 | 由 `state_machines.json` 驅動的轉換函式與 API、證據欄位、冪等鍵、唯一約束、OutcomeEvent 與第二人驗證、ReviewDecision | casework | 9～13 | T-08、T-09、T-10、T-14、T-39～T-47 | 狀態邊界案例 | G5 |
+| WP-11 | 申請、轉介、成果 P6 | WP-07、WP-09 | 由 `state_machines.json` 驅動的轉換函式與 API、證據欄位、冪等鍵、唯一約束（依 kind 的送件前檢查，排除申請本身）、重播時重新檢查權限與同意、OutcomeEvent 與第二人驗證、ReviewDecision | casework | 10～14 | T-08、T-09、T-10、T-14、T-39～T-47、T-55、T-59 | 狀態邊界案例 | G5 |
 | WP-12 | 文件 P5 | WP-11 | DocumentRecord、私有儲存、簽章 URL、病毒掃描、保存期刪除、人工登錄路徑 | documents | 5～8 | 不上傳也能送件；T-13 文件刪除 | 掃描元件維運 | G2 |
 | WP-13 | 任務、通知與升級 P10 | WP-11 | Notification 與 NotificationEvent、Outbox、Email／簡訊轉接層（先接 sandbox）、回呼去重與亂序處理、重試、人工接管、升級規則 | tasks、notifications | 8～12 | T-11、T-15、T-44、T-45 | 簡訊供應商未定（U-12） | G4 |
 | WP-14 | 成效報表 P12 | WP-11 | 彙總表、漏斗（家庭／件數分開）、依 OutcomeEvent 計數、ReportRun 版本化、時間、工時、成本輸入、n<5 遮蔽 | reporting | 6～9 | T-16、T-39～T-42；以合成資料核對手算結果 | 口徑誤解 | G5 |
 | WP-15 | 社工複核佇列 P8＋容量 P11 | WP-11 | 佇列、複核結論（ReviewDecision）、抽查抽樣、機構容量與確認期限 | casework、catalog | 5～7 | T-08、T-09 | — | G3 |
 | WP-16 | 合規與營運文件（非工程為主） | — | 同意書與說明稿、隱私政策（含匿名初篩告知）、資料分享協議範本、訓練教材、事件演練腳本、U-18～U-23 法律確認清單 | 文件 | 0～1 | 法律顧問審閱紀錄 | 法律意見時程 | G2、G8 |
 | WP-17 | 品質驗證工具 | WP-04、WP-15 | golden set 匯入與比對、錯漏推薦統計、續辦提醒模擬 | eligibility、reporting | 2～4 | golden set 報告可產出 | 社工時間 | G6 |
-| WP-18 | 正式環境與資安 | WP-08～WP-13 | production 專案、KMS、備份與還原演練（含重新套用刪除）、監控告警、弱點掃描、滲透測試修正、匿名初篩的 crypto-shredding 或不備份設定（AS-4） | ops | 6～10 | 還原演練紀錄；無高風險未修弱點；T-37 | 雲端選擇（D-202） | G7 |
+| WP-18 | 正式環境與資安 | WP-08～WP-13 | production 專案、KMS、備份與還原演練（含外部控制紀錄的完整性驗證與重新套用）、監控告警、弱點掃描、滲透測試修正、匿名初篩的 crypto-shredding 或不備份設定（AS-4） | ops | 7～11 | 還原演練紀錄；無高風險未修弱點；T-37 | 雲端選擇（D-202） | G7 |
 | WP-19（選用） | AI 資源起草 | WP-10 | ai_gateway、資源欄位草稿、輸出檢查、回退 | ai_gateway | 3～5 | T-18；草稿只進 DRAFT | 供應商條款（U-09） | 試點後 |
 
-合計：第一批次（WP-00～WP-07＋WP-08a）約 45～65 人日；MVP 全部（不含 WP-19）約 100～152 人日。以 2 名工程師並行約 10～15 週；1 名約 20～30 週。這是 [DECISIONS_AND_UNKNOWNS.md](DECISIONS_AND_UNKNOWNS.md) G-01 的依據。
+合計：第一批次（WP-00～WP-07＋WP-08a）約 47～68 人日；MVP 全部（不含 WP-19）約 107～161 人日。以 2 名工程師並行約 11～16 週；1 名約 21～32 週。這是 [DECISIONS_AND_UNKNOWNS.md](DECISIONS_AND_UNKNOWNS.md) G-01 的依據。
+R2 修正對工時的影響（相對 R1 的 45～65／100～152）：WP-02 +1～1、WP-04 +1～1、WP-05 +0～1、WP-08 +1～1、WP-09 +2～3、WP-11 +1～1、WP-18 +1～1，合計 +7～9 人日（第一批次 +2～3）；原因是結構驗證與範圍白名單、P2 伺服器端草稿、單一來源授權表、外部控制紀錄與還原重新套用、依 kind 的申請檢查與冪等重播重檢。這些是規劃估算，不是承諾。
 R1 修正對工時的影響（相對 v0.2-draft 的 42～61／90～135）：WP-02 +1～1、WP-04 +2～3、WP-08 +1～2、WP-09 +1～2、WP-11 +2～3、WP-13 +1～2、WP-14 +1～2、WP-18 +1～2，合計 +10～17 人日；新增內容是組合語意與正式推薦判定、例外存取、撤回清除與刪除帳本、OutcomeEvent、回呼事件與 Outbox、報表版本化。`tools/check_docs.py` 會重新加總本表並與本段數字核對。
 
 ## 3. 試點前必須完成的閘門（真實個案上平台前）
 | 閘門 | 內容 | 驗收證據 | 負責 |
 |---|---|---|---|
-| G1 權限 | 角色＋物件層級權限（含 R6／R7／R8／R9 的限制）、MFA 強制、離職停用流程、break-glass 與覆核授權 | 權限矩陣自動測試全通過（T-19、T-32～T-35）；MFA 覆蓋 100% 內部帳號；R7 無一般個案讀取的測試 | 工程＋R7 |
-| G2 資料保護 | 資料責任人（控管者）指定；同意書與隱私政策經法律審閱；加密、保存期刪除排程、撤回流程、**副本清冊 CP-01～CP-24 全部有清除實作或明確例外**、刪除帳本與備份還原重新套用；事件處理計畫；U-18～U-23 的限制處理已寫入操作程序 | 法律審閱紀錄；T-13、T-36、T-37、T-38、T-48 通過；刪除排程與還原演練紀錄 | 負責人＋法律＋工程 |
+| G1 權限 | 角色＋物件層級權限（含 R6／R7／R8／R9 的限制）、MFA 強制、離職停用流程、break-glass 與覆核授權 | 權限矩陣自動測試全通過（T-19、T-32～T-35、T-50、T-51）；MFA 覆蓋 100% 內部帳號；R7 無一般個案讀取的測試 | 工程＋R7 |
+| G2 資料保護 | 資料責任人（控管者）指定；同意書與隱私政策經法律審閱；加密、保存期刪除排程、撤回流程、**副本清冊 CP-01～CP-26 全部有清除實作或明確例外**、刪除帳本與備份還原重新套用；事件處理計畫；U-18～U-23 的限制處理已寫入操作程序 | 法律審閱紀錄；T-13、T-36、T-37、T-38、T-48、T-52～T-56 通過；刪除排程與還原演練紀錄 | 負責人＋法律＋工程 |
 | G3 人工接案 | 電話／紙本／現場流程、值班表、急迫流程與合作據點法定通報流程對接 | 合成案例演練（J4、J5）紀錄；值班表 | R4＋據點 |
 | G4 補件追蹤 | 任務、提醒、升級、通知失敗改人工、回呼去重與亂序處理、內部逾期不推定失效 | T-11、T-15、T-44、T-45 通過；升級演練 | 工程＋R3 |
-| G5 結果紀錄 | 申請／轉介／取得分開、核准證據與取得證據分開、第二人驗證、OutcomeEvent 計數、報表版本化、合成排除、申請唯一性與重複防護 | T-14、T-16、T-39～T-43、T-46、T-47 通過；手算核對 | 工程＋負責人 |
-| G6 資源品質 | ≥30 項資源 V2 以上發布；golden set ≥30 案；golden set 中「可能符合」錯推薦 0 件、漏推薦 ≤10% 且原因已記錄；正式推薦判定與組合語意測試通過 | WP-17 報告；T-21～T-31 | R5＋R4 |
+| G5 結果紀錄 | 申請／轉介／取得分開、核准證據與取得證據分開、第二人驗證、OutcomeEvent 計數、報表版本化、合成排除、申請唯一性與重複防護 | T-14、T-16、T-39～T-43、T-46、T-47、T-55、T-59 通過；手算核對 | 工程＋負責人 |
+| G6 資源品質 | ≥30 項資源 V2 以上發布；golden set ≥30 案；golden set 中「可能符合」錯推薦 0 件、漏推薦 ≤10% 且原因已記錄；正式推薦判定與組合語意測試通過 | WP-17 報告；T-21～T-31、T-57、T-58、T-60 | R5＋R4 |
 | G7 環境與資安 | production 獨立、備份還原成功、無高風險弱點、秘密管理 | 還原與掃描報告 | 工程 |
 | G8 人員與合作 | 協助員完成訓練；合作據點書面確認接案容量與資料分享範圍 | 訓練紀錄；合作確認文件（私有存放） | 負責人 |
 
@@ -99,7 +100,7 @@ R1 修正對工時的影響（相對 v0.2-draft 的 42～61／90～135）：WP-0
 | AS-6 | 只顯示 `FORMAL`（V2 以上、期限已知）的資源，且標示「初篩不等於核定」；急迫通道只顯示公開專線（U-17 已再查核） |
 
 ## 4. 測試情境
-全部以合成資料執行；資源與家庭來自 [examples/](examples/README.md)。自動化測試（單元或端對端）＋必要的人工演練。T-21 以後為 R1 修正新增。
+全部以合成資料執行；資源與家庭來自 [examples/](examples/README.md)。自動化測試（單元或端對端）＋必要的人工演練。T-21～T-49 為 R1 修正新增；T-50～T-61 為 R2 修正新增。
 
 | ID | 情境 | 設定 | 預期結果 |
 |---|---|---|---|
@@ -139,7 +140,7 @@ R1 修正對工時的影響（相對 v0.2-draft 的 42～61／90～135）：WP-0
 | T-34 | R6 最小資料 | R6 查詢非轉介給自己的案件、讀取 shared_fields 以外欄位、同意撤回後存取 | 全部 403／404；只能見 REF 範圍並回覆受理狀態 |
 | T-35 | R8 不可下鑽與匯出 | R8 嘗試個案層級查詢或匯出；n<5 格 | 403；n<5 遮蔽；只能匯出匿名彙總 |
 | T-36 | 撤回清除與通知 | 依 §1.3.2 逐項撤回用途 | 副本清冊對應項目 7 天內刪除；REFERRAL_SHARE 轉介取消並建立 STOP_USE_NOTICE；ANONYMIZED_REPORTING 撤回後不計入報表 |
-| T-37 | 備份還原重新套用刪除 | 還原到刪除發生之前的備份 | 隔離模式下 `reapply_deletions()` 重新刪除；對帳通過才解除；演練留紀錄 |
+| T-37 | 備份還原重新套用控制紀錄（整合演練） | 還原到撤回與刪除發生之前的備份；含備份後的用途撤回 | 隔離模式下 `reapply_controls()` 重新套用硬刪、遮蔽與用途撤回；驗證通過才解除；演練留紀錄（真實資料庫與備份；T-52～T-54 的純邏輯模擬不取代本項） |
 | T-38 | 稽核保護與受控清除 | 嘗試 UPDATE／DELETE AuditEvent（含 R7）；保存期滿清除 | 一般角色一律失敗並成為事件；清除只經 `audit_purge`＋雙人核可＋PurgeRecord＋雜湊鏈連續驗證 |
 | T-39 | 取得計數：狀態推進不漏計 | 取得後轉 ONGOING／ENDED；跨觀察區間 | 已驗證取得維持計入；新增戶只在首次區間計；累計戶數正確 |
 | T-40 | 部分取得與持續服務 | 先部分後完整；週期性給付 | 家庭與項次各只計一次；PERIOD_CONFIRMED 不增加戶數或項次 |
@@ -152,6 +153,18 @@ R1 修正對工時的影響（相對 v0.2-draft 的 42～61／90～135）：WP-0
 | T-47 | 已核准或已不核准後的重新申請 | 同家庭同資源同期間 | ORIGINAL 被擋；REAPPLY／APPEAL／SUPPLEMENTARY 依條件建立並連結原件與理由 |
 | T-48 | 文件處理路徑 | 本機辨識不可用；檔案未確認的辨識結果 | 回到人工登錄、流程不中斷；未確認結果 7 天刪除；任何情況都不會送出外部 AI |
 | T-49 | 閘門未通過的資料邊界 | 在 staging 嘗試寫入非合成個案；G2 未通過時開啟聯絡表單 | 拒絕；聯絡表單關閉並顯示據點電話 |
+| T-50 | 權限單一來源一致（P11 容量與轉介清單分開） | 以 `permissions.json` 產生 PRD 矩陣、ARCH API 權限欄與頁面權限行；刻意讓 R5 取得轉介清單、API 授權超出矩陣、R7 一般個案讀取、R9 可寫、R6 超出 REF、R8 超出 AGG | 政策檢查全部抓到並報出具體矛盾；R5 只見容量與資源資料；產品階段（WP-08）另需以真實帳號逐格測授權 |
+| T-51 | 其他 R3 驗證成果事件（VERIFY 範圍） | 驗證人＝登錄人、驗證人＝責任人或備援、未被指派的 R3 嘗試驗證、已指派的另一位 R3 驗證並嘗試讀取該案其他資料 | 前三者 403；已指派者只能見單筆事件摘要（類型、日期、證據、描述）並驗證，讀取其他家庭、成員、文件為 403；驗證寫 AuditEvent |
+| T-52 | 控制紀錄先寫與失敗處理 | 外部紀錄不可用；紀錄成功但主庫提交失敗；兩者成功 | 503 且主庫不變；202「已記錄、待套用」且不得顯示完成；200 完成。（純邏輯模擬：`control_cases.json` CS-03、CS-04） |
+| T-53 | 備份後撤回、匯出前主庫失效；水位與隔離 | 備份後撤回 REMINDERS 與 REFERRAL_SHARE；控制紀錄尾端遺失、缺號、竄改 | 還原後重新套用通知取消、分享停止、存取受限；紀錄不完整或短於獨立見證水位則維持隔離；重複套用結果相同。（模擬：CS-01、02、05～07、12） |
+| T-54 | 刪除與遮蔽的驗證差異 | HARD_DELETE、REDACT、REDACT 後再 HARD_DELETE、只有 REDACT 但列不存在；核心用途撤回與法令保存 | HARD_DELETE 驗證不存在；REDACT 驗證欄位已遮蔽（列仍在）；只有 REDACT 卻不存在列為不符合；核心撤回關閉處理並保留限制。（模擬：CS-08～CS-11） |
+| T-55 | 冪等重播重新檢查 | 相同 key＋相同請求重播時：權限已失去、同意已撤回、資源已刪除、一切正常 | 只存回應形狀；重播以當下狀態取得內容：失去權限或撤回→403 無內容；已刪除→410（優先）；正常→原狀態碼與當下內容；回應含非形狀欄位時拒絕儲存 |
+| T-56 | P2 瀏覽器端儲存邊界 | 作答後檢查 localStorage、sessionStorage、IndexedDB、Cache Storage、cookie；按「清除並離開」 | 瀏覽器端無任何答案內容；token 只在 session cookie；按下後伺服器端工作階段已刪、cookie 已清；若新增持久化須先更新副本清冊（CP-25） |
+| T-57 | 規則驗證與推薦判定 fail-closed | 規則中任意位置（第一個或之後）含非法條件或 CUSTOM 運算式；缺 `rule.status`；規則未發布 | 一律 NOT_RECOMMENDED＋`RULE_INVALID`／`RULE_STATUS_MISSING`／`RULE_NOT_PUBLISHED`；非法條件的位置不影響結果；未知範圍引用也視為非法；合法且有範圍定義的規則仍為 FORMAL |
+| T-58 | 口徑範圍鍵白名單 | 口徑含未知鍵、未支援的 `age_between`、型別錯誤、COUNT_MEMBERS_WHERE 的非法 `where`；合法範圍 | 未知或未支援鍵、型別錯誤一律報錯，不得默默忽略；合法範圍正確計入；成員資料未知不得被排除（回 UNKNOWN） |
+| T-59 | 依 kind 的申請檢查與 SUPPLEMENTARY 生命週期 | SUPPLEMENTARY 連結已核准的原件（R4 核可）完成準備→READY_TO_SUBMIT；無核准、關聯錯誤、重複關聯；ORIGINAL 全狀態唯一 | 合法補件可完成準備；其餘依錯誤碼拒絕；ORIGINAL 仍全狀態唯一；檢查排除申請本身 |
+| T-60 | 欄位與派生欄位正確性 | `effective_unknown` 與 `effective_to` 不一致；缺少複查起算資料；複查寬限日數以可稽核時間與 as_of 計算（>14 天、高風險） | VERSION_INVALID／RECHECK_START_MISSING／RECHECK_GRACE_EXCEEDED／RECHECK_HIGH_RISK；`schemas/` 的結構驗證抓到缺必要路徑、型別錯誤與未知鍵 |
+| T-61 | 決策與章節引用正確 | 引用指向語意不符的決策或章節（如停滯門檻引用 D-309） | `check_docs.py` 的引用語境檢查失敗；每個被檢查的 ID 有其關鍵字與例外清單 |
 
 ### 4.1 可執行規格對照
 下表指出目前已有**可執行參考規格**的測試（`python3 docs/platform/examples/check_examples.py`）；其餘由對應工作包實作。參考實作不是產品程式碼，用途是讓規格可被一致實作並防止文件互相矛盾。
@@ -165,11 +178,27 @@ R1 修正對工時的影響（相對 v0.2-draft 的 42～61／90～135）：WP-0
 | T-10、T-46、T-47 | `application_cases` 與 `IdempotencyStore` 檢查 |
 | T-43、T-44 | `state_machines.json`＋`check_examples.py` 的狀態機檢查 |
 | T-45 | `callback_scenarios` |
-| 其餘（T-07、T-11～T-13、T-15～T-20、T-32～T-38、T-48、T-49） | 由 WP-08～WP-18 實作；本輪只有規格 |
+| T-50 | **文件政策檢查**：`tools/gen_permissions.py --check` 與 `tools/test_checks.py`（反例） |
+| T-52、T-53、T-54 | **純邏輯模擬**：`examples/ref_control.py`＋`control_cases.json` |
+| T-55 | `engine_cases.json` 的 `replay_cases`＋`IdempotencyStore` |
+| T-57、T-58 | `recommendation_cases`、`illegal_criterion_variants`、`illegal_expression_variants`、`scope_cases`、`criterion_shape_cases`、順序獨立測試 |
+| T-59 | `application_cases`、`application_ready_cases`、`application_lifecycle_cases` |
+| T-60 | `recommendation_cases` 的複查案例；`tools/schema_lite.py`＋`schemas/`（結構驗證）；`tools/test_checks.py` |
+| T-61 | `tools/check_docs.py` 的引用語境檢查；`tools/test_checks.py`（反例） |
+| 其餘（T-07、T-11～T-13、T-15～T-20、T-32～T-38、T-48、T-49、T-51、T-56） | 由 WP-08～WP-18 實作；本輪只有規格 |
+
+### 4.2 驗證層級（避免把不同層級都稱為「完成」）
+| 層級 | 本輪有什麼 | 能證明什麼 | 不能證明什麼 |
+|---|---|---|---|
+| 文件政策檢查 | `check_docs.py`、`gen_permissions.py --check`、`gen_state_machines.py --check`、`test_checks.py` | 文件之間自洽（矩陣、API、頁面、狀態機、引用、欄位路徑、工時） | 產品行為；實際授權是否生效 |
+| 純邏輯參考模擬 | `ref_engine.py`、`ref_control.py`＋案例（`check_examples.py`） | 規格的順序與判斷彼此一致、可被重現 | 資料庫約束、交易、備份、真實儲存或供應商能力 |
+| 資料庫整合測試 | 無（WP-01 之後） | — | — |
+| 產品驗收與人工演練 | 無 | — | — |
+「通過」一詞在本文件只指所列層級的檢查通過，不代表產品完成或授權行為已被測試。
 
 ## 5. 第一個最小開發批次
 範圍：合成資料的資源目錄 → 需求問答 → 可解釋初篩 → 個人行動清單 → 協助員工作台。
-工作包：WP-00、WP-01、WP-02、WP-03、WP-04、WP-05、WP-06、WP-07、WP-08a（約 45～65 人日）。**逐項執行包、依賴順序、第一個可驗收交付物與操作示範見 [BATCH1_EXECUTION_PACK.md](BATCH1_EXECUTION_PACK.md)。**
+工作包：WP-00、WP-01、WP-02、WP-03、WP-04、WP-05、WP-06、WP-07、WP-08a（約 47～68 人日）。**逐項執行包、依賴順序、第一個可驗收交付物與操作示範見 [BATCH1_EXECUTION_PACK.md](BATCH1_EXECUTION_PACK.md)。**
 
 ### 5.1 交付物
 1. 可在本機與 staging 執行的 Django 應用與 CI（含文件與參考規格檢查）。

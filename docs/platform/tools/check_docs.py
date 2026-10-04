@@ -5,7 +5,7 @@
  1. 相對連結與錨點存在；「[檔案](檔案) §N.M」所指章節存在
  2. WP／T／G／D／U／F／RT／PR／OP／CP／AS／J 與狀態轉換 ID：被引用者皆有定義；T 編號連續
  3. 資料模型欄位路徑：文件中的 `Entity.field` 都存在於 DATA_MODEL 的實體表
- 4. 權限矩陣不變條件（R6／R7／R8／R9 的限制）
+ 4. 權限：permissions.json 單一來源與政策檢查（呼叫 gen_permissions --check）；引用語境（citation_check）；schemas；新測試 T-50～T-61
  5. 工時加總：BUILD_PLAN 工作包表 ↔ 文件中的總數字 ↔ 批次執行包；舊數字不得殘留
  6. 狀態機 JSON 與文件同步（呼叫 gen_state_machines）
  7. 版本標示一致；範例資料皆為合成；公開 repo 不含個資樣式
@@ -181,34 +181,14 @@ def check_fields():
         ok(f"field path `{ent}.{field}` exists", field in fields[ent] or field in COMMON, "")
 
 
-# ------------------------------------------------------------ 4. 權限矩陣
+# ------------------------------------------------------------ 4. 權限（單一來源 permissions.json）
 def check_matrix():
-    prd = read(PLAT / "PRODUCT_REQUIREMENTS.md")
-    a = prd.index("### 4.2 矩陣")
-    b = prd.index("### 4.3")
-    rows = [[c.strip() for c in l.strip().strip("|").split("|")] for l in prd[a:b].splitlines() if l.startswith("|")]
-    header, data = rows[0], rows[2:]
-    ok("matrix has 9 role columns", len(header) == 10, str(len(header)))
-    case_rows = ("家庭與成員概況", "敏感事實", "同意與代理授權", "評估結果與理由", "申請紀錄與狀態", "轉介內容", "成果事件", "文件需求清單", "文件檔案")
-    for r in data:
-        ok(f"matrix row {r[0]} has 10 cells", len(r) == 10, str(len(r)))
-        if len(r) != 10:
-            continue
-        name, cells = r[0], r[1:]
-        r6, r7, r8, r9 = cells[5], cells[6], cells[7], cells[8]
-        if name.startswith(case_rows):
-            ok(f"R7 {name} only BG or none", r7.startswith("BG") or r7.startswith("—"), r7)
-            ok(f"R8 {name} only AGG or none", r8 in ("AGG", "—"), r8)
-            ok(f"R9 {name} read-only sample", r9.startswith("V·SAMPLE") or r9 == "—", r9)
-            ok(f"R6 {name} REF or none", "REF" in r6 or r6.startswith("—"), r6)
-        letters9 = re.match(r"^([VESA]*)·", r9)
-        if letters9:
-            ok(f"R9 {name} no write", set(letters9.group(1)) <= {"V"}, r9)
-        letters8 = re.match(r"^([VESA]*)·", r8)
-        if letters8:
-            ok(f"R8 {name} no edit", set(letters8.group(1)) <= {"V", "S"}, r8)
-    ok("R7 never has plain V on case rows", not any(r[0].startswith(case_rows[:7]) and re.match(r"^V", r[7]) for r in data if len(r) == 10))
-    # API 權限欄的 R 代碼與 BG 規則
+    """R2：矩陣、API 權限欄與頁面權限行由 permissions.json 產生；政策檢查（gen_permissions.policy_problems）取代 R1 的字串前綴檢查。
+
+    這是**文件政策檢查**：確認矩陣、API、頁面、狀態機操作者之間自洽；不是產品授權行為測試。
+    """
+    r = subprocess.run([sys.executable, str(PLAT / "tools" / "gen_permissions.py"), "--check"], capture_output=True, text=True)
+    ok("permissions policy and generated blocks in sync", r.returncode == 0, (r.stdout + r.stderr).strip()[:600])
     arch = read(PLAT / "ARCHITECTURE.md")
     for line in arch.splitlines():
         if line.startswith("| `") and "/api/" in line:
@@ -216,8 +196,49 @@ def check_matrix():
             if len(cols) == 6:
                 perm = cols[4]
                 ok(f"API perm uses valid roles {cols[0][:40]}", all(1 <= int(x) <= 9 for x in re.findall(r"R(\d)", perm)), perm)
-                if "download" in cols[0]:
-                    ok("download not for R7", "R7 不可" in perm)
+                ok(f"API perm not placeholder {cols[0][:40]}", perm not in ("x", ""), perm)
+
+
+# ------------------------------------------------------------ 4b. 引用語境與 schema 與 R2 回覆
+def check_citations():
+    sys.path.insert(0, str(PLAT / "tools"))
+    import citation_check as CC
+    for p in PLAT_MD:
+        if "revisions" in str(p):
+            continue
+        for n, msg in CC.citation_problems(p.name, read(p)):
+            ok(f"citation context {p.name}:{n}", False, msg)
+        ok(f"citation context scanned {p.name}", True)
+
+
+def check_schemas():
+    sys.path.insert(0, str(PLAT / "tools"))
+    import schema_lite as SL
+    names = ("resource_version", "eligibility_rule", "household_scope", "idempotency_response", "control_record")
+    docs = "\n".join(read(p) for p in PLAT_MD if "revisions" not in str(p))
+    for n in names:
+        f = PLAT / "schemas" / f"{n}.schema.json"
+        ok(f"schema file {n}", f.exists())
+        if f.exists():
+            try:
+                SL.validate({}, json.loads(read(f)))
+                ok(f"schema {n} loads and uses only supported keywords", True)
+            except ValueError as e:
+                ok(f"schema {n} loads and uses only supported keywords", False, str(e))
+        ok(f"schema {n} referenced in docs", f"{n}.schema.json" in docs)
+
+
+def check_new_tests():
+    bp = read(PLAT / "BUILD_PLAN_AND_ACCEPTANCE.md")
+    alltext = "\n".join(read(p) for p in PLAT_MD if "revisions" not in str(p) and p.name != "BUILD_PLAN_AND_ACCEPTANCE.md")
+    for i in range(50, 62):
+        tid = f"T-{i}"
+        ok(f"{tid} defined", re.search(r"^\| " + tid + r" \|", bp, re.M) is not None)
+        ok(f"{tid} mapped in BUILD_PLAN 4.1 or 4.2", len(re.findall(tid + r"(?!\d)", bp)) >= 2 or tid in alltext)
+        in_range = any(re.search(r"T-(\d+)～T-(\d+)", m.group(0)) and int(re.search(r"T-(\d+)～T-(\d+)", m.group(0)).group(1)) <= i <= int(re.search(r"T-(\d+)～T-(\d+)", m.group(0)).group(2)) for m in re.finditer(r"T-\d+～T-\d+", bp + alltext))
+        ok(f"{tid} referenced outside its own definition", (tid in alltext) or in_range or len(re.findall(tid + r"(?!\d)", bp)) >= 2, tid)
+    r = subprocess.run([sys.executable, str(PLAT / "tools" / "test_checks.py")], capture_output=True, text=True)
+    ok("tools/test_checks.py counterexamples all caught", r.returncode == 0, (r.stdout + r.stderr).strip()[:600])
 
 
 # ------------------------------------------------------------ 5. 工時
@@ -255,11 +276,12 @@ def check_hours():
     one = (int(wan[0] + 4.5 + 10 + 5 + 0.5), int(wan[1] + 4.5 + 30 + 15 + 0.5))
     ok("OPERATIONS pilot build-cost sentence", f"一次性建置約 NT${one[0]}～{one[1]} 萬" in ops, str(one))
     ok("DECISIONS G-01 hours", f"MVP 工程估 {m[0]}～{m[1]} 人日" in read(PLAT / "DECISIONS_AND_UNKNOWNS.md"))
-    stale = ["42～61", "90～135", "NT$54～108", "NT$74～158", "9～14 週", "18～27 週"]
+    stale = ["42～61", "90～135", "NT$54～108", "NT$74～158", "2 名工程師並行約 9～14 週", "18～27 週",
+             "45～65 人日", "100～152 人日", "NT$60～122", "NT$80～172", "10～15 週；1 名約 20～30 週"]
     for p in PLAT_MD:
         if "revisions" in str(p):
             continue
-        t = "\n".join(l for l in read(p).splitlines() if "相對 v0.2-draft" not in l)
+        t = "\n".join(l for l in read(p).splitlines() if "相對 v0.2-draft" not in l and "相對 R1" not in l and "R1 修正對工時" not in l)
         for s in stale:
             ok(f"stale number {s} in {p.name}", s not in t)
 
@@ -303,6 +325,12 @@ def check_misc():
                     if kind == "email" and m.group(0) in ("noreply@anthropic.com",):
                         continue
                     ok(f"no {kind} pattern in {p.relative_to(ROOT)}", False, m.group(0))
+    r2 = PLAT / "revisions" / "R2_RESPONSE.md"
+    ok("R2_RESPONSE exists", r2.exists())
+    if r2.exists():
+        t2 = read(r2)
+        for i in range(1, 9):
+            ok(f"R2_RESPONSE mentions F-{i:02d}", f"F-{i:02d}" in t2)
     r1 = PLAT / "revisions" / "R1_RESPONSE.md"
     if r1.exists():
         t = read(r1)
@@ -316,6 +344,9 @@ def main():
     check_ids(sm)
     check_fields()
     check_matrix()
+    check_citations()
+    check_schemas()
+    check_new_tests()
     check_hours()
     check_tables()
     check_misc()

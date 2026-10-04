@@ -124,6 +124,7 @@
         ],
         "effective_from": "2026-01-01",
         "effective_to": "2026-12-31",
+        "effective_unknown": false,
         "application_window": {
           "type": "ROLLING"
         },
@@ -240,6 +241,7 @@
         ],
         "effective_from": "2026-01-01",
         "effective_to": "2026-12-31",
+        "effective_unknown": false,
         "application_window": {
           "type": "WITHIN_MONTHS_OF_EVENT",
           "months": 3
@@ -347,6 +349,7 @@
         ],
         "effective_from": "2026-08-01",
         "effective_to": "2027-07-31",
+        "effective_unknown": false,
         "application_window": {
           "type": "ROLLING"
         },
@@ -467,6 +470,7 @@
         ],
         "effective_from": "2026-01-01",
         "effective_to": "2026-12-31",
+        "effective_unknown": false,
         "application_window": {
           "type": "ROLLING"
         },
@@ -694,6 +698,7 @@
         ],
         "effective_from": "2026-01-01",
         "effective_to": "2026-06-30",
+        "effective_unknown": false,
         "application_window": {
           "type": "FIXED",
           "ranges": [

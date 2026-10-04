@@ -1,0 +1,49 @@
+{
+ "title": "ControlRecord（外部控制紀錄的一筆）",
+ "x-note": "不得含個人內容；欄位語意見 OPERATIONS §1.3.3",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "type"
+ ],
+ "properties": {
+  "type": {
+   "enum": [
+    "CONSENT_REVOKE",
+    "HARD_DELETE",
+    "REDACT",
+    "APPLIED"
+   ]
+  },
+  "consent": {
+   "type": "string"
+  },
+  "purposes": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "retention_hold": {
+   "type": "boolean"
+  },
+  "table": {
+   "type": "string"
+  },
+  "id": {
+   "type": "string"
+  },
+  "fields": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "ref": {
+   "type": "integer"
+  },
+  "reason": {
+   "type": "string"
+  }
+ }
+}

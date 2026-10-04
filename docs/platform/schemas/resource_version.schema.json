@@ -1,0 +1,179 @@
+{
+ "title": "ResourceVersion（資源版本）結構",
+ "x-note": "只驗結構、型別、必要欄位、列舉與未知鍵；effective_unknown 與 effective_to 的一致性、複查起算等跨欄位規則由 ref_engine.recommendation_status 驗證（DATA_MODEL §2.4.1）",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "version_label",
+  "status",
+  "verification_level",
+  "regions",
+  "effective_from",
+  "effective_to",
+  "effective_unknown",
+  "application_window",
+  "summary_plain",
+  "how_to_apply",
+  "source_ids",
+  "conflict_status",
+  "capacity_status"
+ ],
+ "properties": {
+  "version_label": {
+   "type": "string",
+   "minLength": 1
+  },
+  "status": {
+   "enum": [
+    "CANDIDATE",
+    "DRAFT",
+    "IN_REVIEW",
+    "PUBLISHED",
+    "NEEDS_RECHECK",
+    "SUSPENDED",
+    "SUPERSEDED",
+    "EXPIRED",
+    "RETIRED"
+   ]
+  },
+  "verification_level": {
+   "enum": [
+    "V0",
+    "V1",
+    "V2",
+    "V3"
+   ]
+  },
+  "regions": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "string",
+    "minLength": 1
+   }
+  },
+  "effective_from": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+  },
+  "effective_to": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+  },
+  "effective_unknown": {
+   "type": "boolean"
+  },
+  "recheck_started_at": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+  },
+  "application_window": {
+   "type": "object",
+   "required": [
+    "type"
+   ],
+   "properties": {
+    "type": {
+     "enum": [
+      "ROLLING",
+      "FIXED",
+      "WITHIN_MONTHS_OF_EVENT",
+      "UNKNOWN"
+     ]
+    },
+    "ranges": {
+     "type": "array"
+    },
+    "months": {
+     "type": "integer",
+     "minimum": 1
+    }
+   },
+   "additionalProperties": false
+  },
+  "benefit_period_rule": {
+   "type": "object"
+  },
+  "summary_plain": {
+   "type": "string",
+   "minLength": 1
+  },
+  "amount_or_service": {
+   "type": "object"
+  },
+  "how_to_apply": {
+   "type": "object",
+   "required": [
+    "channels",
+    "where",
+    "proxy_allowed"
+   ],
+   "properties": {
+    "channels": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string"
+     }
+    },
+    "where": {
+     "type": "string"
+    },
+    "hours": {
+     "type": "string"
+    },
+    "proxy_allowed": {
+     "enum": [
+      "YES",
+      "NO",
+      "CONDITIONAL",
+      "UNKNOWN"
+     ]
+    }
+   },
+   "additionalProperties": false
+  },
+  "stacking_rules": {
+   "type": "object"
+  },
+  "capacity_status": {
+   "enum": [
+    "OPEN",
+    "LIMITED",
+    "FULL",
+    "UNKNOWN"
+   ]
+  },
+  "capacity_confirmed_at": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+  },
+  "source_ids": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "string",
+    "minLength": 1
+   }
+  },
+  "conflict_status": {
+   "enum": [
+    "NONE",
+    "OPEN",
+    "RESOLVED"
+   ]
+  }
+ }
+}

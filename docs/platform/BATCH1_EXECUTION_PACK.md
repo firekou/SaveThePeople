@@ -1,5 +1,5 @@
 # 第一開發批次執行包（WP-00～WP-07、WP-08a）
-work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-04
+work_id：STP-PLATFORM-PLAN-001｜版本：v0.4-draft（R2 修正）｜2026-10-04
 狀態：**已備妥，本輪不開工**。啟動條件見 §1。本批次只使用合成資料，不處理真實個案、不部署正式環境、不提交任何申請。
 上位文件：[BUILD_PLAN_AND_ACCEPTANCE.md](BUILD_PLAN_AND_ACCEPTANCE.md) §2、§5；規格：[ARCHITECTURE.md](ARCHITECTURE.md)、[RESOURCE_AND_ELIGIBILITY_ENGINE.md](RESOURCE_AND_ELIGIBILITY_ENGINE.md)、[DATA_MODEL_AND_STATE_MACHINES.md](DATA_MODEL_AND_STATE_MACHINES.md)。
 
@@ -12,7 +12,7 @@ work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-0
 | # | 條件 | 狀態（本文件撰寫時） | 備註 |
 |---|---|---|---|
 | 1 | 本輪規劃經獨立覆核 APPROVED（不得由作者宣告） | 待 GPT 覆核 | |
-| 2 | 工程人力（D-307） | 未決 | 1 名：依序 D1→D4，約 9～13 週；2 名：D2 可與 D1 後半並行，約 5～7 週 |
+| 2 | 工程人力（D-307） | 未決 | 1 名：依序 D1→D4，約 9～14 週；2 名：D2 可與 D1 後半並行，約 5～7 週 |
 | 3 | 技術堆疊（D-201：Django＋PostgreSQL＋HTMX） | 推薦且可逆 | 若負責人改選其他堆疊，須先重估工時，但資料模型、狀態機 JSON、參考規格不變 |
 | 4 | 開發環境 | 本機 Docker Compose 即可 | 不需要雲端帳號（U-06）；staging 腳本可先寫、後部署 |
 | 5 | 合成資料規範 | 已有 | `docs/platform/examples/`；一律 `is_synthetic=true` |
@@ -34,11 +34,11 @@ flowchart LR
 交付分四段（每段都可獨立驗收與示範）：
 | 段 | 內容 | 工作包 | 工時（人日） |
 |---|---|---|---|
-| **D1（第一個可驗收交付物）** | 合成資源目錄上線：骨架＋CI＋目錄模型＋P1 公開查詢 | WP-00、01、02、03 | 16～24 |
-| D2 | 規則引擎與正式推薦判定，重現全部參考案例 | WP-04 | 9～13 |
-| D3 | 問答→可解釋初篩→行動清單（含代填與列印） | WP-05、06 | 10～14 |
+| **D1（第一個可驗收交付物）** | 合成資源目錄上線：骨架＋CI＋目錄模型＋P1 公開查詢 | WP-00、01、02、03 | 17～25 |
+| D2 | 規則引擎與正式推薦判定，重現全部參考案例 | WP-04 | 10～14 |
+| D3 | 問答→可解釋初篩→行動清單（含代填與列印） | WP-05、06 | 10～15 |
 | D4 | 協助員工作台（合成案件）＋基本角色與稽核 | WP-07、08a | 10～14 |
-合計 45～65 人日（與 BUILD_PLAN §2 的加總一致，`tools/check_docs.py` 會核對）。
+合計 47～68 人日（與 BUILD_PLAN §2 的加總一致，`tools/check_docs.py` 會核對）。
 
 ## 3. 任務拆解
 任務 ID：`B<WP>-<序>`。工時單位人日，每個 WP 的任務加總等於 BUILD_PLAN 的 WP 工時。
@@ -51,20 +51,20 @@ flowchart LR
 | B1-2 | CI：lint、test、遷移檢查 | B0 | 流水線 | 主分支全綠 | 1～1.5 |
 | B1-3 | staging 部署腳本（只允許合成資料） | ARCHITECTURE §3.1 | 腳本與說明 | 啟動時檢查 `is_synthetic`，寫入非合成個案資料被拒 | 1～2 |
 | B1-4 | 模組邊界檢查、載入 `state_machines.json` 的轉換函式骨架、`make spec-check` | ARCHITECTURE §5 | import 邊界規則；轉換函式 | `make spec-check` 執行 `check_examples.py` 通過 | 1 |
-| B2-1 | 模型：Organization、Source、Resource、ResourceVersion | DATA_MODEL §2.1～2.4 | 遷移與 admin | 必填、枚舉、`conflict_status`、`application_window` 類型可驗證 | 2～3 |
-| B2-2 | 模型：DocumentRequirement、HouseholdScopeDefinition、VerificationRecord、EligibilityRule | §2.5、2.6、2.15 | 遷移與 admin | 規則 JSON 通過 `validate_rule`（見 B4-1） | 1.5～2 |
+| B2-1 | 模型：Organization、Source、Resource、ResourceVersion（含 `effective_unknown`、`recheck_started_at`；`effective_unknown` 與 `effective_to` 一致性） | DATA_MODEL §2.1～2.4.1 | 遷移與 admin | 必填、枚舉、`conflict_status`、`application_window` 類型、`effective_unknown`⇔`effective_to` 空值可驗證 | 2.5～3.5 |
+| B2-2 | 模型：DocumentRequirement、HouseholdScopeDefinition、VerificationRecord、EligibilityRule | §2.5、2.6、2.15 | 遷移與 admin | 規則 JSON 通過 `validate_rule`（見 B4-1）；`schemas/` 結構驗證載入 | 2～2.5 |
 | B2-3 | admin 與發布檢查：≥V2、查核人≠作者、發布人≠查核人、UNKNOWN 標記、不可變 | §3.1 轉換 RV-01～RV-14 | 轉換函式（人工部分） | 不符條件的發布被拒（T-07 的發布部分） | 2～3 |
 | B2-4 | 匯入指令 `import_synthetic_catalog` | `synthetic_resources.json` | 6 項資源、6 個來源、2 個口徑 | 匯入後資料與 JSON 一致；RENT-006 為 EXPIRED | 1.5～2 |
 | B3-1 | `catalog_visibility` 與 `GET /api/public/resources` | 引擎 §0.1 | 公開 API | 列表只含 PUBLISHED／NEEDS_RECHECK（T-04） | 1～2 |
 | B3-2 | P1 頁面（篩選、詳情、來源與查核日期、列印） | USER_JOURNEYS P1 | 頁面 | 360px 寬可用；首屏 ≤300KB | 1.5～2 |
 | B3-3 | 測試 T-04、T-21（未生效標示） | engine_cases | 測試 | 通過 | 0.5～1 |
-| B4-1 | 規則 schema 與 `validate_rule`（拒絕不支援的運算子、組合、自述確認不符） | 引擎 §5 | 驗證器 | `engine_cases.json` 的 `invalid_rule_cases` 全過（T-30） | 1.5～2 |
+| B4-1 | 規則 schema 與 `validate_rule`（完整結構驗證與範圍參照驗證分開；拒絕不支援的運算子、組合、自述確認不符、未知或未支援的範圍鍵） | 引擎 §5 | 驗證器 | `invalid_rule_cases`、`scope_cases`、`criterion_shape_cases` 全過（T-30、T-57、T-58） | 2～2.5 |
 | B4-2 | 事實與口徑計算：成員事實未知→UNKNOWN；同戶籍／共同生活口徑 | 引擎 §5.3 | 計算模組 | H1（3 vs 4 人）、H5（未知成員）通過（T-03、T-31） | 2～3 |
 | B4-3 | 運算子與單條件結果（PASS／FAIL／FAIL_UNCONFIRMED／UNKNOWN／HUMAN；5% 人工確認點） | 引擎 §6.1 | 評估核心 | H3／H4 的條件結果通過 | 1.5～2 |
 | B4-4 | ALL／ANY／CUSTOM 組合、資源結果、`flags`、`known_failures`、`missing_inputs` | 引擎 §6.2～6.3 | 彙總邏輯 | `combinator_cases` 全過；H6、H7 通過（T-26、T-27、T-29） | 1.5～2.5 |
-| B4-5 | `recommendation_status`（FORMAL／MANUAL_CHECK_ONLY／NOT_RECOMMENDED） | 引擎 §0.2 | 判定函式 | `recommendation_cases` 全過（T-21～T-25） | 1.5～2 |
+| B4-5 | `recommendation_status`（FORMAL／MANUAL_CHECK_ONLY／NOT_RECOMMENDED） | 引擎 §0.2 | 判定函式（缺 `status` 不可推薦；複查寬限自可稽核時間計算） | `recommendation_cases` 全過（T-21～T-25、T-57、T-60） | 2～2.5 |
 | B4-6 | 以 fixtures 重現全部參考案例；Assessment 持久化與重現 | `expected_assessments.json` | 測試與資料表 | 7 家庭×6 資源全部符合；相同輸入重算一致 | 1～1.5 |
-| B5-1 | 免姓名免帳號 session、題庫（固定題 ≤15＋成員簡表） | USER_JOURNEYS P2 | P2 頁面與 API | 全部答「不知道」仍可完成（T-01） | 2～3 |
+| B5-1 | 免姓名免帳號 session、題庫（固定題 ≤15＋成員簡表） | USER_JOURNEYS P2 | P2 頁面與 API | 全部答「不知道」仍可完成（T-01）；每題存伺服器端工作階段、瀏覽器端無答案內容、「清除並離開」生效（T-56） | 2～4 |
 | B5-2 | 代填模式（記錄管道：電話、現場、紙本） | J4 | 代填畫面 | 可由協助員完整代填（T-12） | 1～1.5 |
 | B5-3 | 急迫轉人工 J5：公開專線、URGENT 任務、非上班時段處置 | J5 | 流程與任務 | 第一頁答「明天沒有食物」立即顯示並建任務（T-17） | 1.5～2 |
 | B5-4 | 測試 T-01、T-12、T-17 | — | 測試 | 通過 | 0.5 |

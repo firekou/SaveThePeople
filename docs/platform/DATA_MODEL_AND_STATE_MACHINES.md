@@ -1,5 +1,5 @@
 # 資料模型與狀態機
-work_id：STP-PLATFORM-PLAN-001｜版本：v0.3-draft（R1 修正）｜2026-10-04
+work_id：STP-PLATFORM-PLAN-001｜版本：v0.4-draft（R2 修正）｜2026-10-04
 相關：[資源與資格引擎](RESOURCE_AND_ELIGIBILITY_ENGINE.md)｜[資料保護與營運](OPERATIONS_AND_PRIVACY.md)｜[架構](ARCHITECTURE.md)｜[合成範例](examples/README.md)
 
 ## 1. 共同約定
@@ -98,7 +98,7 @@ erDiagram
 | Task | INT | RT-CASE | 隨案件 | `dedup_key` | 覆寫＋AuditEvent | — |
 | Notification／NotificationEvent | PRV／INT | RT-NOTIF | 內容摘要到期硬刪，保留統計 | `idempotency_key`；事件 `(provider, provider_event_id)` | 狀態經轉換；事件 append-only | 供應商回呼 |
 | AuditEvent／AccessGrant | INT | RT-AUDIT | 日常禁止；僅受控清除（§2.20） | 無 | append-only | — |
-| DeletionLedger | INT | RT-LEDGER | 到期受控清除 | `(object_type, object_id, executed_at)` | append-only | — |
+| ControlRecord／DeletionLedger | INT | RT-CTRL／RT-LEDGER | 到期受控清除 | `seq` 連號 | append-only（外部） | — |
 | ReportRun | INT | RT-REPORT | 不刪 | 無 | 不覆寫，另立新版本 | 版本欄位見 §2.21 |
 | ScreeningSession／HelpRequest | PRV | RT-SESSION／RT-LEAD | 到期硬刪 | token／同 session 一筆 | 覆寫 | C1 |
 例外：任何實體的 `is_synthetic=true` 資料不得進入正式環境與正式報表。
@@ -160,6 +160,8 @@ erDiagram
 | resource_id | ref(Resource) | 是 | PUB | |
 | version_label | text | 是 | PUB | 例：`2026.1`、`2027-年度` |
 | effective_from / effective_to | date | 否 | PUB | 生效起日／截止日；未知則 null＋`effective_unknown=true`（期限不明，不進正式推薦，只供人工查核） |
+| effective_unknown | bool | 是 | PUB | 正式定義見 §2.4.1；必須等於「`effective_to` 為空」，不一致即資料不合法 |
+| recheck_started_at | date | NEEDS_RECHECK 時必填 | INT | 複查寬限起算日，正式定義見 §2.4.1；其他狀態必為空 |
 | application_window | jsonb | 是 | PUB | `{type: ROLLING｜FIXED（ranges[{from,to}]，可多段）｜WITHIN_MONTHS_OF_EVENT（months，由條件判斷）｜UNKNOWN}`；UNKNOWN 不進正式推薦 |
 | benefit_period_rule | jsonb | 否 | PUB | 給付期間與續辦規則：`{period_type, renewal{required(bool), lead_days, new_application_each_period(bool)}}`；續辦提醒讀取 `benefit_period_rule.renewal.lead_days` |
 | regions | text[] | 是 | PUB | 適用行政區代碼；未知則 `["UNKNOWN"]` 並禁止發布 |
@@ -181,8 +183,20 @@ erDiagram
 | status | 見 §3.1 | 是 | PUB | |
 | supersedes_version_id | ref(ResourceVersion) | 否 | PUB | 版本鏈 |
 | change_summary | text | 否 | INT | 與上一版差異 |
-- 不可變：發布後內容不可修改；修正必須建新版本（錯字修正可建 `patch` 版本並標記 `non_material=true`，不觸發重評）。
+- 不可變：發布後內容不可修改；修正必須建新版本（錯字修正可建 `patch` 版本並標記 `non_material=true`，不觸發重評）。`recheck_started_at` 是狀態轉換（RV-07、RV-08）寫入的**系統欄位**，不屬於「內容」，不受不可變限制。
 - 保存：永久（評估可追溯所需）。
+
+#### 2.4.1 必要欄位的正式定義與派生欄位
+下表是 `recommendation_status`（引擎 §0.2）使用的欄位與派生值的單一定義；結構（型別、必要、列舉、未知鍵）另由 [schemas/resource_version.schema.json](schemas/resource_version.schema.json) 以 `tools/schema_lite.py` 驗證，**跨欄位規則**（如 `effective_unknown`）由 `examples/ref_engine.py` 驗證。結構驗證器只涵蓋它描述的結構，不等於驗證了全部語意。
+| 欄位／派生值 | 型別 | 必填 | 類別 | 來源 | 更新時機 | 版本控管 |
+|---|---|---|---|---|---|---|
+| `effective_unknown` | bool | 是 | 輸入（人工） | R5 建立版本時依來源判斷「截止日是否未知」 | 發布前可改；發布後不可變（需新版本） | 隨 ResourceVersion 不可變 |
+| `recheck_started_at` | date | NEEDS_RECHECK 時必填 | 系統寫入 | RV-07 的觸發事件時間（Asia/Taipei 日期），寫入同一交易並留 AuditEvent | RV-07 寫入；RV-08 清除；RV-09 暫停時保留供稽核 | 不隨版本內容；隨轉換歷史（AuditEvent） |
+| `rule.expression`（CUSTOM） | tree | `combinator=CUSTOM` 時必填 | 輸入（人工） | R5 撰寫、R4 或第二人審查 | 規則發布前可改；發布後不可變 | 隨 EligibilityRule `rule_version` |
+| 派生：`effective_unknown` 一致性 | bool | — | 派生 | 演算法：`effective_unknown == (effective_to is null)`，不一致 → `VERSION_INVALID` | 每次 `recommendation_status` 判定 | 引擎版本 |
+| 派生：複查已過天數 | int | — | 派生 | 演算法：`(as_of 日期) − recheck_started_at`（日曆天）；缺少 → `RECHECK_START_MISSING`；格式不合或晚於 `as_of` → `RECHECK_START_INVALID`；`> 14` → `RECHECK_GRACE_EXCEEDED`（OP-08）；`risk_tier=HIGH` → `RECHECK_HIGH_RISK` | 每次判定 | 引擎版本；寬限天數為暫行參數（OP-08） |
+| 派生：`catalog_visibility`、`recommendation_status` | enum | — | 派生 | 引擎 §0.1、§0.2 | 每次判定 | 引擎版本 |
+API 欄位同步：`GET /api/admin/versions/{id}/recommendation` 回傳 `recommendation`、`reasons[]`、`flags[]`、`as_of`；建立與轉換版本的 API 欄位為上表與 §2.4 欄位（見 ARCHITECTURE §6）。
 
 ### 2.5 EligibilityRule（資格規則）
 | 欄位 | 型別 | 必填 | 分類 | 說明 |
@@ -190,11 +204,12 @@ erDiagram
 | resource_version_id | ref | 是 | PUB | |
 | rule_version | text | 是 | PUB | 語意化版本 `1.0.0`；同資源版本內修正規則也遞增 |
 | criteria | jsonb | 是 | PUB | 條件陣列，格式見 [RESOURCE_AND_ELIGIBILITY_ENGINE.md](RESOURCE_AND_ELIGIBILITY_ENGINE.md) §5 |
-| combinator | enum(ALL, ANY, CUSTOM) | 是 | PUB | CUSTOM 需 `expression` |
+| combinator | enum(ALL, ANY, CUSTOM) | 是 | PUB | CUSTOM 需 `expression`；ALL／ANY 不得有 `expression` |
+| expression | tree | CUSTOM 時必填 | PUB | 節點是條件 ID 字串，或 `{op: ALL｜ANY, children: [節點…]}`（`children` 非空）；必須恰好引用每個 `criterion_id` 一次；定義與驗證見引擎 §5.5、[schemas/eligibility_rule.schema.json](schemas/eligibility_rule.schema.json) |
 | authored_by / reviewed_by | ref | 是 | INT | 不可同一人 |
 | test_cases | jsonb | 是 | INT | 至少：一個可能符合、一個資料不足、一個可能不符合 |
 | authoring_origin | enum(HUMAN, AI_DRAFT_HUMAN_EDITED) | 是 | INT | AI 草稿未經人工審核不得發布 |
-| status | enum(DRAFT, IN_REVIEW, PUBLISHED, RETIRED) | 是 | INT | |
+| status | enum(DRAFT, IN_REVIEW, PUBLISHED, RETIRED) | 是 | INT | **必填，無預設值**：缺少時視為不可推薦（`RULE_STATUS_MISSING`），不得預設為 PUBLISHED |
 - 不可變：發布後不可修改。
 - 每個 criterion 必須有 `source_ref` 指向 Source 原文位置；沒有來源的條件不得存在。
 
@@ -206,6 +221,7 @@ erDiagram
 | income_definition | jsonb | 是 | PUB | 所得項目、計算期間（月平均／年度）、是否含工作能力推估所得等；未知處標 UNKNOWN |
 | property_definition | jsonb | 否 | PUB | 動產、不動產計算方式 |
 | source_ref | jsonb | 是 | PUB | |
+- **支援範圍**：`member_inclusion` 與 `income_definition` 內只有引擎 §5.3 表列的鍵被實作；規格雖提到年齡、就學、服役與工作能力推估所得，但**目前未支援**，出現即報錯並使規則不可推薦（`RULE_INVALID`），不得默默忽略。結構見 [schemas/household_scope.schema.json](schemas/household_scope.schema.json)。
 - 不同方案各自定義；**禁止**共用一個「預設家庭口徑」。若兩方案確實引用相同法規條文，可共用同一 scope_key，但仍各自連結來源。
 
 ### 2.7 Household（家庭）
@@ -342,6 +358,16 @@ erDiagram
   - `kind=SUPPLEMENTARY`（補領、差額）：原件須為 APPROVED，必填理由並由 R4 核可（`relation_approved_by`）。
   - 同一 `(related_application_id, kind)` 在非 DENIED／WITHDRAWN／LAPSED 的狀態下只能有一件（partial unique index）。
   - 違反時 API 回 409 並附既有申請與可行的 kind，不建立新件。
+
+#### 2.13.1 依 kind 的送件前檢查（AP-06；排除申請本身）
+AP-06 的「防重複」**不是**「無任何同鍵已核准申請」。同鍵申請本來就可能存在：SUPPLEMENTARY 必須連結 APPROVED 的原件，若一律擋同鍵已核准的申請，合法的補領永遠無法送件。檢查必須**依 `kind` 分別進行，並排除正在檢查的這件申請本身**（`application_ready_check(existing, app_id)`）：
+| kind | 通過條件（皆排除申請本身） | 對應原因碼 |
+|---|---|---|
+| ORIGINAL | 同家庭、同資源、同給付期間沒有其他 ORIGINAL（**不論任何狀態**） | 建立：`ORIGINAL_EXISTS_<狀態>`；AP-06：`ORIGINAL_DUPLICATE_<狀態>` |
+| REAPPLY | 有關聯原件與理由；原件同家庭、同資源、同給付期間，狀態為 DENIED／WITHDRAWN／LAPSED；且無其他進行中的同種關聯件 | `RELATION_REQUIRED`、`RELATED_NOT_FOUND`、`RELATION_MISMATCH_HOUSEHOLD／RESOURCE／PERIOD`、`RELATED_STATE_INVALID_<狀態>`、`DUPLICATE_RELATED` |
+| APPEAL | 同上，但原件須為 DENIED 或 LAPSED | 同上 |
+| SUPPLEMENTARY | 同上，但原件須為 **APPROVED**，且已由 R4 核可（`relation_approved_by` 有值） | 同上，加 `R4_APPROVAL_REQUIRED` |
+可執行規格：`examples/ref_engine.py` 的 `application_create_allowed`（建立時）與 `application_ready_check`（AP-06）；案例 `application_cases`、`application_ready_cases`、`application_lifecycle_cases`（SUPPLEMENTARY：建立→準備→READY_TO_SUBMIT 的正例，以及無核准、關係錯誤、重複關聯的反例；T-59）。狀態機轉換 AP-06 的前置條件由 `state_machines.json` 產生，不手改。
 - 保存：依 retention_class。
 
 ### 2.14 Referral（轉介）
@@ -460,9 +486,9 @@ Outcome 是「某申請或轉介的取得狀態容器」；計數與統計一律
 | OutcomeEvent | 取得事件（只增不改；統計依據） | `outcome_id`、`event_type`(FIRST_RECEIPT／FULL_RECEIPT／PARTIAL_RECEIPT／PERIOD_CONFIRMED／DUPLICATE_PAYMENT_NOTED／CORRECTION)、`occurred_on`、`evidence_level`(E1～E3)、`evidence_type`、`description`、`recorded_by`、`verified_by`／`verified_at`（第二人，須≠案件責任人與登錄人）、`voids_event_id`（CORRECTION 時必填）、`void_reason` | PRV | 隨案件 |
 | NotificationEvent | 供應商回呼事件（只增不改） | `notification_id`、`provider`、`provider_event_id`（**事件 ID**；`unique(provider, provider_event_id)`）、`provider_message_id`、`event_type`、`provider_event_time`、`received_at`、`applied`(bool；重複、過時或回退事件為 false，仍保留)、`raw_summary` | INT | RT-NOTIF |
 | AccessGrant | 例外存取授權 | `grant_type`(BREAK_GLASS／REVIEW_SAMPLE)、`grantee_id`、`scope`(案件 ID 清單或抽樣規格＋欄位範圍)、`purpose`(DATA_CORRECTION／DELETION_REQUEST／INCIDENT_INVESTIGATION／LEGAL_REQUEST／INDEPENDENT_REVIEW)、`requested_by`、`approved_by_1`／`approved_by_2`（BREAK_GLASS 雙人）、`valid_from`／`expires_at`（BREAK_GLASS ≤4 小時；REVIEW_SAMPLE ≤14 天）、`revoked_at`、`used_count` | INT | RT-AUDIT |
-| DeletionLedger | 刪除與撤回帳本（供備份還原後重新套用） | `object_type`、`object_id`、`action`(HARD_DELETE／REDACT)、`reason`(RETENTION_EXPIRED／CONSENT_REVOKED／CLIENT_REQUEST／INCIDENT)、`executed_at`、`proof_hash`；**不含個人內容**；每日匯出到獨立的僅附加儲存 | INT | RT-LEDGER |
+| ControlRecord（含 DeletionLedger 視圖） | 先寫（write-ahead）的外部控制紀錄，供備份還原後重新套用撤回、停止處理、刪除與遮蔽；外部、僅附加、雜湊鏈 | `seq`、`prev_hash`、`type`(CONSENT_REVOKE／HARD_DELETE／REDACT／APPLIED)、`table`、`id`、`consent_id`、`purposes`、`fields`（僅 REDACT）、`reason`(RETENTION_EXPIRED／CONSENT_REVOKED／CLIENT_REQUEST／INCIDENT)、`recorded_at`、`proof_hash`；**不含個人內容**；`HARD_DELETE`／`REDACT` 兩類即 DeletionLedger | INT | RT-CTRL／RT-LEDGER |
 | ReportRun | 報表產出紀錄 | `report_type`、`period`、`data_cutoff_at`、`metric_spec_version`、`params`(jsonb；例：回溯月數、n 遮蔽門檻)、`engine_version`、`catalog_snapshot_id`、`output_hash`、`supersedes_run_id`、`restatement_note`；以不同版本重算時另立一筆，不覆寫 | INT | RT-REPORT |
-| IdempotencyRecord／Outbox | 技術表（冪等與交易式外送），欄位見 [ARCHITECTURE.md](ARCHITECTURE.md) §6.3 | `actor_id`、`key`、`request_hash`、`state`、`response`（IdempotencyRecord）；`effect_type`、`payload`、`status`、`attempts`、`next_attempt_at`、`idempotency_key`、`last_error`（Outbox） | INT | 24 小時／已完成後 30 天 |
+| IdempotencyRecord／Outbox | 技術表（冪等與交易式外送），欄位見 [ARCHITECTURE.md](ARCHITECTURE.md) §6.3 | `actor_id`、`key`、`request_hash`、`state`、`response`＝`{status_code, resource_ref{type,id}, shape_version}`（IdempotencyRecord；只存形狀不存內容，欄位與重播語意見 ARCHITECTURE §6.3、參考案例 `engine_cases.json` 的 `replay_cases`）；`effect_type`、`payload`、`status`、`attempts`、`next_attempt_at`、`idempotency_key`、`last_error`（Outbox） | INT | 24 小時／已完成後 30 天 |
 
 ## 3. 狀態機
 六個狀態機彼此獨立：資源能否推薦、評估結果、申請審查、轉介受理、實際取得、提醒送達。任何一個的「成功」都不代表其他狀態成功（核准≠取得、送達≠知悉、轉介受理≠服務開始）。
@@ -521,8 +547,8 @@ stateDiagram-v2
 | RV-04 | `DRAFT` → `IN_REVIEW` | 一般 | R5 | 必填欄位完整；每條件有 source_ref；期限與申請期間已填或標 UNKNOWN；規則測試 3 類案例通過 | 規則測試報告 | 可（RV-05） | — |
 | RV-05 | `IN_REVIEW` → `DRAFT` | 撤回 | R5 | 作者撤回送審，或查核人退回 | 退回理由 | 可（RV-04） | — |
 | RV-06 | `IN_REVIEW` → `PUBLISHED` | 一般 | R5 | 查核人≠作者；發布人≠查核人；verification_level≥V2；來源衝突=0；regions 無 UNKNOWN | VerificationRecord | 否 | 暫停（RV-10）或建立 patch／新版本 |
-| RV-07 | `PUBLISHED` → `NEEDS_RECHECK` | 一般 | SYSTEM、R5 | 來源雜湊變動、到期需查核、使用者或承辦回報 | 觸發事件 ID | 可（RV-08） | — |
-| RV-08 | `NEEDS_RECHECK` → `PUBLISHED` | 一般 | R5 | 新 VerificationRecord 確認未變；發布人≠查核人 | VerificationRecord | 可（RV-07） | — |
+| RV-07 | `PUBLISHED` → `NEEDS_RECHECK` | 一般 | SYSTEM、R5 | 來源雜湊變動、到期需查核、使用者或承辦回報；寫入 `recheck_started_at`＝觸發時間 | 觸發事件 ID；`recheck_started_at` | 可（RV-08） | — |
+| RV-08 | `NEEDS_RECHECK` → `PUBLISHED` | 一般 | R5 | 新 VerificationRecord 確認未變；發布人≠查核人；清除 `recheck_started_at` | VerificationRecord | 可（RV-07） | — |
 | RV-09 | `NEEDS_RECHECK` → `SUSPENDED` | 一般 | SYSTEM、R5、R4、R7 | risk_tier=HIGH 者立即；其他超過 14 天未完成查核，或查核發現問題 | 理由；系統觸發時為逾期紀錄 | 否 | RV-11 恢復為 PUBLISHED（需新查核） |
 | RV-10 | `PUBLISHED` → `SUSPENDED` | 一般 | R5、R4、R7 | 來源失效、衝突、期限不明、額滿或發現錯誤 | 理由 | 可（RV-11） | — |
 | RV-11 | `SUSPENDED` → `PUBLISHED` | 一般 | R5 | 問題解除；新 VerificationRecord；仍在有效期間；發布人≠查核人 | VerificationRecord | 可（RV-10） | — |
@@ -646,7 +672,7 @@ stateDiagram-v2
 | AP-03 | `CANDIDATE` → `WITHDRAWN` | 一般 | R3 | 本人不申請 | 本人表示（方式、時間）與原因 | 否 | 重新建立 Application |
 | AP-04 | `AWAITING_CLIENT_DECISION` → `PREPARING_DOCS` | 一般 | R3 | 本人或代理人確認要申請；代理需有效 Consent.proxy | 確認紀錄（方式、時間） | 可（AP-05） | — |
 | AP-05 | `PREPARING_DOCS` → `AWAITING_CLIENT_DECISION` | 撤回 | R3 | 尚未確認內容 | 理由 | 可（AP-04） | — |
-| AP-06 | `PREPARING_DOCS` → `READY_TO_SUBMIT` | 一般 | R3 | 必要文件皆 READY 或 NOT_APPLICABLE（附理由）；申請內容已由本人或代理人逐項確認；再檢查資源仍可正式推薦且版本為最新（否則升版並重評）；無同鍵進行中或已核准申請 | Application.confirmed_content_hash 等確認欄位 | 可（AP-07） | — |
+| AP-06 | `PREPARING_DOCS` → `READY_TO_SUBMIT` | 一般 | R3 | 必要文件皆 READY 或 NOT_APPLICABLE（附理由）；申請內容已由本人或代理人逐項確認；再檢查資源仍可正式推薦且版本為最新（否則升版並重評）；送件前防重複依 `kind` 分別檢查並排除申請本身（DATA_MODEL §2.13.1）：ORIGINAL 無其他同家庭同資源同給付期間的 ORIGINAL；REAPPLY／APPEAL 關聯原件為同家庭、同資源、同給付期間且狀態符合條件，且無其他進行中的同種關聯件；SUPPLEMENTARY 關聯原件為 APPROVED、同家庭、同資源、同給付期間，已有 R4 核可（`relation_approved_by`），且無其他進行中的同種關聯件 | `confirmed_content_hash` 等確認欄位；防重複檢查結果（`application_ready_check`） | 可（AP-07） | — |
 | AP-07 | `READY_TO_SUBMIT` → `PREPARING_DOCS` | 撤回 | R3 | 尚未送出；內容變更時清除本人確認 | 理由 | 可（AP-06） | — |
 | AP-08 | `READY_TO_SUBMIT` → `SUBMITTED` | 一般 | R3 | 送件為人工動作；冪等鍵；本人確認與同意仍有效 | 收件憑據（類型與號碼，或對方姓名職稱與時間） | 否 | AP-19（R4 更正登錄錯誤） |
 | AP-09 | `SUBMITTED` → `UNDER_REVIEW` | 一般 | R3 | 承辦確認收件或受理，或 R3 向承辦查詢後確認審查中（無自動轉換） | 承辦回覆紀錄（對象職稱、日期） | 否 | — |

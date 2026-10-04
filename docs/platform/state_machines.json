@@ -127,8 +127,8 @@
       "SYSTEM",
       "R5"
      ],
-     "pre": "來源雜湊變動、到期需查核、使用者或承辦回報",
-     "evidence": "觸發事件 ID",
+     "pre": "來源雜湊變動、到期需查核、使用者或承辦回報；寫入 `recheck_started_at`＝觸發時間",
+     "evidence": "觸發事件 ID；`recheck_started_at`",
      "revocable": "RV-08",
      "correction": ""
     },
@@ -142,7 +142,7 @@
      "actors": [
       "R5"
      ],
-     "pre": "新 VerificationRecord 確認未變；發布人≠查核人",
+     "pre": "新 VerificationRecord 確認未變；發布人≠查核人；清除 `recheck_started_at`",
      "evidence": "VerificationRecord",
      "revocable": "RV-07",
      "correction": ""
@@ -510,8 +510,8 @@
      "actors": [
       "R3"
      ],
-     "pre": "必要文件皆 READY 或 NOT_APPLICABLE（附理由）；申請內容已由本人或代理人逐項確認；再檢查資源仍可正式推薦且版本為最新（否則升版並重評）；無同鍵進行中或已核准申請",
-     "evidence": "Application.confirmed_content_hash 等確認欄位",
+     "pre": "必要文件皆 READY 或 NOT_APPLICABLE（附理由）；申請內容已由本人或代理人逐項確認；再檢查資源仍可正式推薦且版本為最新（否則升版並重評）；送件前防重複依 `kind` 分別檢查並排除申請本身（DATA_MODEL §2.13.1）：ORIGINAL 無其他同家庭同資源同給付期間的 ORIGINAL；REAPPLY／APPEAL 關聯原件為同家庭、同資源、同給付期間且狀態符合條件，且無其他進行中的同種關聯件；SUPPLEMENTARY 關聯原件為 APPROVED、同家庭、同資源、同給付期間，已有 R4 核可（`relation_approved_by`），且無其他進行中的同種關聯件",
+     "evidence": "`confirmed_content_hash` 等確認欄位；防重複檢查結果（`application_ready_check`）",
      "revocable": "AP-07",
      "correction": ""
     },
