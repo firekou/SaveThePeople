@@ -166,7 +166,7 @@ flowchart TB
 | `PATCH /api/organizations/{id}/capacity` | 更新容量 | 容量狀態、確認方式、確認日期 | 容量 | R3·INT、R4·INT、R5·INT、R6·OWN-ORG（附確認方式與日期；R6 於試點後只可更新自身機構） | 必附確認方式與日期；試點初期 R6 由 R3 代登錄 |
 | `POST /api/notifications/callbacks/{provider}` | 供應商回呼 | 供應商格式 | 200 | 供應商簽章驗證（非人員角色） | 事件先寫 NotificationEvent，以 `(provider, provider_event_id)` 去重；依狀態機只前進，亂序或重複事件 `applied=false`；DELIVERED 後的失敗設 `late_failure` 並建立任務；未知 id 記錄並忽略 |
 | `POST /api/admin/resources/{id}/versions` | 建立版本 | 欄位 | 草稿 | R5·INT | 驗證必填與 UNKNOWN 標記 |
-| `POST /api/admin/versions/{id}/transitions` | 版本生命週期 | `transition_id`、VerificationRecord／理由 | 新狀態＋影響分析（RV-12／RV-13 為系統轉換） | R5·INT、R4·INT、R7·INT（R4、R7 僅限暫停／停用轉換） | 同人限制 403；發布冪等；暫停時回受影響案件清單 |
+| `POST /api/admin/versions/{id}/transitions` | 版本生命週期 | `transition_id`、VerificationRecord／理由 | 新狀態＋影響分析（RV-12／RV-13 為系統轉換） | R5·INT、R4·INT、R7·INT（R4、R7 僅限暫停／停用轉換） | 同人限制 403；發布冪等；暫停時回資源層級影響摘要（彙總件數；不含逐案 ID 或個案內容） |
 | `GET /api/admin/versions/{id}/recommendation` | 正式推薦判定與原因碼 | as_of | `FORMAL`／`MANUAL_CHECK_ONLY`／`NOT_RECOMMENDED`＋原因 | R5·INT、R4·INT、R9·INT、R3·INT、R7·INT | — |
 | `POST /api/access-grants` | 申請例外存取 | grant_type、purpose、scope、期限 | AccessGrant（待核准） | R7·INT、R4·SITE-REV（R7 申請 BREAK_GLASS；R4 核發 REVIEW_SAMPLE） | 期限上限（BG ≤4 小時、REVIEW ≤14 天）；範圍不可事後擴大 |
 | `POST /api/access-grants/{id}/approve` | 核准 | — | 已核准 | R7·INT、R4·SITE-REV（核准人≠申請人） | 自己核准 403；審批寫 AuditEvent |

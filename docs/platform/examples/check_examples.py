@@ -139,6 +139,17 @@ def test_rule_validation_order_independence(cases):
     ok_rule = {"status": "PUBLISHED", "combinator": "CUSTOM", "criteria": [_filler(1), _filler(2), dict(_filler(3), criterion_id="X")],
                "expression": {"op": "ALL", "children": ["F1", {"op": "ANY", "children": ["F2", "X"]}]}}
     check("legal nested CUSTOM stays FORMAL", rec(ok_rule), {"status": "FORMAL", "reasons": []})
+    # F-01：未知節點鍵（根、深層、空鍵名）與錯型別，推薦入口與 rule_problems 都必須具體拒絕；不得只是「剛好崩潰」
+    for var in cases["illegal_expression_variants"]:
+        if not var["id"].startswith("F01-"):
+            continue
+        rule = {"status": "PUBLISHED", "combinator": "CUSTOM", "criteria": [_filler(1), _filler(2), dict(_filler(3), criterion_id="X")],
+                "expression": copy.deepcopy(var["expression"])}
+        probs = R.rule_problems(rule, cases["recommendation_scopes"])
+        want = "unknown expression node key" if var["id"] in ("F01-root-unknown-key-not", "F01-deep-unknown-key", "F01-empty-key-name") else None
+        check(f"{var['id']} reported as ValidationError", bool(probs) and all(t is R.ValidationError or t is R.UnsupportedError for t, _ in probs), True)
+        if want:
+            check(f"{var['id']} names the unknown key", any(want in m for _, m in probs), True)
 
 
 def test_recommendation(cases):
@@ -350,6 +361,44 @@ def test_callbacks(cases):
         check(f"callback {c['id']}", {"state": state, "applied": applied, "late_failure": late}, c["expected"])
 
 
+def test_version_recheck_lifecycle():
+    """F-07：recheck_started_at 的狀態×欄位生命週期（只在 NEEDS_RECHECK；離開即清除；重新進入取得新起算日）。"""
+    import copy
+    M = R.load_machines()
+    base = {"status": "PUBLISHED", "recheck_started_at": None}
+    v1 = R.apply_version_transition(M, base, "RV-07", "SYSTEM", "2026-09-01")
+    check("RV-07 writes start", [v1["status"], v1["recheck_started_at"]], ["NEEDS_RECHECK", "2026-09-01"])
+    v2 = R.apply_version_transition(M, v1, "RV-08", "R5")
+    check("RV-08 clears start", [v2["status"], v2["recheck_started_at"]], ["PUBLISHED", None])
+    v3 = R.apply_version_transition(M, v2, "RV-07", "R5", "2026-09-20")
+    check("re-entering recheck gets a new start", v3["recheck_started_at"], "2026-09-20")
+    v4 = R.apply_version_transition(M, v3, "RV-09", "R5")
+    check("RV-09 clears start on SUSPENDED", [v4["status"], v4["recheck_started_at"]], ["SUSPENDED", None])
+    v5 = R.apply_version_transition(M, v4, "RV-11", "R5")
+    check("RV-11 restores PUBLISHED with empty start", [v5["status"], v5["recheck_started_at"]], ["PUBLISHED", None])
+    v6 = R.apply_version_transition(M, v3, "RV-12", "SYSTEM")
+    check("RV-12 from NEEDS_RECHECK clears start", v6["recheck_started_at"], None)
+    v7 = R.apply_version_transition(M, v3, "RV-13", "SYSTEM")
+    check("RV-13 from NEEDS_RECHECK clears start", v7["recheck_started_at"], None)
+    check("original object not mutated", v3["recheck_started_at"], "2026-09-20")
+    for label, args in (("missing trigger_date", (base, "RV-07", "SYSTEM", None)),
+                        ("garbage trigger_date", (base, "RV-07", "SYSTEM", "last week")),
+                        ("RV-08 from SUSPENDED", (v4, "RV-08", "R5")),
+                        ("RV-07 wrong actor", (base, "RV-07", "R3", "2026-09-01"))):
+        try:
+            R.apply_version_transition(M, *args)
+            check(f"illegal lifecycle step rejected: {label}", "accepted", "ValidationError")
+        except R.ValidationError:
+            check(f"illegal lifecycle step rejected: {label}", "ValidationError", "ValidationError")
+    # 每條合法路徑的結果都必須通過推薦入口的狀態×欄位檢查（不會因 VERSION_INVALID 被誤擋）
+    cases = R.load_json("engine_cases.json")
+    for label, ver in (("after RV-08", v2), ("after RV-11", v5)):
+        res = copy.deepcopy(cases["recommendation_base"])
+        res["version"].update(ver)
+        got = R.recommendation_status(res, cases["recommendation_sources"], cases["recommendation_as_of"], cases["recommendation_scopes"])
+        check(f"legal lifecycle result {label} not VERSION_INVALID", "VERSION_INVALID" in got["reasons"], False)
+
+
 def test_state_machines():
     M = R.load_machines()
     ok = lambda m, cur, tid, actor: R.transition_allowed(M, m, cur, tid, actor)[0]
@@ -544,6 +593,7 @@ def main():
     run_test(test_idempotency_replay, cases)
     run_test(test_callbacks, cases)
     run_test(test_state_machines)
+    run_test(test_version_recheck_lifecycle)
     run_test(test_control, ctrl)
     run_test(test_schemas, res, cases, ctrl)
     run_test(test_md, exp, res, False)

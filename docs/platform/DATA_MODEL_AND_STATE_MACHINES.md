@@ -183,7 +183,7 @@ erDiagram
 | status | 見 §3.1 | 是 | PUB | |
 | supersedes_version_id | ref(ResourceVersion) | 否 | PUB | 版本鏈 |
 | change_summary | text | 否 | INT | 與上一版差異 |
-- 不可變：發布後內容不可修改；修正必須建新版本（錯字修正可建 `patch` 版本並標記 `non_material=true`，不觸發重評）。`recheck_started_at` 是狀態轉換（RV-07、RV-08）寫入的**系統欄位**，不屬於「內容」，不受不可變限制。
+- 不可變：發布後內容不可修改；修正必須建新版本（錯字修正可建 `patch` 版本並標記 `non_material=true`，不觸發重評）。`recheck_started_at` 是狀態轉換（RV-07 寫入；RV-08、RV-09、RV-12、RV-13 清除）寫入的**系統欄位**，不屬於「內容」，不受不可變限制。
 - 保存：永久（評估可追溯所需）。
 
 #### 2.4.1 必要欄位的正式定義與派生欄位
@@ -191,10 +191,10 @@ erDiagram
 | 欄位／派生值 | 型別 | 必填 | 類別 | 來源 | 更新時機 | 版本控管 |
 |---|---|---|---|---|---|---|
 | `effective_unknown` | bool | 是 | 輸入（人工） | R5 建立版本時依來源判斷「截止日是否未知」 | 發布前可改；發布後不可變（需新版本） | 隨 ResourceVersion 不可變 |
-| `recheck_started_at` | date | NEEDS_RECHECK 時必填 | 系統寫入 | RV-07 的觸發事件時間（Asia/Taipei 日期），寫入同一交易並留 AuditEvent | RV-07 寫入；RV-08 清除；RV-09 暫停時保留供稽核 | 不隨版本內容；隨轉換歷史（AuditEvent） |
+| `recheck_started_at` | date | NEEDS_RECHECK 時必填；其他狀態必為空 | 系統寫入 | RV-07 的觸發事件時間（Asia/Taipei 日期），寫入同一交易並留 AuditEvent | **只存在於 NEEDS_RECHECK**：RV-07 寫入（每次重新進入複查都是新的起算日）；離開 NEEDS_RECHECK 的所有轉換（RV-08、RV-09、RV-12、RV-13）一律在同一交易清除；RV-11 等從其他狀態進入 PUBLISHED 時欄位本來就是空。歷史起算日只留在 RV-07 的 AuditEvent，不保留在當前欄位 | 不隨版本內容；隨轉換歷史（AuditEvent） |
 | `rule.expression`（CUSTOM） | tree | `combinator=CUSTOM` 時必填 | 輸入（人工） | R5 撰寫、R4 或第二人審查 | 規則發布前可改；發布後不可變 | 隨 EligibilityRule `rule_version` |
 | 派生：`effective_unknown` 一致性 | bool | — | 派生 | 演算法：`effective_unknown == (effective_to is null)`，不一致 → `VERSION_INVALID` | 每次 `recommendation_status` 判定 | 引擎版本 |
-| 派生：複查已過天數 | int | — | 派生 | 演算法：`(as_of 日期) − recheck_started_at`（日曆天）；缺少 → `RECHECK_START_MISSING`；格式不合或晚於 `as_of` → `RECHECK_START_INVALID`；`> 14` → `RECHECK_GRACE_EXCEEDED`（OP-08）；`risk_tier=HIGH` → `RECHECK_HIGH_RISK` | 每次判定 | 引擎版本；寬限天數為暫行參數（OP-08） |
+| 派生：複查已過天數 | int | — | 派生 | 演算法：`(as_of 日期) − recheck_started_at`（日曆天）；缺少 → `RECHECK_START_MISSING`；格式不合或晚於 `as_of` → `RECHECK_START_INVALID`；非 NEEDS_RECHECK 狀態卻帶有 `recheck_started_at` → `VERSION_INVALID`（不合法的狀態×欄位組合）；`> 14` → `RECHECK_GRACE_EXCEEDED`（OP-08）；`risk_tier=HIGH` → `RECHECK_HIGH_RISK` | 每次判定 | 引擎版本；寬限天數為暫行參數（OP-08） |
 | 派生：`catalog_visibility`、`recommendation_status` | enum | — | 派生 | 引擎 §0.1、§0.2 | 每次判定 | 引擎版本 |
 API 欄位同步：`GET /api/admin/versions/{id}/recommendation` 回傳 `recommendation`、`reasons[]`、`flags[]`、`as_of`；建立與轉換版本的 API 欄位為上表與 §2.4 欄位（見 ARCHITECTURE §6）。
 
@@ -549,11 +549,11 @@ stateDiagram-v2
 | RV-06 | `IN_REVIEW` → `PUBLISHED` | 一般 | R5 | 查核人≠作者；發布人≠查核人；verification_level≥V2；來源衝突=0；regions 無 UNKNOWN | VerificationRecord | 否 | 暫停（RV-10）或建立 patch／新版本 |
 | RV-07 | `PUBLISHED` → `NEEDS_RECHECK` | 一般 | SYSTEM、R5 | 來源雜湊變動、到期需查核、使用者或承辦回報；寫入 `recheck_started_at`＝觸發時間 | 觸發事件 ID；`recheck_started_at` | 可（RV-08） | — |
 | RV-08 | `NEEDS_RECHECK` → `PUBLISHED` | 一般 | R5 | 新 VerificationRecord 確認未變；發布人≠查核人；清除 `recheck_started_at` | VerificationRecord | 可（RV-07） | — |
-| RV-09 | `NEEDS_RECHECK` → `SUSPENDED` | 一般 | SYSTEM、R5、R4、R7 | risk_tier=HIGH 者立即；其他超過 14 天未完成查核，或查核發現問題 | 理由；系統觸發時為逾期紀錄 | 否 | RV-11 恢復為 PUBLISHED（需新查核） |
+| RV-09 | `NEEDS_RECHECK` → `SUSPENDED` | 一般 | SYSTEM、R5、R4、R7 | risk_tier=HIGH 者立即；其他超過 14 天未完成查核，或查核發現問題；同一交易清除 `recheck_started_at`（歷史留在 RV-07 的 AuditEvent） | 理由；系統觸發時為逾期紀錄 | 否 | RV-11 恢復為 PUBLISHED（需新查核） |
 | RV-10 | `PUBLISHED` → `SUSPENDED` | 一般 | R5、R4、R7 | 來源失效、衝突、期限不明、額滿或發現錯誤 | 理由 | 可（RV-11） | — |
 | RV-11 | `SUSPENDED` → `PUBLISHED` | 一般 | R5 | 問題解除；新 VerificationRecord；仍在有效期間；發布人≠查核人 | VerificationRecord | 可（RV-10） | — |
-| RV-12 | `PUBLISHED`、`NEEDS_RECHECK`、`SUSPENDED` → `SUPERSEDED` | 系統 | SYSTEM | 同一 Resource 的新版本發布 | 新版本 ID | 否 | 新版有誤時暫停新版，並以 patch 版本重新發布舊內容 |
-| RV-13 | `PUBLISHED`、`NEEDS_RECHECK`、`SUSPENDED` → `EXPIRED` | 系統 | SYSTEM | effective_to 已過 | 每日排程紀錄 | 否 | effective_to 登錄錯誤時，建立 patch 版本更正並重新查核發布 |
+| RV-12 | `PUBLISHED`、`NEEDS_RECHECK`、`SUSPENDED` → `SUPERSEDED` | 系統 | SYSTEM | 同一 Resource 的新版本發布；自 NEEDS_RECHECK 離開者同一交易清除 `recheck_started_at` | 新版本 ID | 否 | 新版有誤時暫停新版，並以 patch 版本重新發布舊內容 |
+| RV-13 | `PUBLISHED`、`NEEDS_RECHECK`、`SUSPENDED` → `EXPIRED` | 系統 | SYSTEM | effective_to 已過；自 NEEDS_RECHECK 離開者同一交易清除 `recheck_started_at` | 每日排程紀錄 | 否 | effective_to 登錄錯誤時，建立 patch 版本更正並重新查核發布 |
 | RV-14 | `SUSPENDED`、`EXPIRED` → `RETIRED` | 一般 | R5、R7 | 雙人確認；方案停辦或長期無效 | 停辦證據或查核紀錄 | 否 | 新建候選 |
 
 <!-- END GENERATED:resource_version -->

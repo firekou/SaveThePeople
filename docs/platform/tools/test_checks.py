@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gen_permissions as GP  # noqa: E402
 import schema_lite as SL  # noqa: E402
 import citation_check as CC  # noqa: E402
+import prose_policy as PP  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FAILS = []
@@ -208,8 +209,32 @@ def test_citation_counterexamples():
     expect_clean("current docs have no citation-context problems", allp)
 
 
+def test_prose_policy_counterexamples():
+    j = (ROOT / "USER_JOURNEYS_AND_SCREENS.md").read_text(encoding="utf-8")
+    e = (ROOT / "RESOURCE_AND_ELIGIBILITY_ENGINE.md").read_text(encoding="utf-8")
+    a = (ROOT / "ARCHITECTURE.md").read_text(encoding="utf-8")
+    dm = (ROOT / "DATA_MODEL_AND_STATE_MACHINES.md").read_text(encoding="utf-8")
+    sm = (ROOT / "state_machines.json").read_text(encoding="utf-8")
+    expect_clean("baseline P9 prose", PP.p9_problems(j, e, a))
+    expect_clean("baseline recheck lifecycle prose", PP.recheck_lifecycle_problems(sm, dm, e))
+    # F-03：把原本矛盾的文字放回去，必須被具體抓到
+    expect("P9 restored 'view affected cases'", PP.p9_problems(j.replace("查看**資源層級影響摘要**", "查看受影響案件", 1), e, a), "P9 promises case-level content")
+    expect("engine 8.2 restored per-case progress", PP.p9_problems(j, e.replace("**只顯示資源層級影響摘要**", "顯示每案處理進度", 1), a), "ENGINE §8.2 promises case-level content")
+    expect("architecture returns affected case list", PP.p9_problems(j, e, a.replace("資源層級影響摘要（彙總件數；不含逐案 ID 或個案內容）", "受影響案件清單")), "ARCHITECTURE transitions API")
+    expect("P9 summary wording removed", PP.p9_problems(j.replace("不含逐案", "含逐案", 1), e, a), "resource-level impact summary")
+    # F-07：恢復「暫停保留」或移除任一離開轉換的清除說明
+    expect("keep-on-suspend restored", PP.recheck_lifecycle_problems(sm, dm + "\nRV-09 暫停時保留供稽核", e), "kept when SUSPENDED")
+    for tid in PP.RECHECK_EXIT_TRANSITIONS:
+        d = json.loads(sm)
+        for t in d["machines"]["resource_version"]["transitions"]:
+            if t["id"] == tid:
+                t["pre"] = t["pre"].replace("清除 `recheck_started_at`", "")
+        expect(f"{tid} clear statement removed", PP.recheck_lifecycle_problems(json.dumps(d, ensure_ascii=False), dm, e), f"{tid} must state it clears")
+    expect("must-be-empty row removed", PP.recheck_lifecycle_problems(sm, dm.replace("其他狀態必為空", ""), e), "other states must be empty")
+
+
 def main():
-    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples):
+    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples, test_prose_policy_counterexamples):
         try:
             t()
         except Exception as e:  # 工具壞掉也要算失敗

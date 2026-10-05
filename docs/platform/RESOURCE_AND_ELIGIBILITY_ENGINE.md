@@ -24,7 +24,7 @@ work_id：STP-PLATFORM-PLAN-001｜版本：v0.4-draft（R2 修正）｜2026-10-0
 | # | 檢查 | 不通過時 |
 |---|---|---|
 | 1 | 有已發布、**完整驗證通過**的 EligibilityRule（驗證流程見 §5.4：先完整結構驗證，再範圍參照驗證；兩階段都必須完成並通過，驗證未完成或中途例外一律視為不合法） | NOT_RECOMMENDED：`RULE_MISSING`（無規則）、`RULE_STATUS_MISSING`（缺 `rule.status`；**不得預設為已發布**）、`RULE_NOT_PUBLISHED`（`status` 不是 PUBLISHED）、`RULE_INVALID`（任何位置的非法條件、未支援的運算子或組合、非法 CUSTOM 運算式、未知或未支援的口徑範圍鍵、引用不存在的口徑） |
-| 2 | 版本狀態 | PUBLISHED 通過；NEEDS_RECHECK：`risk_tier=HIGH` 為 `RECHECK_HIGH_RISK`（不推薦）；其他風險在進入 NEEDS_RECHECK 後 14 天內（OP-08 暫行）可推薦並加「查核中」標記，超過為 `RECHECK_GRACE_EXCEEDED`（不推薦，且依 RV-09 轉暫停）。**起算資料**：`ResourceVersion.recheck_started_at`（RV-07 寫入觸發時間、RV-08 清除；DATA_MODEL §2.4.1）；已過天數＝`as_of` 日期 − `recheck_started_at` 日期（日曆天，Asia/Taipei），缺少為 `RECHECK_START_MISSING`、格式不合或晚於 `as_of` 為 `RECHECK_START_INVALID`（都不推薦）；SUSPENDED／EXPIRED／SUPERSEDED／RETIRED／CANDIDATE／DRAFT／IN_REVIEW 一律 NOT_RECOMMENDED：`STATUS_<狀態>` |
+| 2 | 版本狀態 | PUBLISHED 通過；NEEDS_RECHECK：`risk_tier=HIGH` 為 `RECHECK_HIGH_RISK`（不推薦）；其他風險在進入 NEEDS_RECHECK 後 14 天內（OP-08 暫行）可推薦並加「查核中」標記，超過為 `RECHECK_GRACE_EXCEEDED`（不推薦，且依 RV-09 轉暫停）。**起算資料**：`ResourceVersion.recheck_started_at`（RV-07 寫入觸發時間；RV-08／09／12／13 離開時清除；DATA_MODEL §2.4.1）；已過天數＝`as_of` 日期 − `recheck_started_at` 日期（日曆天，Asia/Taipei），缺少為 `RECHECK_START_MISSING`、格式不合或晚於 `as_of` 為 `RECHECK_START_INVALID`（都不推薦）；非 NEEDS_RECHECK 狀態卻帶有起算日為 `VERSION_INVALID`；SUSPENDED／EXPIRED／SUPERSEDED／RETIRED／CANDIDATE／DRAFT／IN_REVIEW 一律 NOT_RECOMMENDED：`STATUS_<狀態>` |
 | 3 | `verification_level` ≥ V2 | NOT_RECOMMENDED：`VERIFICATION_TOO_LOW` |
 | 4 | `conflict_status` ≠ OPEN | NOT_RECOMMENDED：`SOURCE_CONFLICT` |
 | 5 | 所引用 Source 皆為 ACTIVE | NOT_RECOMMENDED：`SOURCE_INVALID`（BROKEN／MOVED／SUPERSEDED，需重新查核並引用新來源） |
@@ -237,7 +237,7 @@ resource_version_id、rule_version、engine_version、`as_of`、input_snapshot�
 
 ## 8. 變動監測、頻率與對既有案件的影響
 ### 8.0 複查寬限的起算資料
-`NEEDS_RECHECK` 的寬限天數必須由**可稽核的時間**計算，不得由「版本曾經被標記」之類的旗標推斷：RV-07 轉換時寫入 `recheck_started_at`（等於觸發事件時間，隨轉換的 AuditEvent 可稽核）、RV-08 回到 PUBLISHED 時清除；`recommendation_status` 以 `as_of` 與 `recheck_started_at` 計算已過日曆天數（§0.2 第 2 項）。見 DATA_MODEL §2.4.1。
+`NEEDS_RECHECK` 的寬限天數必須由**可稽核的時間**計算，不得由「版本曾經被標記」之類的旗標推斷：RV-07 轉換時寫入 `recheck_started_at`（等於觸發事件時間，隨轉換的 AuditEvent 可稽核）、離開 NEEDS_RECHECK 的所有轉換（RV-08、RV-09、RV-12、RV-13）一律清除，歷史只留在 RV-07 的 AuditEvent；`recommendation_status` 以 `as_of` 與 `recheck_started_at` 計算已過日曆天數（§0.2 第 2 項）。見 DATA_MODEL §2.4.1。
 
 ### 8.1 查核頻率
 | 風險等級 | 定義 | 例行頻率 | 事件觸發 |
@@ -257,7 +257,7 @@ resource_version_id、rule_version、engine_version、`as_of`、input_snapshot�
 | SUBMITTED 以後 | 不改變申請；新版本僅作資訊，除非承辦要求補件 |
 | 續辦待建立 | 以新版本產生續辦任務 |
 | 資源暫停 | 未送件者 ON_HOLD＋替代資源；已送件者繼續追蹤 |
-影響清單本身存成一筆 AuditEvent，並在 P9 顯示每案處理進度。
+影響清單本身存成一筆 AuditEvent（內含逐案 ID，僅供有該案權限者經 P7／P8 的任務查看）；P9（R5／R4·INT／R7／R9 的資源維護頁）**只顯示資源層級影響摘要**（有無受影響案件、彙總件數），不含逐案 ID、家庭或處理進度——逐案進度由 R3·ASG／R4·SITE-REV 在 P7／P8 看，R5 角色限制不變、不新增個案權限（PRD §4.3）。
 
 ## 9. 失效、衝突與名額不明
 | 狀況 | 偵測 | 處理 |
