@@ -1,5 +1,6 @@
 # R2 剩餘缺口後續修補工作包
 work_id: STP-PLATFORM-PLAN-001
+task_id: STP-PLATFORM-PLAN-001-R2-N-FOLLOWUP
 stage: R2_N_FOLLOWUP
 revision: 1
 status: READY
@@ -51,7 +52,7 @@ python3 docs/platform/tools/test_checks.py
 
 ## 接單、交付與停止
 接單：PR #1引用本包固定handoff SHA、自己的session、平台允許分支、起點、scope、競爭claim核對、deadline與投入；session可不同，不冒充原session、不要求Frank回到舊對話。
-結果：平台允許的本repo成果分支（不強求原PR分支）；non-force，保留祖先與作者。推送後讀回完整result SHA；回PR #1列compare、exact-head回覆連結、逐項狀態、命令與未驗項。
+結果：本次Claude已回報平台指定分支ccr-dd86219c-ijac1h，可於此交付；若後續指定不同分支須在claim明載且核對無競爭成果。從02935f5保留祖先接續，不要求先整合PR #1，候選整合批准不是修補前置。平台允許的本repo成果分支（不強求原PR分支）；non-force，保留祖先與作者。推送後讀回完整result SHA；回PR #1列compare、exact-head回覆連結、逐項狀態、命令與未驗項。
 READY_FOR_GPT_REVIEW或BLOCKED；不能自稱APPROVED。
 未知新差異、競爭claim、期限／額度不足、存取受阻立即具體回報，不force、不繞平台。
 固定成果後next_actor=GPT，獨立覆核N缺口；有新反例需另核對剩餘額度，不默認第二次修補。
