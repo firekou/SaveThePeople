@@ -468,7 +468,8 @@ def eval_criterion(c, hh, scopes, regions):
         count, conf, miss = 0, scope_conf, []
         for p in members:
             age = _fact(p["facts"], "person.age")
-            sch = _fact(p["facts"], "person.in_school") if where.get("in_school") else {"value": True, "confirmation_level": "C3"}
+            # N-02：in_school 鍵「存在」即篩選（true＝在學、false＝不在學）；未提供鍵才不篩選，不得用真值判斷略過 false
+            sch = _fact(p["facts"], "person.in_school") if "in_school" in where else {"value": True, "confirmation_level": "C3"}
             if age is None:
                 miss.append(f"{p['id']}:person.age")
                 continue
@@ -476,7 +477,7 @@ def eval_criterion(c, hh, scopes, regions):
                 miss.append(f"{p['id']}:person.in_school")
                 continue
             conf = min(conf, _conf(age), _conf(sch))
-            if lo <= age["value"] <= hi and (not where.get("in_school") or sch["value"]):
+            if lo <= age["value"] <= hi and ("in_school" not in where or sch["value"] is where["in_school"]):
                 count += 1
         if miss:
             out.update(result="UNKNOWN", missing=sorted(miss))

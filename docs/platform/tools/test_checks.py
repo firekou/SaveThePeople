@@ -9,6 +9,7 @@
 import copy
 import json
 import sys
+import types
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -233,8 +234,194 @@ def test_prose_policy_counterexamples():
     expect("must-be-empty row removed", PP.recheck_lifecycle_problems(sm, dm.replace("其他狀態必為空", ""), e), "other states must be empty")
 
 
+def _mut(name, repls):
+    """載入「被人為破壞」的參考實作：把原始碼指定片段替換後執行。片段找不到就是測試本身壞了。"""
+    path = ROOT / "examples" / f"{name}.py"
+    src = path.read_text(encoding="utf-8")
+    for a, b in repls:
+        COUNT[0] += 1
+        if a not in src:
+            FAILS.append(f"mutation anchor for {name} not found: {a[:50]!r}")
+        src = src.replace(a, b)
+    mod = types.ModuleType(f"{name}_mutant")
+    mod.__file__ = str(path)
+    exec(compile(src, str(path), "exec"), mod.__dict__)
+    return mod
+
+
+def _examples():
+    sys.path.insert(0, str(ROOT / "examples"))
+    import ref_engine, ref_control  # noqa: E401
+    return ref_engine, ref_control
+
+
+def _in_school_result(E):
+    res = E.load_json("synthetic_resources.json")
+    hh = E.load_json("synthetic_households.json")["households"][0]
+    scopes = {x["scope_key"]: x for x in res["household_scopes"]}
+    c = {"criterion_id": "N02", "operator": "COUNT_MEMBERS_WHERE", "scope_key": "SCOPE-CO", "input_keys": ["person.age", "person.in_school"],
+         "threshold": {"where": {"age_between": [0, 17], "in_school": False}, "min_count": 2}, "min_confirmation_for_fail": "C2"}
+    return E.eval_criterion(c, hh, scopes, res["regions"])["result"]
+
+
+def test_n02_mutation():
+    """N-02：H1（0～17 歲、不在學）count=1 < 2 → FAIL_UNCONFIRMED（手算）；把 false 當未提供的舊寫法會得 PASS，必須被抓到。"""
+    E, _ = _examples()
+    COUNT[0] += 1
+    if _in_school_result(E) != "FAIL_UNCONFIRMED":
+        FAILS.append("N-02 baseline in_school=false should be FAIL_UNCONFIRMED")
+    mut = _mut("ref_engine", [('if "in_school" in where else', 'if where.get("in_school") else'),
+                              ('("in_school" not in where or sch["value"] is where["in_school"])', '(not where.get("in_school") or sch["value"])')])
+    COUNT[0] += 1
+    if _in_school_result(mut) != "PASS":
+        FAILS.append("N-02 mutation (truthiness) was expected to change the result to PASS, proving the counterexample is sensitive")
+
+
+def _control_run(RC, witness_mode):
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log = RC.new_state(initial), RC.ControlLog()
+    wit = RC.Witness()
+    if witness_mode == "unflushed":
+        wit.__class__ = type("U", (RC.Witness,), {"report": lambda self, seq: None})
+    rec = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}
+    code, why, st2 = RC.request_control(st, log, wit, rec, db_fail=True)
+    return code, len(log.entries), st2["notifications"]["n1"]["status"], log, wit, initial
+
+
+def test_n03_mutation():
+    """N-03：見證未確認（含只排入定期更新）→ 503、控制紀錄不寫、主庫不動；移除該防護的破壞版本必須被抓到。"""
+    _, RC = _examples()
+    COUNT[0] += 1
+    got = _control_run(RC, "unflushed")[:3]
+    if got != (503, 0, "SCHEDULED"):
+        FAILS.append(f"N-03 baseline unflushed witness: want (503, 0, SCHEDULED) got {got}")
+    mut = _mut("ref_control", [('    if acked is not True:\n        return 503, "WITNESS_UNCONFIRMED", st\n', '')])
+    COUNT[0] += 1
+    got = _control_run(mut, "unflushed")[:3]
+    if got == (503, 0, "SCHEDULED"):
+        FAILS.append("N-03 mutation (witness ack ignored) was not caught")
+    # 還原時見證雜湊比對：整段重寫但重算鏈，只有見證雜湊能抓到
+    for label, RCm, want_quarantined in (("baseline", RC, True), ("mutation", _mut("ref_control", [('log.entries[seq - 1]["hash"] != h', 'False')]), False)):
+        initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+        st, log, wit = RCm.new_state(initial), RCm.ControlLog(), RCm.Witness()
+        RCm.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})
+        e = log.entries[0]
+        e["payload"] = dict(e["payload"], reason="INCIDENT")
+        prev = "0" * 64
+        for x in log.entries:
+            x["prev_hash"] = prev
+            x["hash"] = RCm._hash(prev, RCm._body(x))
+            prev = x["hash"]
+        out = RCm.recover(initial, log, wit)
+        COUNT[0] += 1
+        if out["quarantined"] is not want_quarantined:
+            FAILS.append(f"N-03 rewritten-chain {label}: want quarantined={want_quarantined} got {out['quarantined']} ({out['reason']})")
+    # 還原時見證不可用不得放行
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RC.new_state(initial), RC.ControlLog(), RC.Witness()
+    RC.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})
+    wit.available = False
+    COUNT[0] += 1
+    if RC.recover(initial, log, wit)["reason"] != "WITNESS_UNAVAILABLE":
+        FAILS.append("N-03 unavailable witness must keep quarantine")
+
+
+def test_n04_counterexamples():
+    d, m = base()
+    expect_clean("baseline N-04", GP.policy_problems(d, m))
+    api = next(a for a in d["api"] if a["endpoint"].endswith("/verify"))
+    # verify：結構化排除、note 只能由結構衍生
+    x = copy.deepcopy(d)
+    for a in x["api"]:
+        if a["endpoint"].endswith("/verify"):
+            a["note"] = "R4 可驗證自己登錄的成果；責任人也可驗證"
+    expect("verify note overridden", GP.policy_problems(x, m), "note must equal the text derived from verifier_must_not_be")
+    for dropped in GP.VERIFIER_REQUIRED:
+        x = copy.deepcopy(d)
+        for a in x["api"]:
+            if a["endpoint"].endswith("/verify"):
+                a["verifier_must_not_be"] = [k for k in a["verifier_must_not_be"] if k != dropped]
+                a["note"] = GP.verify_note(a)
+        expect(f"verify exclusion {dropped} dropped", GP.policy_problems(x, m), "verifier_must_not_be must be exactly")
+    x = copy.deepcopy(d)
+    for a in x["api"]:
+        if a["endpoint"].endswith("/verify"):
+            del a["verifier_must_not_be"]
+    expect("verify exclusion removed", GP.policy_problems(x, m), "verifier_must_not_be must be exactly")
+    rec = {"registrant": "U-REG", "case_owner": "U-OWN", "case_owner_delegates": ["U-DEL"]}
+    for who, want in (("U-REG", (False, "VERIFIER_IS_REGISTRANT")), ("U-OWN", (False, "VERIFIER_IS_CASE_OWNER")),
+                      ("U-DEL", (False, "VERIFIER_IS_CASE_OWNER_DELEGATE")), ("U-SECOND", (True, "ok"))):
+        COUNT[0] += 1
+        if GP.verifier_allowed(api, who, rec) != want:
+            FAILS.append(f"verifier_allowed({who}): want {want} got {GP.verifier_allowed(api, who, rec)}")
+    # 資源轉換：R4 不得有 RV-14（矩陣、狀態機、頁面、API 文字一致）
+    x = copy.deepcopy(d)
+    x["matrix"]["resource_internal"]["R4"][0]["transition_limits"] = ["RV-09", "RV-10", "RV-14"]
+    expect("R4 limits widened to RV-14", GP.policy_problems(x, m), "lists RV-14 but the state machine does not allow R4")
+    y = copy.deepcopy(m)
+    for t in y["resource_version"]["transitions"]:
+        if t["id"] == "RV-14":
+            t["actors"] = ["R4", "R5", "R7"]
+    expect("state machine gives RV-14 to R4", GP.policy_problems(d, y), "lets R4 perform RV-14")
+    x = copy.deepcopy(d)
+    for pg in x["pages"]:
+        if pg["page"] == "P9":
+            pg["sections"][0]["note"] = "R5 可編輯與發布（發布人≠查核人）；R4、R7 僅可暫停／停用；R9 唯讀；個案內容一律不可見"
+    expect("P9 old wording restored", GP.policy_problems(x, m), "page P9")
+    x = copy.deepcopy(d)
+    for a in x["api"]:
+        if a["endpoint"] == "POST /api/admin/versions/{id}/transitions":
+            a["note"] = "R4、R7 僅限暫停／停用轉換"
+    expect("transitions API old wording restored", GP.policy_problems(x, m), "transitions")
+    x = copy.deepcopy(d)
+    del x["matrix"]["resource_internal"]["R4"][0]["transition_limits"]
+    expect("R4 edit right without structured limits", GP.policy_problems(x, m), "edit right needs structured transition_limits")
+
+
+def test_n05_schema_counterexamples():
+    sc = SL.load_schema("control_record")
+    payload = sc["definitions"]["payload"]
+    ok = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS"]}
+    envelope = {"seq": 1, "prev_hash": "0" * 64, "hash": "a" * 64, "recorded_at": "2026-01-01T00:00:01Z", "payload": ok}
+    COUNT[0] += 1
+    if SL.validate(envelope, sc) or SL.validate(ok, payload, sc):
+        FAILS.append("N-05 legal envelope/payload rejected")
+    bad = {
+        "missing consent_id": {"type": "CONSENT_REVOKE", "purposes": ["REMINDERS"]},
+        "empty purposes": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": []},
+        "blank purpose": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": [""]},
+        "purposes wrong type": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": "REMINDERS"},
+        "retention_hold wrong type": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS"], "retention_hold": "yes"},
+        "unknown key": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS"], "person_name": "x"},
+        "legacy consent key": {"type": "CONSENT_REVOKE", "consent": "c1", "purposes": ["REMINDERS"]},
+        "bad reason": {"type": "HARD_DELETE", "table": "facts", "id": "f1", "reason": "BECAUSE"},
+        "HARD_DELETE without id": {"type": "HARD_DELETE", "table": "facts"},
+        "HARD_DELETE with fields": {"type": "HARD_DELETE", "table": "facts", "id": "f1", "fields": ["value"]},
+        "REDACT without fields": {"type": "REDACT", "table": "facts", "id": "f1"},
+        "REDACT empty fields": {"type": "REDACT", "table": "facts", "id": "f1", "fields": []},
+        "REDACT with purposes": {"type": "REDACT", "table": "facts", "id": "f1", "fields": ["value"], "purposes": ["X"]},
+        "APPLIED without ref": {"type": "APPLIED"},
+        "APPLIED ref zero": {"type": "APPLIED", "ref": 0},
+        "APPLIED with table": {"type": "APPLIED", "ref": 1, "table": "facts"},
+        "unknown type": {"type": "SOMETHING"},
+        "type only": {"type": "CONSENT_REVOKE"},
+    }
+    for label, p in bad.items():
+        COUNT[0] += 1
+        if not SL.validate(p, payload, sc):
+            FAILS.append(f"N-05 payload not rejected: {label}")
+    for label, mutate in (("no seq", lambda e: e.pop("seq")), ("seq 0", lambda e: e.update(seq=0)), ("short hash", lambda e: e.update(hash="abc")),
+                          ("bad time", lambda e: e.update(recorded_at="yesterday")), ("flat payload fields", lambda e: e.update(type="CONSENT_REVOKE")),
+                          ("no payload", lambda e: e.pop("payload"))):
+        x = copy.deepcopy(envelope)
+        mutate(x)
+        COUNT[0] += 1
+        if not SL.validate(x, sc):
+            FAILS.append(f"N-05 envelope not rejected: {label}")
+
+
 def main():
-    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples, test_prose_policy_counterexamples):
+    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples, test_prose_policy_counterexamples, test_n02_mutation, test_n03_mutation, test_n04_counterexamples, test_n05_schema_counterexamples):
         try:
             t()
         except Exception as e:  # 工具壞掉也要算失敗

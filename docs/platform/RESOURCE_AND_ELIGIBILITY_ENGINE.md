@@ -131,7 +131,7 @@ flowchart LR
 |---|---|---|
 | `EQ`、`NEQ`、`LT`、`LTE`、`GT`、`GTE`、`BETWEEN`、`IN`、`NOT_IN`、`EXISTS` | 比較；`IN` 的值為清單 | 支援 |
 | `REGION_IN` | 行政區（含上層行政區展開） | 支援 |
-| `COUNT_MEMBERS_WHERE` | 依 scope 計數符合條件的成員 | 支援；`threshold` 只允許 `where` 與 `min_count`（整數 ≥1）；`where` 必須含 `age_between`（`[最小, 最大]` 兩個整數且 0 ≤ 最小 ≤ 最大），可加 `in_school`（布林）；其他鍵（含 `relation_in`、`co_residing`、`same_household_registration`）一律報錯，不得忽略 |
+| `COUNT_MEMBERS_WHERE` | 依 scope 計數符合條件的成員 | 支援；`threshold` 只允許 `where` 與 `min_count`（整數 ≥1）；`where` 必須含 `age_between`（`[最小, 最大]` 兩個整數且 0 ≤ 最小 ≤ 最大），可加 `in_school`（布林，三態：**未提供該鍵＝不依就學篩選**；`true`＝只計在學成員；`false`＝只計**不在學**成員，不得當作未提供而略過；加上此鍵後，範圍內成員的 `person.in_school` 未知則整個條件為 `UNKNOWN`，不得排除該成員）；其他鍵（含 `relation_in`、`co_residing`、`same_household_registration`）一律報錯，不得忽略 |
 | `NOT_RECEIVING` | 併領排除，見 §7 | 支援 |
 | `HUMAN_JUDGMENT` | 不自動判斷，必定進人工 | 支援 |
 | `AGE_BETWEEN`（依基準日計歲） | 以生日計算 | **不支援，runner 報錯**（正式實作需支援） |

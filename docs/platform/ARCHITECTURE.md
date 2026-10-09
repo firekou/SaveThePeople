@@ -123,7 +123,7 @@ flowchart TB
 ## 6. 主要 API
 共同規則：
 - 錯誤格式：RFC 9457 Problem Details（`type`、`title`、`detail`、`errors[]`），使用者訊息另提供白話版。
-- **權限**：「權限」欄使用 [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md) §4 的角色與範圍代碼（ASG、SITE-REV、REF、OWN、GRANT、SAMPLE、BG、AGG、INT、ALL-PUB）。未登入 401；無權限 403；不透露物件是否存在時回 404。權限矩陣每格都有自動化測試。
+- **權限**：「權限」欄使用 [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md) §4 的角色與範圍代碼（ASG、SITE-REV、REF、OWN、GRANT、SAMPLE、BG、AGG、INT、ALL-PUB）。未登入 401；無權限 403；不透露物件是否存在時回 404。權限矩陣與 API、頁面、狀態機的一致性由文件政策檢查（`gen_permissions.py`）驗證；產品授權行為測試（T-19、T-32～T-35、T-50、T-51）待 WP-08 實作後才存在，目前**沒有**「每格都有產品自動化測試」。
 - **狀態轉換一律以 `transition_id` 呼叫**（[DATA_MODEL_AND_STATE_MACHINES.md](DATA_MODEL_AND_STATE_MACHINES.md) §3，來源 `state_machines.json`）：請求帶 `transition_id`、`evidence`、`expected_row_version`；伺服器檢查目前狀態、操作者、前置條件與必要證據；不接受直接指定目標狀態；`SYSTEM` 轉換不能由 API 呼叫。
 - **冪等**：所有會建立紀錄或產生外部效果的 POST 需 `Idempotency-Key`。伺服器以 `(actor_id, key)` 存 IdempotencyRecord（24 小時）：首次→處理；相同 key＋相同請求內容→**重播**：只取出儲存的回應形狀（狀態碼與資源參照），再以**當下**的權限、同意與刪除狀態重新取得資源內容回傳（已失去權限或同意撤回→403 且不回內容；資源已刪除→410；刪除優先於 403）；相同 key＋不同內容→422；相同 key 仍在處理中→409 `IN_PROGRESS`。
 - **併發**：狀態轉換與欄位更新帶 `expected_row_version`，不符回 409。
@@ -140,7 +140,7 @@ flowchart TB
 | `POST /api/help-requests` | 請人聯絡 | token、聯絡方式、時段、CONTACT 同意 | HelpRequest id | R1·TOKEN、R2·TOKEN（需 CONTACT 同意） | Idempotency-Key；同 token 只建一筆 |
 | `POST /api/cases` | 建案 | 管道、household 基本、consent | case id、可能重複清單 | R3·ASG（建案者成為責任人） | Idempotency-Key；指紋相符回 409 附候選（需確認合併或強制新建並寫理由） |
 | `POST /api/cases/{id}/consents` | 建立同意 | 用途、對象、方式、代理 | consent id | R3·ASG | 同意書版本必填 |
-| `POST /api/consents/{id}/revoke` | 撤回 | 撤回用途、管道、撤回人 | 受影響項目清單、cleanup 任務 | R1·OWN、R2·SELF、R3·ASG（R1／R2 於試點後；試點初期由 R3 登錄） | 冪等；同一交易內：寫撤回欄位、取消排程通知、REFERRAL_SHARE 轉介走 RF-17、建立清除任務；**先**附加外部 ControlRecord 並取得確認，確認失敗回 503 不改主庫，套用失敗回 202（OPERATIONS §1.3.3） |
+| `POST /api/consents/{id}/revoke` | 撤回 | 撤回用途、管道、撤回人 | 受影響項目清單、cleanup 任務 | R1·OWN、R2·SELF、R3·ASG（R1／R2 於試點後；試點初期由 R3 登錄） | 冪等；同一交易內：寫撤回欄位、取消排程通知、REFERRAL_SHARE 轉介走 RF-17、建立清除任務；**先**由獨立見證持久確認 seq、再附加外部 ControlRecord 並取得確認，見證未確認或紀錄寫入失敗回 503 不改主庫，payload 不合法回 422，套用失敗回 202（OPERATIONS §1.3.3） |
 | `PUT /api/cases/{id}/facts` | 更新事實 | `fact_key`（須在 FactKeyDefinition）、value、confirmation_level、source | 新 Fact 版本 | R1·OWN、R3·ASG（R1 於試點後） | 樂觀鎖；保留歷史；未登錄字彙拒絕 |
 | `POST /api/cases/{id}/assessments` | 評估 | 觸發原因、`as_of` | Assessment（含每資源 `recommendation`） | R3·ASG、R4·SITE-REV（R3／R4 才可見 MANUAL_CHECK_ONLY） | 相同 `(case, input_hash, 版本清單, as_of)` 60 秒內回既有結果；R3／R4 才可見 `MANUAL_CHECK_ONLY` |
 | `POST /api/assessments/{id}/reviews` | 複核（ReviewDecision） | decision、kind、reason | ReviewDecision | R4·SITE-REV（複核人≠承辦） | 版本已變 → 409 要求重評；理由必填 |
@@ -156,7 +156,7 @@ flowchart TB
 | `POST /api/documents/{id}/extract` | 本機文字辨識（試點後，F-26） | 方法 `LOCAL_OCR` | extraction（`confirmed=false`） | R3·ASG（試點後；本機辨識） | 需 DOCUMENT_EXTRACTION 同意；影像與文字不離開私有環境；失敗回人工登錄；**不存在外部 AI 版本** |
 | `POST /api/outcomes/{id}/events` | 登錄取得事件 | event_type、occurred_on、evidence_level、description | OutcomeEvent | R3·ASG、R4·SITE-REV、R6·REF（R6 僅 E2 服務確認；CORRECTION 僅 R4） | 缺 evidence_level 422；`voids_event_id` 僅 R4 |
 | `GET /api/outcome-events/pending-verification` | 待驗證事件摘要 | 無 | 被指派驗證的單筆事件摘要（類型、日期、取得證據、描述） | R3·VERIFY、R4·SITE-REV（待驗證清單：R3 只見被指派驗證的單筆事件摘要） | VERIFY 範圍不含家庭、成員、文件，也不提供未被指派案件的一般讀取 |
-| `POST /api/outcome-events/{id}/verify` | 驗證取得事件 | 驗證說明 | `verified_by`／`verified_at` | R3·VERIFY、R4·SITE-REV（驗證人≠登錄人且≠案件責任人；R3 不因此取得該案其他資料） | 驗證人＝登錄人或責任人 → 403；冪等 |
+| `POST /api/outcome-events/{id}/verify` | 驗證取得事件 | 驗證說明 | `verified_by`／`verified_at` | R3·VERIFY、R4·SITE-REV（驗證人≠登錄人、≠案件責任人、≠代班責任人；R3 不因此取得該案其他資料） | 驗證人＝登錄人、案件責任人或代班責任人 → 403；冪等 |
 | `POST /api/outcomes/{id}/transitions` | 取得狀態轉換 | `transition_id`、evidence | 新狀態 | R3·ASG、R4·SITE-REV（更正轉換僅 R4） | 未 APPROVED／ACCEPTED 的 Outcome 不存在；OC-08／09 只限 R4 |
 | `POST /api/tasks` | 建立案件任務 | 類型、期限、指派 | Task | R3·ASG、R4·SITE-REV | `dedup_key` 重複回既有 |
 | `PATCH /api/tasks/{id}` | 更新、完成、延期案件任務 | 狀態、期限、理由 | Task | R3·ASG、R4·SITE-REV | 延期須附理由；樂觀鎖 |
@@ -166,7 +166,7 @@ flowchart TB
 | `PATCH /api/organizations/{id}/capacity` | 更新容量 | 容量狀態、確認方式、確認日期 | 容量 | R3·INT、R4·INT、R5·INT、R6·OWN-ORG（附確認方式與日期；R6 於試點後只可更新自身機構） | 必附確認方式與日期；試點初期 R6 由 R3 代登錄 |
 | `POST /api/notifications/callbacks/{provider}` | 供應商回呼 | 供應商格式 | 200 | 供應商簽章驗證（非人員角色） | 事件先寫 NotificationEvent，以 `(provider, provider_event_id)` 去重；依狀態機只前進，亂序或重複事件 `applied=false`；DELIVERED 後的失敗設 `late_failure` 並建立任務；未知 id 記錄並忽略 |
 | `POST /api/admin/resources/{id}/versions` | 建立版本 | 欄位 | 草稿 | R5·INT | 驗證必填與 UNKNOWN 標記 |
-| `POST /api/admin/versions/{id}/transitions` | 版本生命週期 | `transition_id`、VerificationRecord／理由 | 新狀態＋影響分析（RV-12／RV-13 為系統轉換） | R5·INT、R4·INT、R7·INT（R4、R7 僅限暫停／停用轉換） | 同人限制 403；發布冪等；暫停時回資源層級影響摘要（彙總件數；不含逐案 ID 或個案內容） |
+| `POST /api/admin/versions/{id}/transitions` | 版本生命週期 | `transition_id`、VerificationRecord／理由 | 新狀態＋影響分析（RV-12／RV-13 為系統轉換） | R5·INT、R4·INT、R7·INT（R4 僅限暫停轉換 RV-09、RV-10；R7 僅限暫停／停用轉換 RV-09、RV-10、RV-14） | 同人限制 403；發布冪等；暫停時回資源層級影響摘要（彙總件數；不含逐案 ID 或個案內容） |
 | `GET /api/admin/versions/{id}/recommendation` | 正式推薦判定與原因碼 | as_of | `FORMAL`／`MANUAL_CHECK_ONLY`／`NOT_RECOMMENDED`＋原因 | R5·INT、R4·INT、R9·INT、R3·INT、R7·INT | — |
 | `POST /api/access-grants` | 申請例外存取 | grant_type、purpose、scope、期限 | AccessGrant（待核准） | R7·INT、R4·SITE-REV（R7 申請 BREAK_GLASS；R4 核發 REVIEW_SAMPLE） | 期限上限（BG ≤4 小時、REVIEW ≤14 天）；範圍不可事後擴大 |
 | `POST /api/access-grants/{id}/approve` | 核准 | — | 已核准 | R7·INT、R4·SITE-REV（核准人≠申請人） | 自己核准 403；審批寫 AuditEvent |

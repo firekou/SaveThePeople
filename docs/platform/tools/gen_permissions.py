@@ -152,6 +152,51 @@ def grant_ok(data, cls, grant, action):
     return entry_allows(data, cls, role, scope, action)
 
 
+VERIFIER_LABEL = {"registrant": "登錄人", "case_owner": "案件責任人", "case_owner_delegate": "代班責任人"}
+VERIFIER_REQUIRED = ["registrant", "case_owner", "case_owner_delegate"]
+
+
+def verify_note(api):
+    """N-04：verify API 的 note 由結構化的 verifier_must_not_be 衍生，不接受自由文字覆蓋。"""
+    return "驗證人≠" + "、≠".join(VERIFIER_LABEL[k] for k in api["verifier_must_not_be"]) + "；R3 不因此取得該案其他資料"
+
+
+def verifier_allowed(api, verifier, record):
+    """參考判斷：驗證人不得是登錄人、案件責任人或代班責任人。回傳 (是否允許, 原因)。
+
+    record = {"registrant": id, "case_owner": id, "case_owner_delegates": [id, ...]}；verifier 為使用者 id。
+    """
+    for k in api["verifier_must_not_be"]:
+        who = record.get("case_owner_delegates", []) if k == "case_owner_delegate" else [record.get(k)]
+        if verifier in who:
+            return False, f"VERIFIER_IS_{k.upper()}"
+    return True, "ok"
+
+
+def limit_phrase(limits, machine):
+    """由狀態機轉換的目標狀態衍生「暫停」「停用」用語（SUSPENDED＝暫停、RETIRED＝停用）。"""
+    verbs = []
+    for tid in limits:
+        t = next(x for x in machine["transitions"] if x["id"] == tid)
+        to = [t["to"]] if isinstance(t["to"], str) else list(t["to"])
+        v = "暫停" if to == ["SUSPENDED"] else "停用" if to == ["RETIRED"] else "?"
+        if v not in verbs:
+            verbs.append(v)
+    verbs.sort(key={"暫停": 0, "停用": 1, "?": 2}.get)
+    return "／".join(verbs) + "轉換 " + "、".join(limits)
+
+
+def derived_resource_notes(data, machines):
+    """N-04：R4／R7 在資源內部資料的限制文字（矩陣、API 權限欄、P9 頁面）一律由 transition_limits 衍生。"""
+    m = machines["resource_version"]
+    out = {}
+    for role in ("R4", "R7"):
+        for e in data["matrix"]["resource_internal"].get(role, []):
+            if "transition_limits" in e:
+                out[role] = limit_phrase(e["transition_limits"], m)
+    return out
+
+
 def policy_problems(data, machines=None):
     P = []
     kinds = {c["id"]: c["kind"] for c in data["classes"]}
@@ -229,6 +274,40 @@ def policy_problems(data, machines=None):
                 P.append(f"api {a['endpoint']}: verification must not be granted to the case owner scope (ASG)")
             if "R3·VERIFY" not in a["grants"]:
                 P.append(f"api {a['endpoint']}: peer R3 verification must use the VERIFY scope")
+    # N-04：verify 的排除條件是結構化欄位，note 只能由它衍生
+    for a in data["api"]:
+        if a["endpoint"].endswith("/verify"):
+            if a.get("verifier_must_not_be") != VERIFIER_REQUIRED:
+                P.append(f"api {a['endpoint']}: verifier_must_not_be must be exactly {VERIFIER_REQUIRED}")
+            elif a["note"] != verify_note(a):
+                P.append(f"api {a['endpoint']}: note must equal the text derived from verifier_must_not_be ({verify_note(a)})")
+    # N-04：R4／R7 的資源轉換限制必須結構化，並與狀態機轉換操作者完全一致；限制文字由結構衍生
+    if machines is not None and "resource_version" in machines:
+        rv = machines["resource_version"]
+        derived = derived_resource_notes(data, machines)
+        for role in ("R4", "R7"):
+            ents = data["matrix"].get("resource_internal", {}).get(role, [])
+            for e in ents:
+                if "E" in e["actions"] and "transition_limits" not in e:
+                    P.append(f"matrix resource_internal.{role}: edit right needs structured transition_limits")
+                if "transition_limits" in e:
+                    lim = set(e["transition_limits"])
+                    by_machine = {t["id"] for t in rv["transitions"] if role in t["actors"]}
+                    for tid in sorted(lim - by_machine):
+                        P.append(f"matrix resource_internal.{role}: transition_limits lists {tid} but the state machine does not allow {role} to perform it")
+                    for tid in sorted(by_machine - lim):
+                        P.append(f"matrix resource_internal.{role}: state machine lets {role} perform {tid} but transition_limits omits it")
+                    if e["note"] != "僅限" + derived[role] + "，不可編輯內容":
+                        P.append(f"matrix resource_internal.{role}: note must equal the text derived from transition_limits")
+        want_api = "；".join(f"{r} 僅限{derived[r]}" for r in ("R4", "R7") if r in derived)
+        for a in data["api"]:
+            if a["endpoint"] == "POST /api/admin/versions/{id}/transitions" and a["note"] != want_api:
+                P.append(f"api {a['endpoint']}: note must equal the text derived from transition_limits ({want_api})")
+        want_page = "R5 可編輯與發布（發布人≠查核人）；" + "；".join(f"{r} 僅可{derived[r]}" for r in ("R4", "R7") if r in derived) + "；R9 唯讀；個案內容一律不可見"
+        for pg in data["pages"]:
+            for sec in pg["sections"]:
+                if sec["class"] == "resource_internal" and any(grant_parts(g)[0] in ("R4", "R7") for g in sec["grants"]) and sec["note"] != want_page:
+                    P.append(f"page {pg['page']} [{sec['label']}]: note must equal the text derived from transition_limits ({want_page})")
     # 狀態機操作者必須在對應 API 與矩陣中有授權
     if machines is not None:
         for mid, m in machines.items():

@@ -248,6 +248,48 @@ def test_unknown_member_not_dropped(res, hhs):
     check("H5 SCOPE-L1 no missing", missing, [])
 
 
+def test_count_in_school(res, hhs):
+    """N-02：where.in_school 三態——未提供＝不篩選、true＝在學、false＝不在學；不得以真值判斷略過 false。
+
+    預期值依 synthetic_households H1（SCOPE-CO 共同生活 4 人）手算：年齡 0～17 的成員為 P2（8 歲、在學 C1）與 P3（3 歲、不在學 C1），
+    P1（35 歲）、P4（66 歲）不在年齡範圍。確認程度皆 C1 < C2，故不足額時為 FAIL_UNCONFIRMED（不是 FAIL）。
+    """
+    import copy
+    scopes = {s["scope_key"]: s for s in res["household_scopes"]}
+    h1 = next(h for h in hhs["households"] if h["id"] == "H1")
+
+    def crit(where, mc):
+        return {"criterion_id": "N02", "operator": "COUNT_MEMBERS_WHERE", "scope_key": "SCOPE-CO",
+                "input_keys": ["person.age", "person.in_school"],
+                "threshold": {"where": where, "min_count": mc}, "min_confirmation_for_fail": "C2"}
+
+    def ev(hh, where, mc):
+        out = R.eval_criterion(crit(where, mc), hh, scopes, res["regions"])
+        return out["result"], (out.get("derived") or {}).get("count"), out.get("missing", [])
+
+    age = [0, 17]
+    check("N-02 no in_school key: no filter, count 2", ev(h1, {"age_between": age}, 2), ("PASS", 2, []))
+    check("N-02 in_school true: only P2, min 1 PASS", ev(h1, {"age_between": age, "in_school": True}, 1), ("PASS", 1, []))
+    check("N-02 in_school true: min 2 FAIL_UNCONFIRMED", ev(h1, {"age_between": age, "in_school": True}, 2), ("FAIL_UNCONFIRMED", 1, []))
+    check("N-02 in_school false: only P3, min 1 PASS", ev(h1, {"age_between": age, "in_school": False}, 1), ("PASS", 1, []))
+    check("N-02 in_school false: count 1 < min 2 is FAIL_UNCONFIRMED (not PASS)",
+          ev(h1, {"age_between": age, "in_school": False}, 2), ("FAIL_UNCONFIRMED", 1, []))
+    unk = copy.deepcopy(h1)
+    unk["persons"][1]["facts"]["person.in_school"] = {"unknown": True, "confirmation_level": "C0"}
+    check("N-02 in_school false with unknown school (8yo) is UNKNOWN",
+          ev(unk, {"age_between": age, "in_school": False}, 2), ("UNKNOWN", None, ["H1-P2:person.in_school"]))
+    check("N-02 in_school true with unknown school is UNKNOWN",
+          ev(unk, {"age_between": age, "in_school": True}, 1)[0], "UNKNOWN")
+    check("N-02 no in_school key ignores unknown school", ev(unk, {"age_between": age}, 2), ("PASS", 2, []))
+    # 確定被排除的成員（35 歲不在年齡範圍）不影響計數；來源確認程度不提升（C1 仍不足以 FAIL）
+    c3 = copy.deepcopy(h1)
+    for p in c3["persons"]:
+        for f in p["facts"].values():
+            f["confirmation_level"] = "C3"
+        p["relation"]["confirmation_level"] = "C3"
+    check("N-02 C3 inputs allow definite FAIL", ev(c3, {"age_between": age, "in_school": False}, 2), ("FAIL", 1, []))
+
+
 # ---------------------------------------------------------------- 4. 其他不變條件
 def test_outcomes(cases):
     for sc in cases["outcome_scenarios"]:
@@ -352,7 +394,11 @@ def test_schemas(res, cases, ctrl):
     for scen in ctrl["scenarios"]:
         for i, st in enumerate(scen["steps"]):
             if st.get("op") == "control":
-                check(f"schema control_record {scen['id']}[{i}]", SL.validate(st["rec"], SL.load_schema("control_record")), [])
+                sch = SL.load_schema("control_record")
+                if st.get("expect_http") == 422:
+                    # 刻意不合法的請求：schema 或語意檢查必須擋下（語意類由 ref_control.validate_payload 驗證）
+                    continue
+                check(f"schema control payload {scen['id']}[{i}]", SL.validate(st["rec"], sch["definitions"]["payload"], sch), [])
 
 
 def test_callbacks(cases):
@@ -436,6 +482,13 @@ def _dig(obj, dotted):
     return obj
 
 
+class UnflushedWitness(RC.Witness):
+    """N-03 注入模型：見證只做「定期更新」，report 只把 seq 排入待更新、沒有持久確認（回傳 None）。"""
+
+    def report(self, seq):
+        self.pending_seq = seq
+
+
 def run_control_scenario(initial, sc):
     """執行一個控制紀錄情境（純邏輯模擬）。回傳 (最後一次 recover 結果, 觀察到的狀態碼清單, 目前主庫狀態)。"""
     import copy
@@ -453,11 +506,37 @@ def run_control_scenario(initial, sc):
             https.append(code)
             if "expect_http" in step:
                 check(f"{sc['id']} http", code, step["expect_http"])
+            if "expect_status" in step:
+                check(f"{sc['id']} status", why, step["expect_status"])
         elif op == "lose_log_tail":
             del log.entries[len(log.entries) - step["n"]:]
         elif op == "corrupt_log":
             e = log.entries[step["index"]]
-            e["rec"] = dict(e["rec"], tampered=True)
+            e["payload"] = dict(e["payload"], tampered=True)
+        elif op == "rewrite_log_entry":
+            # 攻擊模型：改寫某筆內容並重算其後整條雜湊鏈（鏈本身仍連續）；只有獨立見證記下的雜湊能抓到
+            e = log.entries[step["index"]]
+            e["payload"] = dict(e["payload"], reason="INCIDENT")
+            prev = log.entries[step["index"] - 1]["hash"] if step["index"] else "0" * 64
+            for x in log.entries[step["index"]:]:
+                x["prev_hash"] = prev
+                x["hash"] = RC._hash(prev, RC._body(x))
+                prev = x["hash"]
+        elif op == "replay_entry":
+            log.entries.append(copy.deepcopy(log.entries[step["index"]]))  # 把舊紀錄原樣重播到尾端
+        elif op == "witness":
+            if step["mode"] == "fail_next":
+                wit.fail_next = 1
+            elif step["mode"] == "unflushed":
+                w2 = UnflushedWitness()  # 定期更新尚未 flush：report 只排入、不確認
+                w2.max_seq, w2.hash_at = wit.max_seq, dict(wit.hash_at)
+                wit = w2
+            elif step["mode"] == "down":
+                wit.available = False
+            elif step["mode"] == "up":
+                wit.available = True
+            else:
+                raise ValueError(step["mode"])
         elif op == "drop_log_entry":
             del log.entries[step["index"]]
         elif op == "recover":
@@ -472,6 +551,9 @@ def run_control_scenario(initial, sc):
             raise ValueError(op)
     if before_reapply is not None:
         recovered["unchanged"] = before_reapply == recovered["state"]
+    if not any(step["op"] in ("corrupt_log", "rewrite_log_entry", "replay_entry", "drop_log_entry", "lose_log_tail") for step in sc["steps"]):
+        for e in log.entries:
+            check(f"{sc['id']} envelope seq{e['seq']} matches schema", SL.validate(e, SL.load_schema("control_record")), [])
     return recovered, https, st
 
 
@@ -491,6 +573,31 @@ def test_control(ctrl):
             check(f"{sc['id']} access {purpose}", RC.access_allowed(rec["state"], "c1", purpose), want)
         if exp.get("state_unchanged_by_reapply"):
             check(f"{sc['id']} reapply idempotent", rec["unchanged"], True)
+
+
+def test_control_log_envelope():
+    """N-05：APPLIED.ref 必須指向較早且非 APPLIED 的紀錄；envelope 欄位（seq、prev_hash、hash、recorded_at）由紀錄系統產生，不可由請求夾帶。"""
+    log = RC.ControlLog()
+    for label, payload in (("APPLIED ref to nothing", {"type": "APPLIED", "ref": 1}),
+                           ("APPLIED ref missing", {"type": "APPLIED"}),
+                           ("envelope fields in payload", {"type": "HARD_DELETE", "table": "facts", "id": "f1", "seq": 1}),
+                           ("prev_hash in payload", {"type": "HARD_DELETE", "table": "facts", "id": "f1", "prev_hash": "0" * 64})):
+        try:
+            log.append(payload)
+            check(f"N-05 log rejects {label}", "accepted", "InvalidControl")
+        except RC.InvalidControl:
+            check(f"N-05 log rejects {label}", "InvalidControl", "InvalidControl")
+    check("N-05 rejected appends leave log empty", log.entries, [])
+    log.append({"type": "HARD_DELETE", "table": "facts", "id": "f1"})
+    log.append({"type": "APPLIED", "ref": 1})
+    for label, ref in (("APPLIED ref to APPLIED", 2), ("APPLIED ref to future", 9), ("APPLIED ref zero", 0)):
+        try:
+            log.append({"type": "APPLIED", "ref": ref})
+            check(f"N-05 log rejects {label}", "accepted", "InvalidControl")
+        except RC.InvalidControl:
+            check(f"N-05 log rejects {label}", "InvalidControl", "InvalidControl")
+    check("N-05 envelope keys", sorted(log.entries[0]), ["hash", "payload", "prev_hash", "recorded_at", "seq"])
+    check("N-05 valid chain", log.verify_chain(), (True, "ok"))
 
 
 # ---------------------------------------------------------------- 5. Markdown 由 JSON 產生
@@ -588,6 +695,7 @@ def main():
     run_test(test_recommendation, cases)
     run_test(test_households, res, hhs, exp)
     run_test(test_unknown_member_not_dropped, res, hhs)
+    run_test(test_count_in_school, res, hhs)
     run_test(test_outcomes, cases)
     run_test(test_applications, cases)
     run_test(test_idempotency_replay, cases)
@@ -595,6 +703,7 @@ def main():
     run_test(test_state_machines)
     run_test(test_version_recheck_lifecycle)
     run_test(test_control, ctrl)
+    run_test(test_control_log_envelope)
     run_test(test_schemas, res, cases, ctrl)
     run_test(test_md, exp, res, False)
     if FAILS:
