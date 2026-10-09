@@ -1,0 +1,5565 @@
+{
+ "_notice": "SYNTHETIC. 引擎行為單元案例：組合語意、規則驗證、正式推薦判定、取得成果計數、申請唯一性、回呼處理。預期值由規格手算。",
+ "combinator_cases": [
+  {
+   "id": "ALL-unknown-fail",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "FAIL"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ALL-unknown-failunconf",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "FAIL_UNCONFIRMED"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ALL-unknown-human",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "HUMAN"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ALL-fail-failunconf",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "FAIL_UNCONFIRMED"
+   },
+   "expected": "FAIL"
+  },
+  {
+   "id": "ALL-failunconf-human",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL_UNCONFIRMED",
+    "C2": "HUMAN"
+   },
+   "expected": "FAIL_UNCONFIRMED"
+  },
+  {
+   "id": "ALL-fail-human",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "HUMAN"
+   },
+   "expected": "FAIL"
+  },
+  {
+   "id": "ALL-human-pass",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "HUMAN",
+    "C2": "PASS"
+   },
+   "expected": "HUMAN"
+  },
+  {
+   "id": "ALL-pass-pass",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "PASS"
+   },
+   "expected": "PASS"
+  },
+  {
+   "id": "ANY-pass-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "FAIL"
+   },
+   "expected": "PASS"
+  },
+  {
+   "id": "ANY-pass-unknown",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "UNKNOWN"
+   },
+   "expected": "PASS"
+  },
+  {
+   "id": "ANY-unknown-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "FAIL"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ANY-unknown-human",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "UNKNOWN",
+    "C2": "HUMAN"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "ANY-human-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "HUMAN",
+    "C2": "FAIL"
+   },
+   "expected": "HUMAN"
+  },
+  {
+   "id": "ANY-fail-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "FAIL"
+   },
+   "expected": "FAIL"
+  },
+  {
+   "id": "ANY-fail-failunconf",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     "C1",
+     "C2"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "FAIL_UNCONFIRMED"
+   },
+   "expected": "FAIL_UNCONFIRMED"
+  },
+  {
+   "id": "CUSTOM-all-any-pass",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     {
+      "op": "ANY",
+      "children": [
+       "C2",
+       "C3"
+      ]
+     }
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "FAIL",
+    "C3": "PASS"
+   },
+   "expected": "PASS"
+  },
+  {
+   "id": "CUSTOM-all-any-unknown",
+   "tree": {
+    "op": "ALL",
+    "children": [
+     "C1",
+     {
+      "op": "ANY",
+      "children": [
+       "C2",
+       "C3"
+      ]
+     }
+    ]
+   },
+   "results": {
+    "C1": "PASS",
+    "C2": "FAIL",
+    "C3": "UNKNOWN"
+   },
+   "expected": "UNKNOWN"
+  },
+  {
+   "id": "CUSTOM-any-all-fail",
+   "tree": {
+    "op": "ANY",
+    "children": [
+     {
+      "op": "ALL",
+      "children": [
+       "C1",
+       "C2"
+      ]
+     },
+     "C3"
+    ]
+   },
+   "results": {
+    "C1": "FAIL",
+    "C2": "PASS",
+    "C3": "FAIL"
+   },
+   "expected": "FAIL"
+  }
+ ],
+ "resource_mapping_cases": [
+  {
+   "root": "PASS",
+   "result": "LIKELY_ELIGIBLE",
+   "unconfirmed": null
+  },
+  {
+   "root": "HUMAN",
+   "result": "LIKELY_ELIGIBLE",
+   "unconfirmed": null
+  },
+  {
+   "root": "UNKNOWN",
+   "result": "INSUFFICIENT_DATA",
+   "unconfirmed": null
+  },
+  {
+   "root": "FAIL_UNCONFIRMED",
+   "result": "LIKELY_INELIGIBLE",
+   "unconfirmed": true
+  },
+  {
+   "root": "FAIL",
+   "result": "LIKELY_INELIGIBLE",
+   "unconfirmed": false
+  }
+ ],
+ "invalid_rule_cases": [
+  {
+   "id": "unsupported-combinator-NOT",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "NOT",
+     "children": [
+      "C1",
+      "C2"
+     ]
+    }
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "unsupported-combinator-N_OF_M",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "N_OF_M",
+     "n": 1,
+     "children": [
+      "C1",
+      "C2"
+     ]
+    }
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "unsupported-combinator-name",
+   "rule": {
+    "combinator": "XOR",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "missing-combinator",
+   "rule": {
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "custom-without-expression",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "expression-without-custom",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": [
+      "C1"
+     ]
+    }
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "expression-misses-criterion",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": [
+      "C1"
+     ]
+    }
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "expression-unknown-criterion",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": [
+      "C1",
+      "C9"
+     ]
+    }
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "empty-children",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": []
+    }
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "operator-AGE_BETWEEN",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "AGE_BETWEEN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "operator-DATE_WITHIN",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "DATE_WITHIN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "operator-unknown-name",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "FUZZY_MATCH",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "self-report-cannot-confirm-fail",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "min_confirmation_for_fail": "C1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "human-trigger-unsupported",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "LTE",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "requires_human_when": [
+       "always"
+      ]
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "missing-source-ref",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      }
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "duplicate-criterion-id",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "valid-all",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": null
+  },
+  {
+   "id": "valid-any",
+   "rule": {
+    "combinator": "ANY",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": null
+  },
+  {
+   "id": "valid-custom",
+   "rule": {
+    "combinator": "CUSTOM",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C3",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "expression": {
+     "op": "ALL",
+     "children": [
+      "C1",
+      {
+       "op": "ANY",
+       "children": [
+        "C2",
+        "C3"
+       ]
+      }
+     ]
+    }
+   },
+   "expect": null
+  }
+ ],
+ "recommendation_base": {
+  "resource_key": "TW-DEMO-BASE",
+  "risk_tier": "MEDIUM",
+  "version": {
+   "status": "PUBLISHED",
+   "verification_level": "V2",
+   "conflict_status": "NONE",
+   "source_ids": [
+    "S-1"
+   ],
+   "effective_from": "2026-01-01",
+   "effective_to": "2026-12-31",
+   "application_window": {
+    "type": "ROLLING"
+   },
+   "capacity_status": "OPEN",
+   "effective_unknown": false
+  },
+  "rule": {
+   "status": "PUBLISHED",
+   "combinator": "ALL",
+   "criteria": [
+    {
+     "criterion_id": "C1",
+     "operator": "EQ",
+     "input_keys": [
+      "household.x"
+     ],
+     "threshold": {
+      "value": 1
+     },
+     "source_ref": "S-1#1"
+    }
+   ]
+  }
+ },
+ "recommendation_sources": {
+  "S-1": {
+   "status": "ACTIVE"
+  }
+ },
+ "recommendation_as_of": "2026-10-03",
+ "recommendation_cases": [
+  {
+   "id": "base",
+   "override": {},
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "not-yet-effective",
+   "override": {
+    "version.effective_from": "2027-01-01"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "NOT_YET_EFFECTIVE"
+    ]
+   }
+  },
+  {
+   "id": "period-ended-but-status-not-yet-expired",
+   "override": {
+    "version.effective_to": "2026-09-30"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "PERIOD_ENDED"
+    ]
+   }
+  },
+  {
+   "id": "window-closed",
+   "override": {
+    "version.application_window": {
+     "type": "FIXED",
+     "ranges": [
+      {
+       "from": "2026-01-15",
+       "to": "2026-03-31"
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "WINDOW_CLOSED"
+    ]
+   }
+  },
+  {
+   "id": "window-not-open",
+   "override": {
+    "version.application_window": {
+     "type": "FIXED",
+     "ranges": [
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-30"
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "WINDOW_NOT_OPEN"
+    ]
+   }
+  },
+  {
+   "id": "window-open",
+   "override": {
+    "version.application_window": {
+     "type": "FIXED",
+     "ranges": [
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-31"
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "window-multi-range-second-open",
+   "override": {
+    "version.application_window": {
+     "type": "FIXED",
+     "ranges": [
+      {
+       "from": "2026-01-15",
+       "to": "2026-03-31"
+      },
+      {
+       "from": "2026-09-01",
+       "to": "2026-10-31"
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "period-unknown",
+   "override": {
+    "version.effective_to": null,
+    "version.effective_unknown": true
+   },
+   "expected": {
+    "status": "MANUAL_CHECK_ONLY",
+    "reasons": [
+     "PERIOD_UNKNOWN"
+    ]
+   }
+  },
+  {
+   "id": "window-unknown",
+   "override": {
+    "version.application_window": {
+     "type": "UNKNOWN"
+    }
+   },
+   "expected": {
+    "status": "MANUAL_CHECK_ONLY",
+    "reasons": [
+     "WINDOW_UNKNOWN"
+    ]
+   }
+  },
+  {
+   "id": "period-and-window-unknown",
+   "override": {
+    "version.effective_to": null,
+    "version.effective_unknown": true,
+    "version.application_window": {
+     "type": "UNKNOWN"
+    }
+   },
+   "expected": {
+    "status": "MANUAL_CHECK_ONLY",
+    "reasons": [
+     "PERIOD_UNKNOWN",
+     "WINDOW_UNKNOWN"
+    ]
+   }
+  },
+  {
+   "id": "recheck-low-risk-3-days",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_started_at": "2026-09-30"
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "recheck-low-risk-15-days",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_started_at": "2026-09-18"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_GRACE_EXCEEDED"
+    ]
+   }
+  },
+  {
+   "id": "recheck-high-risk",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "risk_tier": "HIGH",
+    "version.recheck_started_at": "2026-10-02"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_HIGH_RISK"
+    ]
+   }
+  },
+  {
+   "id": "suspended",
+   "override": {
+    "version.status": "SUSPENDED"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_SUSPENDED"
+    ]
+   }
+  },
+  {
+   "id": "expired-status",
+   "override": {
+    "version.status": "EXPIRED"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_EXPIRED"
+    ]
+   }
+  },
+  {
+   "id": "superseded",
+   "override": {
+    "version.status": "SUPERSEDED"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_SUPERSEDED"
+    ]
+   }
+  },
+  {
+   "id": "draft",
+   "override": {
+    "version.status": "DRAFT"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_DRAFT"
+    ]
+   }
+  },
+  {
+   "id": "verification-v1",
+   "override": {
+    "version.verification_level": "V1"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERIFICATION_TOO_LOW"
+    ]
+   }
+  },
+  {
+   "id": "verification-v3",
+   "override": {
+    "version.verification_level": "V3"
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "source-conflict",
+   "override": {
+    "version.conflict_status": "OPEN"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "SOURCE_CONFLICT"
+    ]
+   }
+  },
+  {
+   "id": "source-conflict-resolved",
+   "override": {
+    "version.conflict_status": "RESOLVED"
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "source-broken",
+   "override": {},
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "SOURCE_INVALID"
+    ]
+   },
+   "source_status": {
+    "S-1": "BROKEN"
+   }
+  },
+  {
+   "id": "source-moved",
+   "override": {},
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "SOURCE_INVALID"
+    ]
+   },
+   "source_status": {
+    "S-1": "MOVED"
+   }
+  },
+  {
+   "id": "rule-unpublished",
+   "override": {
+    "rule.status": "DRAFT"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_NOT_PUBLISHED"
+    ]
+   }
+  },
+  {
+   "id": "rule-invalid-operator",
+   "override": {
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "AGE_BETWEEN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "multiple-hard-reasons",
+   "override": {
+    "version.status": "SUSPENDED",
+    "version.conflict_status": "OPEN",
+    "version.effective_from": "2027-01-01"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "STATUS_SUSPENDED",
+     "SOURCE_CONFLICT",
+     "NOT_YET_EFFECTIVE"
+    ]
+   }
+  },
+  {
+   "id": "hard-plus-soft",
+   "override": {
+    "version.effective_from": "2027-01-01",
+    "version.effective_to": null,
+    "version.effective_unknown": true
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "NOT_YET_EFFECTIVE",
+     "PERIOD_UNKNOWN"
+    ]
+   }
+  },
+  {
+   "id": "capacity-full-still-formal",
+   "override": {
+    "version.capacity_status": "FULL"
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "F01-later-criterion-C1",
+   "override": {
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "min_confirmation_for_fail": "C1"
+     }
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F01-first-criterion-C1",
+   "override": {
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "min_confirmation_for_fail": "C1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F01-last-of-three-C1",
+   "override": {
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C3",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "min_confirmation_for_fail": "C1"
+     }
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F01-custom-NOT",
+   "override": {
+    "rule.combinator": "CUSTOM",
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "rule.expression": {
+     "op": "NOT",
+     "children": [
+      "C1",
+      "C2"
+     ]
+    }
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F01-unknown-scope-first-then-custom-NOT",
+   "override": {
+    "rule.combinator": "CUSTOM",
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "scope_key": "SCOPE-NOPE"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "rule.expression": {
+     "op": "NOT",
+     "children": [
+      "C1",
+      "C2"
+     ]
+    }
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F01-unknown-scope-first-then-bad-later-criterion",
+   "override": {
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "scope_key": "SCOPE-NOPE"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "min_confirmation_for_fail": "C1"
+     }
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F01-rule-status-missing",
+   "override": {
+    "rule.status": "__DELETE__"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_STATUS_MISSING"
+    ]
+   }
+  },
+  {
+   "id": "F01-rule-status-unknown-value",
+   "override": {
+    "rule.status": "ARCHIVED"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F01-rule-missing",
+   "override": {
+    "rule": "__DELETE__"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_MISSING"
+    ]
+   }
+  },
+  {
+   "id": "F01-draft-and-invalid",
+   "override": {
+    "rule.status": "DRAFT",
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "AGE_BETWEEN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_NOT_PUBLISHED",
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F01-scoped-rule-valid",
+   "override": {
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "LTE",
+      "input_keys": [
+       "derived.income_per_capita"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "value": 18000
+      },
+      "source_ref": "S-1#2"
+     }
+    ]
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "F01-scoped-rule-unknown-scope",
+   "override": {
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "LTE",
+      "input_keys": [
+       "derived.income_per_capita"
+      ],
+      "scope_key": "SCOPE-NOPE",
+      "threshold": {
+       "value": 18000
+      },
+      "source_ref": "S-1#2"
+     }
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F02-scoped-rule-with-unsupported-age-scope",
+   "override": {
+    "rule.criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     },
+     {
+      "criterion_id": "C2",
+      "operator": "LTE",
+      "input_keys": [
+       "derived.income_per_capita"
+      ],
+      "scope_key": "SCOPE-BAD-AGE",
+      "threshold": {
+       "value": 18000
+      },
+      "source_ref": "S-1#2"
+     }
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RULE_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-recheck-exactly-14-days",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_started_at": "2026-09-19"
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "F07-recheck-15-days",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_started_at": "2026-09-18"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_GRACE_EXCEEDED"
+    ]
+   }
+  },
+  {
+   "id": "F07-recheck-start-missing",
+   "override": {
+    "version.status": "NEEDS_RECHECK"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_START_MISSING"
+    ]
+   }
+  },
+  {
+   "id": "F07-recheck-start-in-future",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_started_at": "2026-10-05"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_START_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-recheck-high-risk-start-missing",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "risk_tier": "HIGH"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_START_MISSING",
+     "RECHECK_HIGH_RISK"
+    ]
+   }
+  },
+  {
+   "id": "F07-published-ignores-stale-recheck-start",
+   "override": {
+    "version.recheck_started_at": "2026-01-01"
+   },
+   "expected": {
+    "status": "FORMAL",
+    "reasons": []
+   }
+  },
+  {
+   "id": "F07-effective-unknown-missing",
+   "override": {
+    "version.effective_unknown": "__DELETE__"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-effective-unknown-inconsistent-false",
+   "override": {
+    "version.effective_to": null
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-effective-unknown-inconsistent-true",
+   "override": {
+    "version.effective_unknown": true
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-application-window-missing",
+   "override": {
+    "version.application_window": "__DELETE__"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-source-ids-empty",
+   "override": {
+    "version.source_ids": []
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-recheck-start-garbage-text",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_started_at": "last week"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_START_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-recheck-start-not-a-string",
+   "override": {
+    "version.status": "NEEDS_RECHECK",
+    "version.recheck_started_at": 20260930
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "RECHECK_START_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-version-status-is-a-list",
+   "override": {
+    "version.status": [
+     "PUBLISHED"
+    ]
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-effective-unknown-true-but-date-present",
+   "override": {
+    "version.effective_unknown": true
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-effective-unknown-false-but-date-missing",
+   "override": {
+    "version.effective_to": null
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-effective-unknown-missing",
+   "override": {
+    "version.effective_unknown": "__DELETE__"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-effective-unknown-consistent-period-unknown",
+   "override": {
+    "version.effective_unknown": true,
+    "version.effective_to": null
+   },
+   "expected": {
+    "status": "MANUAL_CHECK_ONLY",
+    "reasons": [
+     "PERIOD_UNKNOWN"
+    ]
+   }
+  }
+ ],
+ "outcome_scenarios": [
+  {
+   "id": "T-39-status-advance-does-not-lose-count",
+   "outcomes": {
+    "o1": {
+     "household": "HA",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o1",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-05",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-05",
+     "verified_by": "u2",
+     "verified_on": "2026-10-06"
+    },
+    {
+     "id": "e2",
+     "outcome": "o1",
+     "event_type": "PERIOD_CONFIRMED",
+     "occurred_on": "2026-11-05",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-11-05",
+     "verified_by": "u2",
+     "verified_on": "2026-11-05"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-11-30",
+     "expected": {
+      "new_households_in_window": [
+       "HA"
+      ],
+      "cumulative_households": [
+       "HA"
+      ],
+      "resource_items_in_window": [
+       "o1"
+      ],
+      "pending_verification_households": []
+     }
+    },
+    {
+     "window": [
+      "2026-11-01",
+      "2026-11-30"
+     ],
+     "known_at": "2026-11-30",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [
+       "HA"
+      ],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-40-partial-then-full-counts-once",
+   "outcomes": {
+    "o2": {
+     "household": "HB",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o2",
+     "event_type": "PARTIAL_RECEIPT",
+     "occurred_on": "2026-10-10",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-10",
+     "verified_by": "u2",
+     "verified_on": "2026-10-10"
+    },
+    {
+     "id": "e2",
+     "outcome": "o2",
+     "event_type": "FULL_RECEIPT",
+     "occurred_on": "2026-10-20",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-20",
+     "verified_by": "u2",
+     "verified_on": "2026-10-20"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [
+       "HB"
+      ],
+      "cumulative_households": [
+       "HB"
+      ],
+      "resource_items_in_window": [
+       "o2"
+      ],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-40-two-resources-one-household",
+   "outcomes": {
+    "o3": {
+     "household": "HC",
+     "is_new_to_household": true
+    },
+    "o4": {
+     "household": "HC",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o3",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-05",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-05",
+     "verified_by": "u2",
+     "verified_on": "2026-10-05"
+    },
+    {
+     "id": "e2",
+     "outcome": "o4",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-12",
+     "verified_by": "u2",
+     "verified_on": "2026-10-12"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [
+       "HC"
+      ],
+      "cumulative_households": [
+       "HC"
+      ],
+      "resource_items_in_window": [
+       "o3",
+       "o4"
+      ],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-41-unverified-listed-separately",
+   "outcomes": {
+    "o5": {
+     "household": "HD",
+     "is_new_to_household": true
+    },
+    "o6": {
+     "household": "HE",
+     "is_new_to_household": true
+    },
+    "o7": {
+     "household": "HF",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o5",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-12"
+    },
+    {
+     "id": "e2",
+     "outcome": "o6",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u3",
+     "recorded_on": "2026-10-12",
+     "verified_by": "u1",
+     "verified_on": "2026-10-12"
+    },
+    {
+     "id": "e3",
+     "outcome": "o7",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u4",
+     "case_owner": "u3",
+     "recorded_on": "2026-10-12",
+     "verified_by": "u3",
+     "verified_on": "2026-10-12"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": [
+       "HD",
+       "HE",
+       "HF"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-41-verified-later-moves-out-of-pending",
+   "outcomes": {
+    "o8": {
+     "household": "HG",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o8",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-12",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-12",
+     "verified_by": "u2",
+     "verified_on": "2026-10-20"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-15",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": [
+       "HG"
+      ]
+     }
+    },
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [
+       "HG"
+      ],
+      "cumulative_households": [
+       "HG"
+      ],
+      "resource_items_in_window": [
+       "o8"
+      ],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-42-duplicate-payment-and-correction",
+   "outcomes": {
+    "o9": {
+     "household": "HH",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o9",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-08",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-08",
+     "verified_by": "u2",
+     "verified_on": "2026-10-08"
+    },
+    {
+     "id": "e2",
+     "outcome": "o9",
+     "event_type": "DUPLICATE_PAYMENT_NOTED",
+     "occurred_on": "2026-10-15",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-15",
+     "verified_by": "u2",
+     "verified_on": "2026-10-15"
+    },
+    {
+     "id": "e3",
+     "outcome": "o9",
+     "event_type": "CORRECTION",
+     "occurred_on": "2026-10-08",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-11-10",
+     "verified_by": "u2",
+     "verified_on": "2026-11-10",
+     "voids": "e1"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-11-05",
+     "expected": {
+      "new_households_in_window": [
+       "HH"
+      ],
+      "cumulative_households": [
+       "HH"
+      ],
+      "resource_items_in_window": [
+       "o9"
+      ],
+      "pending_verification_households": []
+     }
+    },
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-11-30",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-42-not-new-is-renewal-not-counted",
+   "outcomes": {
+    "o10": {
+     "household": "HI",
+     "is_new_to_household": false
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o10",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-08",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-08",
+     "verified_by": "u2",
+     "verified_on": "2026-10-08"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "T-14-approved-without-receipt-not-counted",
+   "outcomes": {
+    "o11": {
+     "household": "HJ",
+     "is_new_to_household": true
+    }
+   },
+   "events": [],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-10-31",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  },
+  {
+   "id": "event-after-window-end-ignored",
+   "outcomes": {
+    "o12": {
+     "household": "HK",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o12",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-11-02",
+     "evidence_level": "E2",
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-11-02",
+     "verified_by": "u2",
+     "verified_on": "2026-11-02"
+    }
+   ],
+   "queries": [
+    {
+     "window": [
+      "2026-10-01",
+      "2026-10-31"
+     ],
+     "known_at": "2026-11-30",
+     "expected": {
+      "new_households_in_window": [],
+      "cumulative_households": [],
+      "resource_items_in_window": [],
+      "pending_verification_households": []
+     }
+    }
+   ]
+  }
+ ],
+ "outcome_invalid_events": [
+  {
+   "id": "missing-evidence-level",
+   "outcomes": {
+    "o13": {
+     "household": "HL",
+     "is_new_to_household": true
+    }
+   },
+   "events": [
+    {
+     "id": "e1",
+     "outcome": "o13",
+     "event_type": "FIRST_RECEIPT",
+     "occurred_on": "2026-10-05",
+     "evidence_level": null,
+     "recorded_by": "u1",
+     "case_owner": "u1",
+     "recorded_on": "2026-10-05",
+     "verified_by": "u2",
+     "verified_on": "2026-10-05"
+    }
+   ],
+   "expect": "ValidationError"
+  }
+ ],
+ "application_cases": [
+  {
+   "id": "original-first",
+   "existing": [],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "original-after-approved-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026"
+   },
+   "expected": [
+    false,
+    "ORIGINAL_EXISTS_APPROVED"
+   ]
+  },
+  {
+   "id": "original-after-submitted-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "SUBMITTED"
+    }
+   ],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026"
+   },
+   "expected": [
+    false,
+    "ORIGINAL_EXISTS_SUBMITTED"
+   ]
+  },
+  {
+   "id": "original-after-denied-must-be-reapply",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    }
+   ],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026"
+   },
+   "expected": [
+    false,
+    "ORIGINAL_EXISTS_DENIED"
+   ]
+  },
+  {
+   "id": "original-other-period-ok",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2027"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "reapply-after-denied",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "補齊文件後重新申請"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "reapply-needs-reason",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1"
+   },
+   "expected": [
+    false,
+    "RELATION_REQUIRED"
+   ]
+  },
+  {
+   "id": "reapply-after-approved-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "想再申請"
+   },
+   "expected": [
+    false,
+    "RELATED_STATE_INVALID_APPROVED"
+   ]
+  },
+  {
+   "id": "reapply-twice-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "REAPPLY",
+     "status": "PREPARING_DOCS",
+     "related": "a1"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "重複"
+   },
+   "expected": [
+    false,
+    "DUPLICATE_RELATED"
+   ]
+  },
+  {
+   "id": "reapply-after-previous-reapply-denied",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "REAPPLY",
+     "status": "DENIED",
+     "related": "a1"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a2",
+    "reason": "再次申請"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "appeal-after-denied",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    }
+   ],
+   "new": {
+    "kind": "APPEAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "依通知所載管道申復"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "appeal-while-under-review-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "UNDER_REVIEW"
+    }
+   ],
+   "new": {
+    "kind": "APPEAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "x"
+   },
+   "expected": [
+    false,
+    "RELATED_STATE_INVALID_UNDER_REVIEW"
+   ]
+  },
+  {
+   "id": "supplementary-needs-r4",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "補領差額"
+   },
+   "expected": [
+    false,
+    "R4_APPROVAL_REQUIRED"
+   ]
+  },
+  {
+   "id": "supplementary-with-r4",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "補領差額",
+    "relation_approved_by": "r4-1"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "supplementary-wrong-household",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H2",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "x",
+    "relation_approved_by": "r4-1"
+   },
+   "expected": [
+    false,
+    "RELATION_MISMATCH_HOUSEHOLD"
+   ]
+  },
+  {
+   "id": "supplementary-wrong-resource",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R2",
+    "period": "2026",
+    "related": "a1",
+    "reason": "x",
+    "relation_approved_by": "r4-1"
+   },
+   "expected": [
+    false,
+    "RELATION_MISMATCH_RESOURCE"
+   ]
+  },
+  {
+   "id": "supplementary-wrong-period",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2027",
+    "related": "a1",
+    "reason": "x",
+    "relation_approved_by": "r4-1"
+   },
+   "expected": [
+    false,
+    "RELATION_MISMATCH_PERIOD"
+   ]
+  },
+  {
+   "id": "supplementary-related-not-found",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "ghost",
+    "reason": "x",
+    "relation_approved_by": "r4-1"
+   },
+   "expected": [
+    false,
+    "RELATED_NOT_FOUND"
+   ]
+  },
+  {
+   "id": "supplementary-duplicate-related-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "UNDER_REVIEW",
+     "related": "a1",
+     "reason": "x",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "again",
+    "relation_approved_by": "r4-1"
+   },
+   "expected": [
+    false,
+    "DUPLICATE_RELATED"
+   ]
+  },
+  {
+   "id": "supplementary-after-previous-denied-ok",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "DENIED",
+     "related": "a1",
+     "reason": "x",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "again",
+    "relation_approved_by": "r4-1"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "appeal-wrong-period",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    }
+   ],
+   "new": {
+    "kind": "APPEAL",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2027",
+    "related": "a1",
+    "reason": "x"
+   },
+   "expected": [
+    false,
+    "RELATION_MISMATCH_PERIOD"
+   ]
+  },
+  {
+   "id": "reapply-after-withdrawn-ok",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "WITHDRAWN"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "想通了再申請"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "reapply-after-lapsed-ok",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "LAPSED"
+    }
+   ],
+   "new": {
+    "kind": "REAPPLY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "related": "a1",
+    "reason": "機關已受理新件"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "unrelated-original-other-resource-ok",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "ORIGINAL",
+    "household": "H1",
+    "resource": "R2",
+    "period": "2026"
+   },
+   "expected": [
+    true,
+    "ok"
+   ]
+  }
+ ],
+ "callback_scenarios": [
+  {
+   "id": "T-45-normal",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     true
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-out-of-order",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     false
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-duplicate-event",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     false,
+     true
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-same-message-multiple-events",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     false
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-late-failure-after-delivered",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "DELIVERED"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "FAILED"
+    }
+   ],
+   "expected": {
+    "state": "DELIVERED",
+    "applied": [
+     true,
+     false
+    ],
+    "late_failure": true
+   }
+  },
+  {
+   "id": "T-45-bounce-after-accepted",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "FAILED"
+    }
+   ],
+   "expected": {
+    "state": "FAILED",
+    "applied": [
+     true,
+     true
+    ],
+    "late_failure": false
+   }
+  },
+  {
+   "id": "T-45-accepted-after-failed-ignored",
+   "events": [
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e1",
+     "provider_message_id": "m1",
+     "event_type": "FAILED"
+    },
+    {
+     "provider": "sms-demo",
+     "provider_event_id": "e2",
+     "provider_message_id": "m1",
+     "event_type": "ACCEPTED_BY_PROVIDER"
+    }
+   ],
+   "expected": {
+    "state": "FAILED",
+    "applied": [
+     true,
+     false
+    ],
+    "late_failure": false
+   }
+  }
+ ],
+ "recommendation_scopes": {
+  "SCOPE-OK": {
+   "scope_key": "SCOPE-OK",
+   "member_inclusion": {
+    "relation_in": [
+     "SELF",
+     "CHILD"
+    ],
+    "co_residing": "YES"
+   },
+   "income_definition": {
+    "items": [
+     "monthly_earned_income"
+    ],
+    "period": "MONTHLY_AVERAGE"
+   },
+   "source_ref": "S-1#2"
+  },
+  "SCOPE-BAD-AGE": {
+   "scope_key": "SCOPE-BAD-AGE",
+   "member_inclusion": {
+    "co_residing": "YES",
+    "age_between": [
+     0,
+     17
+    ]
+   },
+   "income_definition": {
+    "items": [
+     "monthly_earned_income"
+    ],
+    "period": "MONTHLY_AVERAGE"
+   },
+   "source_ref": "S-1#2"
+  }
+ },
+ "scope_cases": [
+  {
+   "id": "valid-same-registration-relation",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "relation_in": [
+      "SELF",
+      "SPOUSE",
+      "CHILD",
+      "PARENT"
+     ],
+     "same_household_registration": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": null
+  },
+  {
+   "id": "valid-co-residing",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": null
+  },
+  {
+   "id": "valid-co-residing-NO",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "NO"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": null
+  },
+  {
+   "id": "GPT-repro-age_between-in-member_inclusion",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES",
+     "age_between": [
+      0,
+      17
+     ]
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "in_school-in-member_inclusion",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES",
+     "in_school": true
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "military_service-in-member_inclusion",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES",
+     "military_service": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "unknown-inclusion-key",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES",
+     "hair_color": "red"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "typo-in-inclusion-key",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_resideing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "co_residing-wrong-type-bool",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": true
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "co_residing-bad-value",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "MAYBE"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "same_registration-list",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "same_household_registration": [
+      "YES"
+     ]
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "relation_in-not-list",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "relation_in": "SELF"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "relation_in-empty",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "relation_in": []
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "relation_in-unknown-value",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "relation_in": [
+      "SELF",
+      "COUSIN"
+     ]
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "relation_in-UNKNOWN-not-allowed",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "relation_in": [
+      "UNKNOWN"
+     ]
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "empty-member_inclusion-would-include-everyone",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {},
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "member_inclusion-missing",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "income-items-unknown-item",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "lottery"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "income-items-empty",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "income-period-annual-unsupported",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income"
+     ],
+     "period": "ANNUAL"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "income-period-unknown-name",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income"
+     ],
+     "period": "WEEKLY"
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "income-imputed-unsupported",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income"
+     ],
+     "period": "MONTHLY_AVERAGE",
+     "include_imputed_income": true
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "income-unknown-key",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income"
+     ],
+     "period": "MONTHLY_AVERAGE",
+     "bonus": 1
+    },
+    "source_ref": "S-1#2"
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "property_definition-unsupported",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2",
+    "property_definition": {
+     "movable": "x"
+    }
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "scope-top-level-unknown-key",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    },
+    "source_ref": "S-1#2",
+    "extra_rule": 1
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "scope-missing-source_ref",
+   "scope": {
+    "scope_key": "SCOPE-T",
+    "member_inclusion": {
+     "co_residing": "YES"
+    },
+    "income_definition": {
+     "items": [
+      "monthly_earned_income",
+      "monthly_pension"
+     ],
+     "period": "MONTHLY_AVERAGE"
+    }
+   },
+   "expect": "ValidationError"
+  }
+ ],
+ "criterion_shape_cases": [
+  {
+   "id": "count-valid",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ]
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": null
+  },
+  {
+   "id": "count-valid-in_school",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         6,
+         15
+        ],
+        "in_school": true
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": null
+  },
+  {
+   "id": "count-where-missing",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-where-empty",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {},
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-age_between-string",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": "6-15"
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-age_between-reversed",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         15,
+         6
+        ]
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-age_between-negative",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         -1,
+         5
+        ]
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-age_between-float",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         1.5,
+         5
+        ]
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-age_between-three-values",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         1,
+         2,
+         3
+        ]
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-where-unknown-key",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ],
+        "eye_color": "x"
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-where-relation_in-unsupported",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ],
+        "relation_in": [
+         "CHILD"
+        ]
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "count-where-co_residing-unsupported",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ],
+        "co_residing": "YES"
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "count-in_school-not-bool",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ],
+        "in_school": "yes"
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-without-age_between",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "in_school": true
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-min_count-zero",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ]
+       },
+       "min_count": 0
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-min_count-string",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ]
+       },
+       "min_count": "1"
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-min_count-bool",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ]
+       },
+       "min_count": true
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-unknown-threshold-key",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-OK",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ]
+       },
+       "min_count": 1,
+       "bonus": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-without-scope_key",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ]
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "count-unknown-scope",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "COUNT_MEMBERS_WHERE",
+      "input_keys": [
+       "person.age"
+      ],
+      "scope_key": "SCOPE-NOPE",
+      "threshold": {
+       "where": {
+        "age_between": [
+         0,
+         17
+        ]
+       },
+       "min_count": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "LTE-string-value",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "LTE",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": "18000"
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "LTE-bool-value",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "LTE",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": true
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "LTE-list-value",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "LTE",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": [
+        1
+       ]
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "IN-scalar-value",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "IN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": "A"
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "IN-empty-list",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "IN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": []
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "BETWEEN-one-value",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "BETWEEN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": [
+        1
+       ]
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "BETWEEN-reversed",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "BETWEEN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": [
+        5,
+        1
+       ]
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "BETWEEN-valid",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "BETWEEN",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": [
+        1,
+        5
+       ]
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": null
+  },
+  {
+   "id": "EQ-list-value",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": [
+        1
+       ]
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "REGION_IN-string-value",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "REGION_IN",
+      "input_keys": [
+       "household.region_code"
+      ],
+      "threshold": {
+       "value": "DEMO"
+      },
+      "source_ref": "S"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "REGION_IN-wrong-input-key",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "REGION_IN",
+      "input_keys": [
+       "household.zip"
+      ],
+      "threshold": {
+       "value": [
+        "DEMO"
+       ]
+      },
+      "source_ref": "S"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "NOT_RECEIVING-empty",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "NOT_RECEIVING",
+      "input_keys": [
+       "household.receiving_resources"
+      ],
+      "threshold": {
+       "value": []
+      },
+      "source_ref": "S"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "derived-income-without-scope",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "LTE",
+      "input_keys": [
+       "derived.income_per_capita"
+      ],
+      "threshold": {
+       "value": 18000
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "person-key-direct-compare-unsupported",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "LTE",
+      "input_keys": [
+       "person.monthly_earned_income"
+      ],
+      "threshold": {
+       "value": 18000
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "unknown-input-namespace",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "LTE",
+      "input_keys": [
+       "foo.bar"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "two-input-keys",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "LTE",
+      "input_keys": [
+       "household.a",
+       "household.b"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "criterion-unknown-key-typo",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "min_confirmaton_for_fail": "C2"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "on_missing-other-unsupported",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "on_missing": "FAIL"
+     }
+    ]
+   },
+   "expect": "UnsupportedError"
+  },
+  {
+   "id": "discretionary-not-bool",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "discretionary": "no"
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "requires_human-on-non-numeric",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "requires_human_when": [
+       "value_within_5_percent_of_threshold"
+      ]
+     }
+    ]
+   },
+   "expect": "ValidationError"
+  },
+  {
+   "id": "requires_human-on-numeric-ok",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "LTE",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1",
+      "requires_human_when": [
+       "value_within_5_percent_of_threshold"
+      ]
+     }
+    ]
+   },
+   "expect": null
+  },
+  {
+   "id": "rule-unknown-key",
+   "rule": {
+    "combinator": "ALL",
+    "criteria": [
+     {
+      "criterion_id": "C1",
+      "operator": "EQ",
+      "input_keys": [
+       "household.x"
+      ],
+      "threshold": {
+       "value": 1
+      },
+      "source_ref": "S-1#1"
+     }
+    ],
+    "hidden": 1
+   },
+   "expect": "ValidationError"
+  }
+ ],
+ "illegal_criterion_variants": [
+  {
+   "id": "C1-confirms-fail",
+   "criterion": {
+    "criterion_id": "C1",
+    "operator": "EQ",
+    "input_keys": [
+     "household.x"
+    ],
+    "threshold": {
+     "value": 1
+    },
+    "source_ref": "S-1#1",
+    "min_confirmation_for_fail": "C1"
+   }
+  },
+  {
+   "id": "unsupported-operator",
+   "criterion": {
+    "criterion_id": "C1",
+    "operator": "AGE_BETWEEN",
+    "input_keys": [
+     "household.x"
+    ],
+    "threshold": {
+     "value": 1
+    },
+    "source_ref": "S-1#1"
+   }
+  },
+  {
+   "id": "unknown-operator",
+   "criterion": {
+    "criterion_id": "C1",
+    "operator": "FUZZY",
+    "input_keys": [
+     "household.x"
+    ],
+    "threshold": {
+     "value": 1
+    },
+    "source_ref": "S-1#1"
+   }
+  },
+  {
+   "id": "missing-source_ref",
+   "criterion": {
+    "criterion_id": "C1",
+    "operator": "EQ",
+    "input_keys": [
+     "household.x"
+    ],
+    "threshold": {
+     "value": 1
+    }
+   }
+  },
+  {
+   "id": "unknown-scope",
+   "criterion": {
+    "criterion_id": "C1",
+    "operator": "LTE",
+    "input_keys": [
+     "derived.income_per_capita"
+    ],
+    "threshold": {
+     "value": 1
+    },
+    "source_ref": "S-1#1",
+    "scope_key": "SCOPE-NOPE"
+   }
+  },
+  {
+   "id": "bad-scope-age_between",
+   "criterion": {
+    "criterion_id": "C1",
+    "operator": "LTE",
+    "input_keys": [
+     "derived.income_per_capita"
+    ],
+    "threshold": {
+     "value": 1
+    },
+    "source_ref": "S-1#1",
+    "scope_key": "SCOPE-BAD-AGE"
+   }
+  },
+  {
+   "id": "type-error",
+   "criterion": {
+    "criterion_id": "C1",
+    "operator": "LTE",
+    "input_keys": [
+     "household.x"
+    ],
+    "threshold": {
+     "value": "1"
+    },
+    "source_ref": "S-1#1"
+   }
+  },
+  {
+   "id": "unknown-key",
+   "criterion": {
+    "criterion_id": "C1",
+    "operator": "EQ",
+    "input_keys": [
+     "household.x"
+    ],
+    "threshold": {
+     "value": 1
+    },
+    "source_ref": "S-1#1",
+    "typo_key": 1
+   }
+  }
+ ],
+ "illegal_expression_variants": [
+  {
+   "id": "NOT-node",
+   "expression": {
+    "op": "NOT",
+    "children": [
+     "F1",
+     "F2",
+     "X"
+    ]
+   }
+  },
+  {
+   "id": "N_OF_M-node",
+   "expression": {
+    "op": "N_OF_M",
+    "n": 1,
+    "children": [
+     "F1",
+     "F2",
+     "X"
+    ]
+   }
+  },
+  {
+   "id": "missing-criterion",
+   "expression": {
+    "op": "ALL",
+    "children": [
+     "F1",
+     "F2"
+    ]
+   }
+  },
+  {
+   "id": "unknown-criterion-ref",
+   "expression": {
+    "op": "ALL",
+    "children": [
+     "F1",
+     "F2",
+     "X",
+     "GHOST"
+    ]
+   }
+  }
+ ],
+ "application_ready_cases": [
+  {
+   "id": "F06-supplementary-ready-positive",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補領差額",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "F06-supplementary-ready-without-r4",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補領差額",
+     "relation_approved_by": null
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    false,
+    "R4_APPROVAL_REQUIRED"
+   ]
+  },
+  {
+   "id": "F06-supplementary-ready-original-no-longer-approved",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "UNDER_REVIEW"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補領差額",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    false,
+    "RELATED_STATE_INVALID_UNDER_REVIEW"
+   ]
+  },
+  {
+   "id": "F06-supplementary-ready-wrong-household",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H2",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補領差額",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    false,
+    "RELATION_MISMATCH_HOUSEHOLD"
+   ]
+  },
+  {
+   "id": "F06-supplementary-ready-wrong-resource",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R2",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補領差額",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    false,
+    "RELATION_MISMATCH_RESOURCE"
+   ]
+  },
+  {
+   "id": "F06-supplementary-ready-wrong-period",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2027",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補領差額",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    false,
+    "RELATION_MISMATCH_PERIOD"
+   ]
+  },
+  {
+   "id": "F06-supplementary-ready-duplicate-related",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補領差額",
+     "relation_approved_by": "r4-1"
+    },
+    {
+     "id": "a3",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "SUBMITTED",
+     "related": "a1",
+     "reason": "x",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    false,
+    "DUPLICATE_RELATED"
+   ]
+  },
+  {
+   "id": "F06-supplementary-ready-other-withdrawn-not-duplicate",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補領差額",
+     "relation_approved_by": "r4-1"
+    },
+    {
+     "id": "a3",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "WITHDRAWN",
+     "related": "a1",
+     "reason": "x",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "F06-supplementary-ready-related-missing",
+   "existing": [
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補領差額",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    false,
+    "RELATED_NOT_FOUND"
+   ]
+  },
+  {
+   "id": "F06-supplementary-ready-self-reference-is-not-related",
+   "existing": [
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "PREPARING_DOCS",
+     "related": "a2",
+     "reason": "補領差額",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    false,
+    "RELATED_NOT_FOUND"
+   ]
+  },
+  {
+   "id": "F06-original-ready-excludes-itself",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "PREPARING_DOCS"
+    }
+   ],
+   "app_id": "a1",
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "F06-original-ready-ignores-other-kinds",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "PREPARING_DOCS"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "SUPPLEMENTARY",
+     "status": "APPROVED",
+     "related": "a0",
+     "reason": "x",
+     "relation_approved_by": "r4-1"
+    }
+   ],
+   "app_id": "a1",
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "F06-original-ready-with-another-original-blocked",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "PREPARING_DOCS"
+    },
+    {
+     "id": "a9",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "app_id": "a1",
+   "expected": [
+    false,
+    "ORIGINAL_DUPLICATE_APPROVED"
+   ]
+  },
+  {
+   "id": "F06-reapply-ready-after-denied",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "REAPPLY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補文件"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "F06-reapply-ready-but-original-now-approved",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "REAPPLY",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "補文件"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    false,
+    "RELATED_STATE_INVALID_APPROVED"
+   ]
+  },
+  {
+   "id": "F06-appeal-ready-after-denied",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "DENIED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "APPEAL",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "申復"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "F06-appeal-ready-after-lapsed",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "LAPSED"
+    },
+    {
+     "id": "a2",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "APPEAL",
+     "status": "PREPARING_DOCS",
+     "related": "a1",
+     "reason": "申復"
+    }
+   ],
+   "app_id": "a2",
+   "expected": [
+    true,
+    "ok"
+   ]
+  }
+ ],
+ "application_lifecycle_cases": [
+  {
+   "id": "F06-supplementary-create-prepare-ready",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "id": "a2",
+    "related": "a1",
+    "reason": "補領差額",
+    "relation_approved_by": "r4-1"
+   },
+   "path": [
+    "CANDIDATE",
+    "AWAITING_CLIENT_DECISION",
+    "PREPARING_DOCS",
+    "READY_TO_SUBMIT"
+   ],
+   "expected_ready": [
+    true,
+    "ok"
+   ]
+  },
+  {
+   "id": "F06-supplementary-without-r4-cannot-be-created",
+   "existing": [
+    {
+     "id": "a1",
+     "household": "H1",
+     "resource": "R1",
+     "period": "2026",
+     "kind": "ORIGINAL",
+     "status": "APPROVED"
+    }
+   ],
+   "new": {
+    "kind": "SUPPLEMENTARY",
+    "household": "H1",
+    "resource": "R1",
+    "period": "2026",
+    "id": "a2",
+    "related": "a1",
+    "reason": "補領差額"
+   },
+   "path": [],
+   "expected_create": [
+    false,
+    "R4_APPROVAL_REQUIRED"
+   ]
+  }
+ ],
+ "replay_cases": [
+  {
+   "id": "F05-replay-returns-current-content-not-stored-body",
+   "world": {
+    "permitted": true,
+    "consent_valid": true,
+    "deleted": false,
+    "current": {
+     "status": "UNDER_REVIEW"
+    }
+   },
+   "expected": [
+    201,
+    {
+     "status": "UNDER_REVIEW"
+    }
+   ]
+  },
+  {
+   "id": "F05-replay-after-consent-revoked-returns-nothing",
+   "world": {
+    "permitted": true,
+    "consent_valid": false,
+    "deleted": false,
+    "current": {
+     "status": "UNDER_REVIEW"
+    }
+   },
+   "expected": [
+    403,
+    null
+   ]
+  },
+  {
+   "id": "F05-replay-after-role-lost-returns-nothing",
+   "world": {
+    "permitted": false,
+    "consent_valid": true,
+    "deleted": false,
+    "current": {
+     "status": "UNDER_REVIEW"
+    }
+   },
+   "expected": [
+    403,
+    null
+   ]
+  },
+  {
+   "id": "F05-replay-after-deletion-returns-gone",
+   "world": {
+    "permitted": true,
+    "consent_valid": true,
+    "deleted": true,
+    "current": null
+   },
+   "expected": [
+    410,
+    null
+   ]
+  },
+  {
+   "id": "F05-deleted-takes-precedence-over-forbidden",
+   "world": {
+    "permitted": false,
+    "consent_valid": false,
+    "deleted": true,
+    "current": null
+   },
+   "expected": [
+    410,
+    null
+   ]
+  }
+ ]
+}

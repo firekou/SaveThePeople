@@ -1,0 +1,1985 @@
+{
+ "_notice": "權限單一事實來源。PRD §4.2 矩陣、ARCHITECTURE §6 API 權限欄、USER_JOURNEYS 頁面「權限」行由 tools/gen_permissions.py 產生；請改此檔再重新產生。政策檢查見 tools/gen_permissions.py 的 policy_problems()。這是文件政策檢查，不是產品授權行為測試。",
+ "roles": [
+  "R1",
+  "R2",
+  "R3",
+  "R4",
+  "R5",
+  "R6",
+  "R7",
+  "R8",
+  "R9",
+  "PUBLIC"
+ ],
+ "scopes": {
+  "ALL-PUB": "所有已發布的公開資訊",
+  "INT": "內部資料（不含個案內容）",
+  "OWN": "本人所屬家庭",
+  "GRANT": "Consent.proxy 授權範圍與期間",
+  "ASG": "責任人或備援案件",
+  "SITE-REV": "同據點、同意書允許，且在複核佇列或抽樣範圍",
+  "REF": "轉介給該機構且同意有效的那一筆，僅 shared_fields",
+  "SAMPLE": "AccessGrant REVIEW_SAMPLE 抽樣案件（去識別化，≤14 天）",
+  "AGG": "匿名彙總（n<5 遮蔽）",
+  "BG": "AccessGrant BREAK_GLASS（雙人核可、≤4 小時）",
+  "TOKEN": "本次初篩工作階段 token",
+  "VERIFY": "被指派驗證的單筆 OutcomeEvent 摘要（不含家庭、成員、文件；驗證人≠登錄人≠責任人）",
+  "SELF": "本人自己的授權或存取紀錄",
+  "OWN-RES": "自身提供的資源",
+  "OWN-ORG": "自身機構的容量資料"
+ },
+ "classes": [
+  {
+   "id": "public_resource",
+   "label": "公開資源資訊（已發布版本）",
+   "kind": "public"
+  },
+  {
+   "id": "resource_internal",
+   "label": "資源草稿、查核紀錄、來源快照",
+   "kind": "internal"
+  },
+  {
+   "id": "resource_task",
+   "label": "資源查核任務",
+   "kind": "internal"
+  },
+  {
+   "id": "rule_published",
+   "label": "資格規則（已發布）",
+   "kind": "public"
+  },
+  {
+   "id": "document_requirement",
+   "label": "文件需求範本（DocumentRequirement，隨資源版本）",
+   "kind": "public"
+  },
+  {
+   "id": "capacity_data",
+   "label": "機構與服務容量資料（不含個案）",
+   "kind": "internal"
+  },
+  {
+   "id": "screening_session",
+   "label": "初篩工作階段（免姓名免帳號；去連結化，非匿名保證）",
+   "kind": "case"
+  },
+  {
+   "id": "case_profile",
+   "label": "家庭與成員概況",
+   "kind": "case"
+  },
+  {
+   "id": "case_sensitive",
+   "label": "敏感事實（所得、財產、健康、身障、證件號）",
+   "kind": "case"
+  },
+  {
+   "id": "safety_flags",
+   "label": "安全旗標（家暴、兒少保護、不可家中聯絡）",
+   "kind": "case"
+  },
+  {
+   "id": "consent",
+   "label": "同意與代理授權",
+   "kind": "case"
+  },
+  {
+   "id": "assessment",
+   "label": "評估結果與理由（含複核）",
+   "kind": "case"
+  },
+  {
+   "id": "action_plan",
+   "label": "行動清單",
+   "kind": "case"
+  },
+  {
+   "id": "application",
+   "label": "申請紀錄與狀態",
+   "kind": "case"
+  },
+  {
+   "id": "referral",
+   "label": "個案轉介內容與清單",
+   "kind": "case"
+  },
+  {
+   "id": "document_progress",
+   "label": "個案文件需求與準備進度",
+   "kind": "case"
+  },
+  {
+   "id": "document_file",
+   "label": "文件檔案（私有儲存）",
+   "kind": "case"
+  },
+  {
+   "id": "case_task",
+   "label": "案件任務、提醒、通知紀錄",
+   "kind": "case"
+  },
+  {
+   "id": "outcome_event",
+   "label": "成果事件（OutcomeEvent）",
+   "kind": "case"
+  },
+  {
+   "id": "ops_metadata",
+   "label": "外部失敗與背景作業 metadata（不含個案內容）",
+   "kind": "internal"
+  },
+  {
+   "id": "audit_event",
+   "label": "稽核事件",
+   "kind": "internal"
+  },
+  {
+   "id": "access_grant",
+   "label": "例外存取授權（AccessGrant）",
+   "kind": "internal"
+  },
+  {
+   "id": "review_note",
+   "label": "獨立覆核意見（ReviewNote）",
+   "kind": "internal"
+  },
+  {
+   "id": "aggregate_report",
+   "label": "匿名彙總報表",
+   "kind": "aggregate"
+  },
+  {
+   "id": "account_admin",
+   "label": "帳號與角色管理",
+   "kind": "internal"
+  }
+ ],
+ "matrix": {
+  "public_resource": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R3": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R5": [
+    {
+     "actions": "VE",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R6": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R8": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ]
+  },
+  "resource_internal": {
+   "R3": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "VE",
+     "scope": "INT",
+     "note": "僅限暫停轉換 RV-09、RV-10，不可編輯內容"
+    }
+   ],
+   "R5": [
+    {
+     "actions": "VEA",
+     "scope": "INT",
+     "note": "查核人≠發布人"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "VE",
+     "scope": "INT",
+     "note": "僅限暫停／停用轉換 RV-09、RV-10、RV-14，不可編輯內容"
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": ""
+    }
+   ]
+  },
+  "resource_task": {
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": ""
+    }
+   ],
+   "R5": [
+    {
+     "actions": "VE",
+     "scope": "INT",
+     "note": ""
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": ""
+    }
+   ]
+  },
+  "rule_published": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": "白話版"
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": "白話版"
+    }
+   ],
+   "R3": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R5": [
+    {
+     "actions": "VEA",
+     "scope": "INT",
+     "note": ""
+    }
+   ],
+   "R6": [
+    {
+     "actions": "V",
+     "scope": "OWN-RES",
+     "note": "自身提供的資源"
+    }
+   ]
+  },
+  "document_requirement": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R3": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R5": [
+    {
+     "actions": "VE",
+     "scope": "INT",
+     "note": ""
+    }
+   ],
+   "R6": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R8": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": ""
+    }
+   ]
+  },
+  "capacity_data": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": "僅公開的容量狀態"
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "ALL-PUB",
+     "note": "僅公開的容量狀態"
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "INT",
+     "note": "電話或書面確認後登錄確認方式與日期"
+    }
+   ],
+   "R4": [
+    {
+     "actions": "VE",
+     "scope": "INT",
+     "note": "電話或書面確認後登錄確認方式與日期"
+    }
+   ],
+   "R5": [
+    {
+     "actions": "VE",
+     "scope": "INT",
+     "note": "電話或書面確認後登錄確認方式與日期"
+    }
+   ],
+   "R6": [
+    {
+     "actions": "VE",
+     "scope": "OWN-ORG",
+     "note": "試點後；試點初期由 R3 代為登錄"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": ""
+    }
+   ]
+  },
+  "screening_session": {
+   "R1": [
+    {
+     "actions": "VE",
+     "scope": "TOKEN",
+     "note": "本次 token"
+    }
+   ],
+   "R2": [
+    {
+     "actions": "VE",
+     "scope": "TOKEN",
+     "note": "本次 token"
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": "代填"
+    }
+   ],
+   "R8": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": ""
+    }
+   ]
+  },
+  "case_profile": {
+   "R1": [
+    {
+     "actions": "VE",
+     "scope": "OWN",
+     "note": ""
+    }
+   ],
+   "R2": [
+    {
+     "actions": "VE",
+     "scope": "GRANT",
+     "note": ""
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "VE",
+     "scope": "SITE-REV",
+     "note": ""
+    }
+   ],
+   "R6": [
+    {
+     "actions": "V",
+     "scope": "REF",
+     "note": "僅 shared_fields"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "VE",
+     "scope": "BG",
+     "note": "依 AccessGrant 用途與範圍"
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": "去識別化"
+    }
+   ]
+  },
+  "case_sensitive": {
+   "R1": [
+    {
+     "actions": "VE",
+     "scope": "OWN",
+     "note": ""
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "GRANT",
+     "note": ""
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": "用途限評估與申請"
+    }
+   ],
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "SITE-REV",
+     "note": ""
+    }
+   ],
+   "R6": [
+    {
+     "actions": "V",
+     "scope": "REF",
+     "note": "僅 shared_fields 內"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "VE",
+     "scope": "BG",
+     "note": "依 AccessGrant 用途與範圍"
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": "遮蔽原始值，只見確認程度與判斷結果"
+    }
+   ]
+  },
+  "safety_flags": {
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "SITE-REV",
+     "note": ""
+    }
+   ]
+  },
+  "consent": {
+   "R1": [
+    {
+     "actions": "VE",
+     "scope": "OWN",
+     "note": "可查看與撤回自己的同意"
+    }
+   ],
+   "R2": [
+    {
+     "actions": "VE",
+     "scope": "SELF",
+     "note": "查看與撤回自身授權"
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": "建立、記錄撤回"
+    }
+   ],
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "SITE-REV",
+     "note": ""
+    }
+   ],
+   "R6": [
+    {
+     "actions": "V",
+     "scope": "REF",
+     "note": "該轉介的同意摘要"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "BG",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": ""
+    }
+   ]
+  },
+  "assessment": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "OWN",
+     "note": ""
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "GRANT",
+     "note": ""
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": "加註；含 MANUAL_CHECK_ONLY 人工查核項"
+    }
+   ],
+   "R4": [
+    {
+     "actions": "VE",
+     "scope": "SITE-REV",
+     "note": "複核結論；含 MANUAL_CHECK_ONLY 人工查核項"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "BG",
+     "note": ""
+    }
+   ],
+   "R8": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": ""
+    }
+   ]
+  },
+  "action_plan": {
+   "R1": [
+    {
+     "actions": "VE",
+     "scope": "OWN",
+     "note": "勾選自己的步驟"
+    }
+   ],
+   "R2": [
+    {
+     "actions": "VE",
+     "scope": "GRANT",
+     "note": "勾選自己的步驟"
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "SITE-REV",
+     "note": ""
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "BG",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": ""
+    }
+   ]
+  },
+  "application": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "OWN",
+     "note": ""
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "GRANT",
+     "note": ""
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "VE",
+     "scope": "SITE-REV",
+     "note": "含更正轉換"
+    }
+   ],
+   "R6": [
+    {
+     "actions": "V",
+     "scope": "REF",
+     "note": "僅該轉介對應的服務"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "BG",
+     "note": ""
+    }
+   ],
+   "R8": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": ""
+    }
+   ]
+  },
+  "referral": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "OWN",
+     "note": ""
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "GRANT",
+     "note": ""
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VES",
+     "scope": "ASG",
+     "note": "依 share_targets"
+    }
+   ],
+   "R4": [
+    {
+     "actions": "VES",
+     "scope": "SITE-REV",
+     "note": ""
+    }
+   ],
+   "R6": [
+    {
+     "actions": "VE",
+     "scope": "REF",
+     "note": "受理狀態、服務回覆；只含轉介給自己的那一筆"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "BG",
+     "note": ""
+    }
+   ],
+   "R8": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": ""
+    }
+   ]
+  },
+  "document_progress": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "OWN",
+     "note": ""
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "GRANT",
+     "note": ""
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "VE",
+     "scope": "SITE-REV",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": ""
+    }
+   ]
+  },
+  "document_file": {
+   "R1": [
+    {
+     "actions": "VE",
+     "scope": "OWN",
+     "note": "自身上傳"
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "GRANT",
+     "note": ""
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": "代為上傳與確認；限申請用途，下載留紀錄"
+    }
+   ],
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "SITE-REV",
+     "note": "複核中"
+    }
+   ]
+  },
+  "case_task": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "OWN",
+     "note": "給自己的"
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "GRANT",
+     "note": "給自己的"
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": ""
+    }
+   ],
+   "R4": [
+    {
+     "actions": "VE",
+     "scope": "SITE-REV",
+     "note": ""
+    }
+   ],
+   "R6": [
+    {
+     "actions": "V",
+     "scope": "REF",
+     "note": "給自己的"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "BG",
+     "note": ""
+    }
+   ],
+   "R8": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": ""
+    }
+   ]
+  },
+  "outcome_event": {
+   "R1": [
+    {
+     "actions": "VE",
+     "scope": "OWN",
+     "note": "回報取得，E1"
+    }
+   ],
+   "R2": [
+    {
+     "actions": "VE",
+     "scope": "GRANT",
+     "note": "E1"
+    }
+   ],
+   "R3": [
+    {
+     "actions": "VE",
+     "scope": "ASG",
+     "note": "登錄；不可驗證自己登錄或自己負責的事件"
+    },
+    {
+     "actions": "VA",
+     "scope": "VERIFY",
+     "note": "驗證另一位 R3 負責、非自己登錄、且被指派驗證的單筆事件；只可見事件摘要（類型、日期、取得證據、描述），不含家庭、成員與文件"
+    }
+   ],
+   "R4": [
+    {
+     "actions": "VEA",
+     "scope": "SITE-REV",
+     "note": "驗證與更正"
+    }
+   ],
+   "R6": [
+    {
+     "actions": "E",
+     "scope": "REF",
+     "note": "服務開始／完成確認，E2"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "BG",
+     "note": ""
+    }
+   ],
+   "R8": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SAMPLE",
+     "note": ""
+    }
+   ]
+  },
+  "ops_metadata": {
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": ""
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": "外部失敗清單、背景作業狀態；不含 rendered_summary 與個案內容"
+    }
+   ]
+  },
+  "audit_event": {
+   "R1": [
+    {
+     "actions": "V",
+     "scope": "OWN",
+     "note": "自身存取紀錄摘要，經 R3 提供"
+    }
+   ],
+   "R2": [
+    {
+     "actions": "V",
+     "scope": "GRANT",
+     "note": "同左"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": "metadata，不含敏感值"
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "INT",
+     "note": "彙總與抽樣"
+    }
+   ]
+  },
+  "access_grant": {
+   "R4": [
+    {
+     "actions": "VEA",
+     "scope": "SITE-REV",
+     "note": "核發 REVIEW_SAMPLE，需負責人同意"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "VEA",
+     "scope": "INT",
+     "note": "申請與核准 BREAK_GLASS；申請人≠核准人，雙人"
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "SELF",
+     "note": "自身授權"
+    }
+   ]
+  },
+  "review_note": {
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "SITE-REV",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "VE",
+     "scope": "SAMPLE",
+     "note": "只寫意見，不改被覆核資料"
+    }
+   ]
+  },
+  "aggregate_report": {
+   "R3": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": "自身據點"
+    }
+   ],
+   "R4": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": ""
+    }
+   ],
+   "R5": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": "資源成效"
+    }
+   ],
+   "R6": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": "自身資源，n≥5"
+    }
+   ],
+   "R7": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": ""
+    }
+   ],
+   "R8": [
+    {
+     "actions": "VS",
+     "scope": "AGG",
+     "note": ""
+    }
+   ],
+   "R9": [
+    {
+     "actions": "V",
+     "scope": "AGG",
+     "note": ""
+    }
+   ]
+  },
+  "account_admin": {
+   "R7": [
+    {
+     "actions": "VE",
+     "scope": "INT",
+     "note": ""
+    }
+   ]
+  }
+ },
+ "api": [
+  {
+   "endpoint": "GET /api/public/resources",
+   "class": "public_resource",
+   "action": "V",
+   "grants": [
+    "PUBLIC·ALL-PUB"
+   ],
+   "note": ""
+  },
+  {
+   "endpoint": "GET /api/public/resources/{key}",
+   "class": "public_resource",
+   "action": "V",
+   "grants": [
+    "PUBLIC·ALL-PUB"
+   ],
+   "note": ""
+  },
+  {
+   "endpoint": "POST /api/screenings",
+   "class": "screening_session",
+   "action": "E",
+   "grants": [
+    "R1·TOKEN",
+    "R2·TOKEN"
+   ],
+   "note": "公開入口；速率限制"
+  },
+  {
+   "endpoint": "PUT /api/screenings/{token}/answers",
+   "class": "screening_session",
+   "action": "E",
+   "grants": [
+    "R1·TOKEN",
+    "R2·TOKEN",
+    "R3·ASG"
+   ],
+   "note": "token 持有者或代填的 R3"
+  },
+  {
+   "endpoint": "POST /api/screenings/{token}/evaluate",
+   "class": "screening_session",
+   "action": "V",
+   "grants": [
+    "R1·TOKEN",
+    "R2·TOKEN"
+   ],
+   "note": "只回 FORMAL"
+  },
+  {
+   "endpoint": "DELETE /api/screenings/{token}",
+   "class": "screening_session",
+   "action": "E",
+   "grants": [
+    "R1·TOKEN",
+    "R2·TOKEN"
+   ],
+   "note": "清除並離開：立即硬刪工作階段（CP-05）並清除 cookie（CP-25）"
+  },
+  {
+   "endpoint": "POST /api/help-requests",
+   "class": "screening_session",
+   "action": "E",
+   "grants": [
+    "R1·TOKEN",
+    "R2·TOKEN"
+   ],
+   "note": "需 CONTACT 同意"
+  },
+  {
+   "endpoint": "POST /api/cases",
+   "class": "case_profile",
+   "action": "E",
+   "grants": [
+    "R3·ASG"
+   ],
+   "note": "建案者成為責任人"
+  },
+  {
+   "endpoint": "POST /api/cases/{id}/consents",
+   "class": "consent",
+   "action": "E",
+   "grants": [
+    "R3·ASG"
+   ],
+   "note": ""
+  },
+  {
+   "endpoint": "POST /api/consents/{id}/revoke",
+   "class": "consent",
+   "action": "E",
+   "grants": [
+    "R1·OWN",
+    "R2·SELF",
+    "R3·ASG"
+   ],
+   "note": "R1／R2 於試點後；試點初期由 R3 登錄"
+  },
+  {
+   "endpoint": "PUT /api/cases/{id}/facts",
+   "class": "case_sensitive",
+   "action": "E",
+   "grants": [
+    "R1·OWN",
+    "R3·ASG"
+   ],
+   "note": "R1 於試點後"
+  },
+  {
+   "endpoint": "POST /api/cases/{id}/assessments",
+   "class": "assessment",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV"
+   ],
+   "note": "R3／R4 才可見 MANUAL_CHECK_ONLY"
+  },
+  {
+   "endpoint": "POST /api/assessments/{id}/reviews",
+   "class": "assessment",
+   "action": "E",
+   "grants": [
+    "R4·SITE-REV"
+   ],
+   "note": "複核人≠承辦"
+  },
+  {
+   "endpoint": "POST /api/assessments/{id}/retry",
+   "class": "assessment",
+   "action": "E",
+   "grants": [
+    "R3·ASG"
+   ],
+   "note": "AS-03 重試評估（僅 EVALUATION_FAILED）"
+  },
+  {
+   "endpoint": "POST /api/cases/{id}/applications",
+   "class": "application",
+   "action": "E",
+   "grants": [
+    "R3·ASG"
+   ],
+   "note": "SUPPLEMENTARY 另需 R4 核可（relation_approved_by）"
+  },
+  {
+   "endpoint": "POST /api/applications/{id}/transitions",
+   "class": "application",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV"
+   ],
+   "note": "依 transition_id 的操作者；更正轉換僅 R4"
+  },
+  {
+   "endpoint": "POST /api/cases/{id}/referrals",
+   "class": "referral",
+   "action": "E",
+   "grants": [
+    "R3·ASG"
+   ],
+   "note": ""
+  },
+  {
+   "endpoint": "POST /api/referrals/{id}/transitions",
+   "class": "referral",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV",
+    "R6·REF"
+   ],
+   "note": "依 transition_id 的操作者"
+  },
+  {
+   "endpoint": "GET /api/referrals",
+   "class": "referral",
+   "action": "V",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV",
+    "R6·REF"
+   ],
+   "note": "個案轉介清單；R5 不可"
+  },
+  {
+   "endpoint": "POST /api/documents/upload-intents",
+   "class": "document_file",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R1·OWN"
+   ],
+   "note": "R1 於試點後；需 DOCUMENT_STORAGE 同意"
+  },
+  {
+   "endpoint": "POST /api/documents/{id}/confirm",
+   "class": "document_file",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R1·OWN"
+   ],
+   "note": "同上"
+  },
+  {
+   "endpoint": "GET /api/documents/{id}/download",
+   "class": "document_file",
+   "action": "V",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV",
+    "R1·OWN",
+    "R2·GRANT"
+   ],
+   "note": "R7 不可；每次寫 AuditEvent"
+  },
+  {
+   "endpoint": "POST /api/documents/{id}/extract",
+   "class": "document_file",
+   "action": "E",
+   "grants": [
+    "R3·ASG"
+   ],
+   "note": "試點後；本機辨識"
+  },
+  {
+   "endpoint": "POST /api/outcomes/{id}/events",
+   "class": "outcome_event",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV",
+    "R6·REF"
+   ],
+   "note": "R6 僅 E2 服務確認；CORRECTION 僅 R4"
+  },
+  {
+   "endpoint": "GET /api/outcome-events/pending-verification",
+   "class": "outcome_event",
+   "action": "V",
+   "grants": [
+    "R3·VERIFY",
+    "R4·SITE-REV"
+   ],
+   "note": "待驗證清單：R3 只見被指派驗證的單筆事件摘要"
+  },
+  {
+   "endpoint": "POST /api/outcome-events/{id}/verify",
+   "class": "outcome_event",
+   "action": "A",
+   "grants": [
+    "R3·VERIFY",
+    "R4·SITE-REV"
+   ],
+   "note": "驗證人≠登錄人且≠案件責任人；R3 不因此取得該案其他資料"
+  },
+  {
+   "endpoint": "POST /api/outcomes/{id}/transitions",
+   "class": "outcome_event",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV"
+   ],
+   "note": "更正轉換僅 R4"
+  },
+  {
+   "endpoint": "POST /api/tasks",
+   "class": "case_task",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV"
+   ],
+   "note": ""
+  },
+  {
+   "endpoint": "PATCH /api/tasks/{id}",
+   "class": "case_task",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV"
+   ],
+   "note": ""
+  },
+  {
+   "endpoint": "POST /api/resource-tasks",
+   "class": "resource_task",
+   "action": "E",
+   "grants": [
+    "R5·INT"
+   ],
+   "note": "資源查核任務"
+  },
+  {
+   "endpoint": "POST /api/notifications/{id}/transitions",
+   "class": "case_task",
+   "action": "E",
+   "grants": [
+    "R3·ASG",
+    "R4·SITE-REV"
+   ],
+   "note": "人工通知處理"
+  },
+  {
+   "endpoint": "GET /api/capacity",
+   "class": "capacity_data",
+   "action": "V",
+   "grants": [
+    "R3·INT",
+    "R4·INT",
+    "R5·INT",
+    "R6·OWN-ORG",
+    "R7·INT",
+    "R9·INT"
+   ],
+   "note": "機構與服務容量；不含個案"
+  },
+  {
+   "endpoint": "PATCH /api/organizations/{id}/capacity",
+   "class": "capacity_data",
+   "action": "E",
+   "grants": [
+    "R3·INT",
+    "R4·INT",
+    "R5·INT",
+    "R6·OWN-ORG"
+   ],
+   "note": "附確認方式與日期；R6 於試點後只可更新自身機構"
+  },
+  {
+   "endpoint": "POST /api/admin/resources/{id}/versions",
+   "class": "resource_internal",
+   "action": "E",
+   "grants": [
+    "R5·INT"
+   ],
+   "note": ""
+  },
+  {
+   "endpoint": "POST /api/admin/versions/{id}/transitions",
+   "class": "resource_internal",
+   "action": "E",
+   "grants": [
+    "R5·INT",
+    "R4·INT",
+    "R7·INT"
+   ],
+   "note": "R4、R7 僅限暫停／停用轉換"
+  },
+  {
+   "endpoint": "GET /api/admin/versions/{id}/recommendation",
+   "class": "resource_internal",
+   "action": "V",
+   "grants": [
+    "R5·INT",
+    "R4·INT",
+    "R9·INT",
+    "R3·INT",
+    "R7·INT"
+   ],
+   "note": ""
+  },
+  {
+   "endpoint": "POST /api/access-grants",
+   "class": "access_grant",
+   "action": "E",
+   "grants": [
+    "R7·INT",
+    "R4·SITE-REV"
+   ],
+   "note": "R7 申請 BREAK_GLASS；R4 核發 REVIEW_SAMPLE"
+  },
+  {
+   "endpoint": "POST /api/access-grants/{id}/approve",
+   "class": "access_grant",
+   "action": "A",
+   "grants": [
+    "R7·INT",
+    "R4·SITE-REV"
+   ],
+   "note": "核准人≠申請人"
+  },
+  {
+   "endpoint": "POST /api/access-grants/{id}/revoke",
+   "class": "access_grant",
+   "action": "E",
+   "grants": [
+    "R7·INT",
+    "R4·SITE-REV"
+   ],
+   "note": ""
+  },
+  {
+   "endpoint": "POST /api/review-notes",
+   "class": "review_note",
+   "action": "E",
+   "grants": [
+    "R9·SAMPLE"
+   ],
+   "note": "只寫意見"
+  },
+  {
+   "endpoint": "GET /api/reports/funnel",
+   "class": "aggregate_report",
+   "action": "V",
+   "grants": [
+    "R3·AGG",
+    "R4·AGG",
+    "R5·AGG",
+    "R6·AGG",
+    "R7·AGG",
+    "R8·AGG",
+    "R9·AGG"
+   ],
+   "note": "R3 僅自身據點；無個案下鑽"
+  },
+  {
+   "endpoint": "GET /api/audit-events",
+   "class": "audit_event",
+   "action": "V",
+   "grants": [
+    "R7·INT",
+    "R9·INT"
+   ],
+   "note": "metadata；R9 為彙總與抽樣"
+  }
+ ],
+ "pages": [
+  {
+   "page": "P1",
+   "title": "公開資源查詢",
+   "sections": [
+    {
+     "label": "頁面",
+     "class": "public_resource",
+     "action": "V",
+     "grants": [
+      "PUBLIC·ALL-PUB"
+     ],
+     "note": "依引擎 §0.1 catalog_visibility：列表只含 PUBLISHED 與 NEEDS_RECHECK；暫停、過期、被取代只在直接連結或歷史頁顯示狀態說明；查核人姓名不公開"
+    }
+   ]
+  },
+  {
+   "page": "P2",
+   "title": "簡短需求問答",
+   "sections": [
+    {
+     "label": "本次工作階段",
+     "class": "screening_session",
+     "action": "E",
+     "grants": [
+      "R1·TOKEN",
+      "R2·TOKEN",
+      "R3·ASG"
+     ],
+     "note": "免姓名免帳號、去連結化，不等於匿名；R3 為代填"
+    }
+   ]
+  },
+  {
+   "page": "P3",
+   "title": "個人化候選資源與資格解釋",
+   "sections": [
+    {
+     "label": "本次工作階段結果",
+     "class": "screening_session",
+     "action": "V",
+     "grants": [
+      "R1·TOKEN",
+      "R2·TOKEN"
+     ],
+     "note": "只含 FORMAL 資源"
+    },
+    {
+     "label": "案件內結果",
+     "class": "assessment",
+     "action": "V",
+     "grants": [
+      "R1·OWN",
+      "R2·GRANT",
+      "R3·ASG",
+      "R4·SITE-REV"
+     ],
+     "note": ""
+    },
+    {
+     "label": "人工查核項頁籤（MANUAL_CHECK_ONLY）",
+     "class": "assessment",
+     "action": "V",
+     "grants": [
+      "R3·ASG",
+      "R4·SITE-REV"
+     ],
+     "note": "受助者不可見"
+    }
+   ]
+  },
+  {
+   "page": "P4",
+   "title": "個人行動清單",
+   "sections": [
+    {
+     "label": "頁面",
+     "class": "action_plan",
+     "action": "V",
+     "grants": [
+      "R1·OWN",
+      "R2·GRANT",
+      "R3·ASG",
+      "R4·SITE-REV"
+     ],
+     "note": "本人與代理人可勾選自己的步驟；R3 可編輯"
+    }
+   ]
+  },
+  {
+   "page": "P5",
+   "title": "文件需求與準備進度",
+   "sections": [
+    {
+     "label": "進度",
+     "class": "document_progress",
+     "action": "V",
+     "grants": [
+      "R1·OWN",
+      "R2·GRANT",
+      "R3·ASG",
+      "R4·SITE-REV"
+     ],
+     "note": ""
+    },
+    {
+     "label": "檔案",
+     "class": "document_file",
+     "action": "V",
+     "grants": [
+      "R1·OWN",
+      "R2·GRANT",
+      "R3·ASG",
+      "R4·SITE-REV"
+     ],
+     "note": "R7 只能執行刪除作業、看不到內容；下載留 AuditEvent"
+    }
+   ]
+  },
+  {
+   "page": "P6",
+   "title": "申請與服務追蹤",
+   "sections": [
+    {
+     "label": "申請",
+     "class": "application",
+     "action": "V",
+     "grants": [
+      "R1·OWN",
+      "R2·GRANT",
+      "R3·ASG",
+      "R4·SITE-REV"
+     ],
+     "note": "R1／R2 為唯讀摘要；R6 無此頁"
+    },
+    {
+     "label": "成果事件登錄",
+     "class": "outcome_event",
+     "action": "E",
+     "grants": [
+      "R3·ASG",
+      "R4·SITE-REV"
+     ],
+     "note": "驗證不在此頁：由「待驗證」清單（P7）處理"
+    }
+   ]
+  },
+  {
+   "page": "P7",
+   "title": "協助員案件工作台",
+   "sections": [
+    {
+     "label": "案件清單與今日任務",
+     "class": "case_task",
+     "action": "V",
+     "grants": [
+      "R3·ASG",
+      "R4·SITE-REV"
+     ],
+     "note": "R3 僅責任人或備援案件；R4 僅複核佇列或抽樣範圍"
+    },
+    {
+     "label": "待我驗證",
+     "class": "outcome_event",
+     "action": "A",
+     "grants": [
+      "R3·VERIFY",
+      "R4·SITE-REV"
+     ],
+     "note": "R3 只見被指派驗證的單筆事件摘要，不因此取得該案其他資料"
+    }
+   ]
+  },
+  {
+   "page": "P8",
+   "title": "社工複核佇列",
+   "sections": [
+    {
+     "label": "複核",
+     "class": "assessment",
+     "action": "E",
+     "grants": [
+      "R4·SITE-REV"
+     ],
+     "note": "複核人≠案件承辦"
+    },
+    {
+     "label": "唯讀抽樣檢視",
+     "class": "assessment",
+     "action": "V",
+     "grants": [
+      "R9·SAMPLE"
+     ],
+     "note": "去識別化"
+    }
+   ]
+  },
+  {
+   "page": "P9",
+   "title": "資源維護、查核與版本管理",
+   "sections": [
+    {
+     "label": "頁面",
+     "class": "resource_internal",
+     "action": "V",
+     "grants": [
+      "R5·INT",
+      "R4·INT",
+      "R7·INT",
+      "R9·INT"
+     ],
+     "note": "R5 可編輯與發布（發布人≠查核人）；R4、R7 僅可暫停／停用；R9 唯讀；個案內容一律不可見"
+    }
+   ]
+  },
+  {
+   "page": "P10",
+   "title": "任務、補件、續辦與提醒",
+   "sections": [
+    {
+     "label": "案件任務與提醒",
+     "class": "case_task",
+     "action": "V",
+     "grants": [
+      "R1·OWN",
+      "R2·GRANT",
+      "R3·ASG",
+      "R4·SITE-REV",
+      "R6·REF"
+     ],
+     "note": "R1／R2／R6 只看給自己的"
+    },
+    {
+     "label": "資源查核任務",
+     "class": "resource_task",
+     "action": "V",
+     "grants": [
+      "R5·INT"
+     ],
+     "note": ""
+    },
+    {
+     "label": "外部失敗清單",
+     "class": "ops_metadata",
+     "action": "V",
+     "grants": [
+      "R7·INT",
+      "R4·INT"
+     ],
+     "note": "不含 rendered_summary 與個案內容"
+    }
+   ]
+  },
+  {
+   "page": "P11",
+   "title": "機構接案容量與轉介狀態",
+   "sections": [
+    {
+     "label": "A 容量資料（不含個案）",
+     "class": "capacity_data",
+     "action": "V",
+     "grants": [
+      "R3·INT",
+      "R4·INT",
+      "R5·INT",
+      "R6·OWN-ORG"
+     ],
+     "note": "R5 只能看與維護容量／資源資料"
+    },
+    {
+     "label": "B 個案轉介清單",
+     "class": "referral",
+     "action": "V",
+     "grants": [
+      "R3·ASG",
+      "R4·SITE-REV",
+      "R6·REF"
+     ],
+     "note": "R5 不可；R6 只見轉介給自己、同意有效、僅 shared_fields"
+    }
+   ]
+  },
+  {
+   "page": "P12",
+   "title": "成效與成本報表",
+   "sections": [
+    {
+     "label": "頁面",
+     "class": "aggregate_report",
+     "action": "V",
+     "grants": [
+      "R3·AGG",
+      "R4·AGG",
+      "R5·AGG",
+      "R6·AGG",
+      "R7·AGG",
+      "R8·AGG",
+      "R9·AGG"
+     ],
+     "note": "R3 僅自身據點；任何角色皆無個案下鑽與個案匯出"
+    }
+   ]
+  }
+ ],
+ "machine_api": {
+  "resource_version": [
+   "POST /api/admin/versions/{id}/transitions"
+  ],
+  "assessment": [
+   "POST /api/assessments/{id}/reviews",
+   "POST /api/assessments/{id}/retry"
+  ],
+  "application": [
+   "POST /api/applications/{id}/transitions"
+  ],
+  "referral": [
+   "POST /api/referrals/{id}/transitions"
+  ],
+  "outcome": [
+   "POST /api/outcomes/{id}/transitions"
+  ],
+  "notification": [
+   "POST /api/notifications/{id}/transitions"
+  ]
+ },
+ "machine_class": {
+  "resource_version": "resource_internal",
+  "assessment": "assessment",
+  "application": "application",
+  "referral": "referral",
+  "outcome": "outcome_event",
+  "notification": "case_task"
+ },
+ "api_external": {
+  "POST /api/notifications/callbacks/{provider}": "供應商簽章驗證（非人員角色）"
+ }
+}

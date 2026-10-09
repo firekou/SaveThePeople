@@ -1,0 +1,678 @@
+{
+ "_notice": "SYNTHETIC. 預期結果由規格作者依 RESOURCE_AND_ELIGIBILITY_ENGINE.md §0、§6 手算，不由模型或 runner 輸出複製；作為規則引擎驗收基準。R4 角色正式覆核前，僅作規格驗證用。",
+ "evaluation_date": "2026-10-03",
+ "expected": {
+  "H1": {
+   "TW-DEMO-LIVING-001": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "UNKNOWN"
+    },
+    "derived": {
+     "C2": {
+      "members": 3,
+      "income_per_capita": 13333
+     }
+    },
+    "missing_inputs": [
+     "H1:household.movable_property_per_capita"
+    ]
+   },
+   "TW-DEMO-EMERG-002": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_INELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "FAIL_UNCONFIRMED",
+     "C3": "HUMAN"
+    },
+    "unconfirmed": true,
+    "flags": [
+     "CONFIRM_SELF_REPORT",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-EDU-003": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "PASS"
+    },
+    "derived": {
+     "C3": {
+      "members": 4,
+      "income_per_capita": 11500
+     }
+    }
+   },
+   "TW-DEMO-CHILD-004": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "PASS",
+     "C4": "PASS"
+    },
+    "derived": {
+     "C3": {
+      "members": 4,
+      "income_per_capita": 11500
+     }
+    }
+   },
+   "TW-DEMO-FOOD-005": {
+    "recommendation": {
+     "status": "MANUAL_CHECK_ONLY",
+     "reasons": [
+      "PERIOD_UNKNOWN"
+     ]
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "HUMAN"
+    },
+    "flags": [
+     "CAPACITY_FULL",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-RENT-006": {
+    "recommendation": {
+     "status": "NOT_RECOMMENDED",
+     "reasons": [
+      "STATUS_EXPIRED",
+      "PERIOD_ENDED",
+      "WINDOW_CLOSED"
+     ]
+    }
+   }
+  },
+  "H2": {
+   "TW-DEMO-LIVING-001": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "UNKNOWN",
+     "C2": "UNKNOWN",
+     "C3": "UNKNOWN"
+    }
+   },
+   "TW-DEMO-EMERG-002": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "UNKNOWN",
+     "C2": "UNKNOWN",
+     "C3": "HUMAN"
+    },
+    "flags": [
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-EDU-003": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "UNKNOWN",
+     "C2": "UNKNOWN",
+     "C3": "UNKNOWN"
+    },
+    "missing_inputs": [
+     "H2:household.members",
+     "H2:household.region_code"
+    ]
+   },
+   "TW-DEMO-CHILD-004": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "UNKNOWN",
+     "C2": "UNKNOWN",
+     "C3": "UNKNOWN",
+     "C4": "UNKNOWN"
+    }
+   },
+   "TW-DEMO-FOOD-005": {
+    "recommendation": {
+     "status": "MANUAL_CHECK_ONLY",
+     "reasons": [
+      "PERIOD_UNKNOWN"
+     ]
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "UNKNOWN",
+     "C2": "HUMAN"
+    },
+    "flags": [
+     "CAPACITY_FULL",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-RENT-006": {
+    "recommendation": {
+     "status": "NOT_RECOMMENDED",
+     "reasons": [
+      "STATUS_EXPIRED",
+      "PERIOD_ENDED",
+      "WINDOW_CLOSED"
+     ]
+    }
+   }
+  },
+  "H3": {
+   "TW-DEMO-LIVING-001": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_INELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "FAIL_UNCONFIRMED",
+     "C3": "PASS"
+    },
+    "unconfirmed": true,
+    "flags": [
+     "CONFIRM_SELF_REPORT",
+     "HUMAN_CHECK"
+    ],
+    "derived": {
+     "C2": {
+      "members": 3,
+      "income_per_capita": 18500
+     }
+    }
+   },
+   "TW-DEMO-EMERG-002": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "HUMAN"
+    },
+    "flags": [
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-EDU-003": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_INELIGIBLE",
+    "criteria": {
+     "C1": "FAIL_UNCONFIRMED",
+     "C2": "PASS",
+     "C3": "PASS"
+    },
+    "unconfirmed": true,
+    "flags": [
+     "CONFIRM_SELF_REPORT"
+    ]
+   },
+   "TW-DEMO-CHILD-004": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "PASS",
+     "C4": "PASS"
+    }
+   },
+   "TW-DEMO-FOOD-005": {
+    "recommendation": {
+     "status": "MANUAL_CHECK_ONLY",
+     "reasons": [
+      "PERIOD_UNKNOWN"
+     ]
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "HUMAN"
+    },
+    "flags": [
+     "CAPACITY_FULL",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-RENT-006": {
+    "recommendation": {
+     "status": "NOT_RECOMMENDED",
+     "reasons": [
+      "STATUS_EXPIRED",
+      "PERIOD_ENDED",
+      "WINDOW_CLOSED"
+     ]
+    }
+   }
+  },
+  "H4": {
+   "TW-DEMO-LIVING-001": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "UNKNOWN"
+    },
+    "flags": [
+     "ALREADY_RECEIVING"
+    ],
+    "derived": {
+     "C2": {
+      "members": 2,
+      "income_per_capita": 10000
+     }
+    }
+   },
+   "TW-DEMO-EMERG-002": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "UNKNOWN",
+     "C3": "HUMAN"
+    },
+    "flags": [
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-EDU-003": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_INELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "FAIL_UNCONFIRMED",
+     "C3": "PASS"
+    },
+    "unconfirmed": true,
+    "flags": [
+     "CONFIRM_SELF_REPORT"
+    ]
+   },
+   "TW-DEMO-CHILD-004": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_INELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "PASS",
+     "C4": "FAIL"
+    },
+    "unconfirmed": false
+   },
+   "TW-DEMO-FOOD-005": {
+    "recommendation": {
+     "status": "MANUAL_CHECK_ONLY",
+     "reasons": [
+      "PERIOD_UNKNOWN"
+     ]
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "HUMAN"
+    },
+    "flags": [
+     "CAPACITY_FULL",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-RENT-006": {
+    "recommendation": {
+     "status": "NOT_RECOMMENDED",
+     "reasons": [
+      "STATUS_EXPIRED",
+      "PERIOD_ENDED",
+      "WINDOW_CLOSED"
+     ]
+    }
+   }
+  },
+  "H5": {
+   "TW-DEMO-LIVING-001": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "PASS"
+    },
+    "derived": {
+     "C2": {
+      "members": 3,
+      "income_per_capita": 8333
+     }
+    }
+   },
+   "TW-DEMO-EMERG-002": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_INELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "FAIL_UNCONFIRMED",
+     "C3": "HUMAN"
+    },
+    "unconfirmed": true,
+    "flags": [
+     "CONFIRM_SELF_REPORT",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-EDU-003": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "UNKNOWN",
+     "C3": "UNKNOWN"
+    },
+    "missing_inputs": [
+     "H5-P3:person.co_residing"
+    ]
+   },
+   "TW-DEMO-CHILD-004": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "UNKNOWN",
+     "C3": "UNKNOWN",
+     "C4": "PASS"
+    },
+    "missing_inputs": [
+     "H5-P3:person.co_residing"
+    ]
+   },
+   "TW-DEMO-FOOD-005": {
+    "recommendation": {
+     "status": "MANUAL_CHECK_ONLY",
+     "reasons": [
+      "PERIOD_UNKNOWN"
+     ]
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "HUMAN"
+    },
+    "flags": [
+     "CAPACITY_FULL",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-RENT-006": {
+    "recommendation": {
+     "status": "NOT_RECOMMENDED",
+     "reasons": [
+      "STATUS_EXPIRED",
+      "PERIOD_ENDED",
+      "WINDOW_CLOSED"
+     ]
+    }
+   }
+  },
+  "H6": {
+   "TW-DEMO-LIVING-001": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "UNKNOWN",
+     "C3": "UNKNOWN"
+    },
+    "missing_inputs": [
+     "H6-P1:person.monthly_earned_income",
+     "H6:household.movable_property_per_capita"
+    ]
+   },
+   "TW-DEMO-EMERG-002": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_INELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "FAIL_UNCONFIRMED",
+     "C3": "HUMAN"
+    },
+    "unconfirmed": true,
+    "flags": [
+     "CONFIRM_SELF_REPORT",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-EDU-003": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "FAIL",
+     "C2": "PASS",
+     "C3": "UNKNOWN"
+    },
+    "known_failures": [
+     "C1"
+    ],
+    "flags": [
+     "KNOWN_MISMATCH_PRESENT"
+    ],
+    "missing_inputs": [
+     "H6-P1:person.monthly_earned_income"
+    ]
+   },
+   "TW-DEMO-CHILD-004": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "UNKNOWN",
+     "C4": "PASS"
+    },
+    "missing_inputs": [
+     "H6-P1:person.monthly_earned_income"
+    ]
+   },
+   "TW-DEMO-FOOD-005": {
+    "recommendation": {
+     "status": "MANUAL_CHECK_ONLY",
+     "reasons": [
+      "PERIOD_UNKNOWN"
+     ]
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "HUMAN"
+    },
+    "flags": [
+     "CAPACITY_FULL",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-RENT-006": {
+    "recommendation": {
+     "status": "NOT_RECOMMENDED",
+     "reasons": [
+      "STATUS_EXPIRED",
+      "PERIOD_ENDED",
+      "WINDOW_CLOSED"
+     ]
+    }
+   }
+  },
+  "H7": {
+   "TW-DEMO-LIVING-001": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "UNKNOWN",
+     "C3": "UNKNOWN"
+    },
+    "missing_inputs": [
+     "H7-P1:person.monthly_earned_income",
+     "H7:household.movable_property_per_capita"
+    ]
+   },
+   "TW-DEMO-EMERG-002": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "HUMAN"
+    },
+    "flags": [
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-EDU-003": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "FAIL_UNCONFIRMED",
+     "C2": "PASS",
+     "C3": "UNKNOWN"
+    },
+    "known_failures": [
+     "C1"
+    ],
+    "flags": [
+     "CONFIRM_SELF_REPORT",
+     "KNOWN_MISMATCH_PRESENT"
+    ],
+    "missing_inputs": [
+     "H7-P1:person.monthly_earned_income"
+    ]
+   },
+   "TW-DEMO-CHILD-004": {
+    "recommendation": {
+     "status": "FORMAL",
+     "reasons": []
+    },
+    "result": "INSUFFICIENT_DATA",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "PASS",
+     "C3": "UNKNOWN",
+     "C4": "PASS"
+    },
+    "missing_inputs": [
+     "H7-P1:person.monthly_earned_income"
+    ]
+   },
+   "TW-DEMO-FOOD-005": {
+    "recommendation": {
+     "status": "MANUAL_CHECK_ONLY",
+     "reasons": [
+      "PERIOD_UNKNOWN"
+     ]
+    },
+    "result": "LIKELY_ELIGIBLE",
+    "criteria": {
+     "C1": "PASS",
+     "C2": "HUMAN"
+    },
+    "flags": [
+     "CAPACITY_FULL",
+     "HUMAN_CHECK"
+    ]
+   },
+   "TW-DEMO-RENT-006": {
+    "recommendation": {
+     "status": "NOT_RECOMMENDED",
+     "reasons": [
+      "STATUS_EXPIRED",
+      "PERIOD_ENDED",
+      "WINDOW_CLOSED"
+     ]
+    }
+   }
+  }
+ }
+}

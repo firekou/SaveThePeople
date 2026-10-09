@@ -1,0 +1,39 @@
+{
+ "title": "IdempotencyRecord.response（回應形狀）",
+ "x-note": "只存形狀，不存回應內容（ARCHITECTURE §6.3、OPERATIONS CP-12）",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "status_code",
+  "resource_ref",
+  "shape_version"
+ ],
+ "properties": {
+  "status_code": {
+   "type": "integer",
+   "minimum": 200
+  },
+  "shape_version": {
+   "type": "integer",
+   "minimum": 1
+  },
+  "resource_ref": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "type",
+    "id"
+   ],
+   "properties": {
+    "type": {
+     "type": "string",
+     "minLength": 1
+    },
+    "id": {
+     "type": "string",
+     "minLength": 1
+    }
+   }
+  }
+ }
+}

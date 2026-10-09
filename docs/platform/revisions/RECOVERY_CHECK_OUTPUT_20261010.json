@@ -1,0 +1,42 @@
+{
+  "tested_parent": "27f575518e77b97807d7b746c03434265baef2d3",
+  "scope": "candidate plus new governance documents; document checks and reference logic only",
+  "results": [
+    {
+      "command": "python3 docs/platform/examples/check_examples.py",
+      "stdout": "OK: 942 checks passed\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 docs/platform/tools/gen_state_machines.py --check",
+      "stdout": "OK: 6 state machines, 86 transitions, doc in sync\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 docs/platform/tools/check_docs.py",
+      "stdout": "OK: 2045 doc checks passed\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 docs/platform/tools/gen_permissions.py --check",
+      "stdout": "OK: permissions policy (25 classes, 143 matrix cells, 42 API, 12 pages), docs in sync\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 docs/platform/tools/test_checks.py",
+      "stdout": "OK: test_checks 62 counterexample checks passed\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff origin/main -- docs/PROJECT_BLUEPRINT.md docs/EXECUTION_PLAN.md docs/SERVICE_MODEL.md docs/DATA_AND_PRODUCT_SPEC.md",
+      "stdout": "",
+      "stderr": "",
+      "exit_code": 0
+    }
+  ]
+}
