@@ -32,3 +32,6 @@ Frank已有可貼給Claude的執行Prompt；不要求其搬運覆核。平台未
 固定結果→GPT exact-head覆核→通過後核對候選整合與D1啟動條件。Reviewer不改作者實作或自批。
 無新內容可以去重，但必須先查未送工單、未回寫結果或失敗通知；不得把本機完成當遠端交付。
 成果層次：文件/參考模擬已有；產品/DB/合成網站E2E/真實服務/取得成果均未驗收。服務P0～P3無新增證據，工程D1～D4未開始。
+
+## 最新執行端回報核對
+Claude於2026-10-09T18:20Z回報PACKET_NOT_AVAILABLE（issuecomment-6086760059），已核對GitHub但未claim／修改／push。平台分支ccr-dd86219c-ijac1h可交付（dry-run屬作者證據，非已推送）。本次遠端包補齊缺欄位，task_id=STP-PLATFORM-PLAN-001-R2-N-FOLLOWUP；不要求修補先等候選整合授權。這是收到舊缺包回報與回填，不是Claude已讀新包。其無自動輪詢／本次無可用launcher，next_actor仍Claude，下次喚醒讀固定新工單。
