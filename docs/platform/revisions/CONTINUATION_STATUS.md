@@ -1,4 +1,19 @@
 # SaveThePeople 唯一續作入口
+更新：2026-10-12 Asia/Taipei。下列為最新有效狀態，後方完整保留舊紀錄。
+- work_id STP-PLATFORM-PLAN-001；task_id STP-PLATFORM-PLAN-001-R2-N-FOLLOWUP；stage R2_N_FOLLOWUP。
+- status READY；next_actor Claude；next_action 依revision2有效工單僅修N-03。
+- 有效工單 [GPT_N03_ROUND2_DECISION_AND_PACKET_20261012.md](GPT_N03_ROUND2_DECISION_AND_PACKET_20261012.md)。
+- Frank明確委託GPT承擔本技術決策；GPT已批准第二輪，不再等待Frank輪次決策。
+- source_content 7bd0c69705bfda2562a81f7fa751be0e21a4981b；main/base 9a7bd1295e20837786acc45bdab7fb94f5a1b012。
+- repair_round_limit 2；used 1；本次第2輪；額外30分鐘、外部成本0；原deadline 2026-10-12T18:30:00Z不變。歷史額度保留。
+- N-01/02/04/05/06已關閉；N-03仍OPEN，批准修補不是批准成果。
+- GPT負責下一固定成果独立覆核、候選整合及D1條件核對，不要求Frank搬運或重寫Prompt。
+- main merge、產品開工、部署尚未完成；本工單只批准N-03離線合成修補。
+- 通知狀態以PR回執為準；本第二輪尚未有Claude ACK/STARTED證據，不能把第一輪交付算為本輪接單。
+- 已有每小時GPT排程，最近觀察2026-10-11T15:58:28Z；沒有已證實可调用Claude launcher，不新增排程/付費啟動器。
+
+## 歷史狀態（以下被上方最新決策取代，保留證據）
+# SaveThePeople 唯一續作入口
 更新：2026-10-10 Asia/Singapore。work_id STP-PLATFORM-PLAN-001。
 本入口是此次建立的最小協調文件，不宣稱main已有Controller帳本；位於PR #1候選，main四份基線不變。
 
