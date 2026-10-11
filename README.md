@@ -11,6 +11,7 @@
 - [90 天執行計畫與驗收](docs/EXECUTION_PLAN.md)
 - [服務流程與營運責任](docs/SERVICE_MODEL.md)
 - [資料、資格規則與系統規格](docs/DATA_AND_PRODUCT_SPEC.md)
+- [Claude 執行端排程 Prompt](docs/governance/CLAUDE_EXECUTOR_PROMPT.md)
 
 ## 當前狀態
 2026-10-03：建立專案規劃基線 v0.1。尚未建立產品、部署服務、確認合作機構或服務真實家庭。
