@@ -3,9 +3,11 @@
 這是**純邏輯模擬**，不是資料庫、物件儲存或備份整合演練。它只用來驗證規格中的順序與判斷是否自洽：
   0. 先驗證 payload（schema＋目標存在＋用途／欄位非空）；不合法回 422，不寫任何東西（N-05）；
   1. 先寫（write-ahead）：先讓**獨立見證持久確認**即將使用的 seq（N-03：見證確認在前、且必須同步持久，不可只靠定期回報），
-     再把控制意圖附加到外部僅附加的控制紀錄（含雜湊鏈），**再讓見證同步持久確認該筆雜湊（錨點）**；任一未確認都不改主庫；
+     見證確認時**同時綁定原始意圖摘要（seq→完整 payload 摘要，不可覆寫）**；再把控制意圖附加到外部僅附加的控制紀錄（含雜湊鏈），
+     **再讓見證同步持久確認該筆雜湊（錨點）**；任一未確認都不改主庫；補錨點只在紀錄內容與見證綁定的原始意圖相符時才做，絕不從可能被改寫的紀錄自動建立可信錨點；
   2. 主庫在單一交易內套用；失敗則回 202（已記錄、待套用），不回「完成」；200／202 只在 seq 與雜湊錨點都已確認後才可能回覆；
-  3. 還原：驗證控制紀錄鏈完整、尾端不短於獨立見證的水位、**每筆非 APPLIED 紀錄都有見證錨點且雜湊相符**，否則維持隔離；
+  3. 還原：驗證控制紀錄鏈完整、尾端不短於獨立見證的水位、**每筆紀錄（含 APPLIED，不信任當下 type）都與見證綁定的原始意圖相符**、
+     每筆非 APPLIED 紀錄都有見證錨點且雜湊相符，否則維持隔離；
      再把備份水位之後的紀錄全部重新套用；
   4. 驗證：HARD_DELETE 驗證物件不存在；REDACT 驗證指定欄位已遮蔽（列仍在）；用途撤回驗證通知取消、分享停止、存取限制。
 所有套用動作都是冪等的：重複套用結果相同。
@@ -35,8 +37,17 @@ class WitnessUnavailable(Exception):
     pass
 
 
+class IntentConflict(WitnessUnavailable):
+    """同一 seq 已綁定另一份原始意圖：見證不可覆寫（N-03 第三輪）。"""
+
+
 class InvalidControl(ValueError):
     pass
+
+
+def intent_digest(payload):
+    """原始意圖的摘要：涵蓋完整 payload（type、purposes、ref…）。見證在寫入前綁定，之後只能比對、不可覆寫。"""
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
 def _hash(prev_hash, body):
@@ -104,19 +115,22 @@ class Witness:
       失敗、逾時或不可用＝錨點未確認：請求回 503（主庫不改），且還原時該筆因缺錨點而**維持隔離**；
       缺錨點的紀錄不可被當成「已被見證」（否則攻擊者可縮減用途後重算鏈）。
     - `available=False` 表示還原時無法查詢見證：不得放行。
+    - `report(seq, digest)` 同時把「seq→原始意圖摘要」綁定進見證（不可覆寫；同 seq 不同摘要→IntentConflict）。
+      還原與補錨點都只比對這個綁定，不從目前的紀錄內容建立信任。
     - 逾時（TimeoutError）與不可用一樣視為未確認，必須轉成規範的 503，不可往外拋。
     """
 
     def __init__(self):
         self.max_seq = 0
         self.hash_at = {}
+        self.intent_at = {}
         self.available = True
         self.fail_next = 0
         self.hash_fail_next = 0
         self.timeout_next = 0
         self.hash_timeout_next = 0
 
-    def report(self, seq):
+    def report(self, seq, digest=None):
         if self.timeout_next:
             self.timeout_next -= 1
             raise TimeoutError("witness timeout")
@@ -125,6 +139,11 @@ class Witness:
             raise WitnessUnavailable("witness unavailable")
         if not self.available:
             raise WitnessUnavailable("witness unavailable")
+        if digest is not None:
+            bound = self.intent_at.get(seq)
+            if bound is not None and bound != digest:
+                raise IntentConflict("seq already bound to another intent")
+            self.intent_at.setdefault(seq, digest)
         self.max_seq = max(self.max_seq, seq)
         return True
 
@@ -296,11 +315,14 @@ def request_control(st, log, wit, rec, db_fail=False):
         validate_payload(st, rec)
     except InvalidControl:
         return 422, "INVALID_CONTROL", st
-    if not reanchor_missing(log, wit):
-        return 503, "ANCHOR_UNCONFIRMED", st
+    ok, why = reanchor_missing(log, wit)
+    if not ok:
+        return 503, why, st
     seq = log.next_seq()
     try:
-        acked = wit.report(seq)
+        acked = wit.report(seq, intent_digest(rec))
+    except IntentConflict:
+        return 503, "INTENT_CONFLICT", st
     except UNCONFIRMED:
         acked = False
     if acked is not True:
@@ -326,8 +348,9 @@ def request_control(st, log, wit, rec, db_fail=False):
         return 202, "RECORDED_PENDING_APPLY", st
     try:
         s2 = log.next_seq()
-        if wit.report(s2) is True:
-            log.append({"type": "APPLIED", "ref": seq})
+        applied = {"type": "APPLIED", "ref": seq}
+        if wit.report(s2, intent_digest(applied)) is True:
+            log.append(applied)
             wit.record_hash(s2, log.entries[-1]["hash"])
     except (LogUnavailable, WitnessUnavailable, TimeoutError):
         pass
@@ -335,25 +358,29 @@ def request_control(st, log, wit, rec, db_fail=False):
 
 
 def reanchor_missing(log, wit):
-    """補上缺少的雜湊錨點（只在鏈完整時，對 seq ≤ 見證水位的非 APPLIED 紀錄）。全部補上或本來就齊全→True；補不上→False。
+    """補上缺少的雜湊錨點。回傳 (成功?, 失敗原因)。
 
-    限制（模擬層級）：補錨點信任當下的紀錄內容；失敗到重試之間若有人改寫紀錄，無法由此偵測。
-    這個窗口期間的還原一律因 ANCHOR_MISSING 維持隔離，所以不會被放行。
+    N-03 第三輪：只在「紀錄內容與見證寫入前綁定的原始意圖摘要相符」時才補；沒有綁定或不相符就拒絕，
+    也絕不為了讓下一個請求繼續而把目前（可能被改寫）的內容當成可信錨點。拒絕時不寫任何東西，
+    該筆維持缺錨點、還原維持隔離；解除須走受控恢復（資料責任人與 R7 以見證綁定的原始意圖與備份副本比對後處理），不在自動路徑內。
     """
-    missing = [e for e in log.entries if e["payload"]["type"] != "APPLIED" and e["seq"] not in wit.hash_at]
-    if not missing:
-        return True
+    unanchored = [e for e in log.entries if e["seq"] not in wit.hash_at]
+    if not unanchored:
+        return True, None
     if not log.verify_chain()[0]:
-        return False
+        return False, "INTENT_MISMATCH"
+    for e in unanchored:
+        # 缺錨點的紀錄（含偽裝成 APPLIED 者）一律先比對見證綁定的原始意圖；真正的 APPLIED（摘要相符）不需錨點
+        if e["seq"] > wit.max_seq or wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):
+            return False, "INTENT_MISMATCH"
+    missing = [e for e in unanchored if e["payload"]["type"] != "APPLIED"]
     for e in missing:
-        if e["seq"] > wit.max_seq:
-            return False
         try:
             if wit.record_hash(e["seq"], e["hash"]) is not True:
-                return False
+                return False, "ANCHOR_UNCONFIRMED"
         except UNCONFIRMED:
-            return False
-    return True
+            return False, "ANCHOR_UNCONFIRMED"
+    return True, None
 
 
 def reapply_all(st, entries, from_seq=0):
@@ -369,7 +396,7 @@ def recover(snapshot, log, wit, skip_reapply=False):
     """由備份還原後的處理。回傳 dict：quarantined、reason、watermark、mismatches、state。
 
     維持隔離（不恢復服務）的條件：控制紀錄鏈不完整；獨立見證無法查詢；紀錄尾端短於獨立見證的水位；見證記下的雜湊與紀錄不符（整段重寫）；
-    任一非 APPLIED 紀錄缺見證錨點（N-03：不得只比對「已存在」的錨點）；套用後驗證仍有不符合。
+    任一紀錄（含 APPLIED）與見證綁定的原始意圖不符或沒有綁定（N-03 第三輪：不信任當下 type）；任一非 APPLIED 紀錄缺見證錨點（N-03：不得只比對「已存在」的錨點）；套用後驗證仍有不符合。
     """
     st = new_state(snapshot)
     ok, why = log.verify_chain()
@@ -387,6 +414,10 @@ def recover(snapshot, log, wit, skip_reapply=False):
     for seq, h in sorted(wit.hash_at.items()):
         if seq <= log.last_seq() and log.entries[seq - 1]["hash"] != h:
             out["reason"] = f"LOG_REWRITTEN_AT_{seq}"
+            return out
+    for e in log.entries:
+        if wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):
+            out["reason"] = f"INTENT_MISMATCH_AT_{e['seq']}"
             return out
     for e in log.entries:
         if e["payload"]["type"] != "APPLIED" and e["seq"] not in wit.hash_at:

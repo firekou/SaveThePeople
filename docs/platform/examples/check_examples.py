@@ -485,7 +485,7 @@ def _dig(obj, dotted):
 class UnflushedWitness(RC.Witness):
     """N-03 注入模型：見證只做「定期更新」，report 只把 seq 排入待更新、沒有持久確認（回傳 None）。"""
 
-    def report(self, seq):
+    def report(self, seq, digest=None):
         self.pending_seq = seq
 
 
@@ -516,7 +516,10 @@ def run_control_scenario(initial, sc):
         elif op == "rewrite_log_entry":
             # 攻擊模型：改寫某筆內容並重算其後整條雜湊鏈（鏈本身仍連續）；只有獨立見證記下的雜湊能抓到
             e = log.entries[step["index"]]
-            e["payload"] = dict(e["payload"], purposes=step["set_purposes"]) if "set_purposes" in step else dict(e["payload"], reason="INCIDENT")
+            if "set_payload" in step:
+                e["payload"] = copy.deepcopy(step["set_payload"])
+            else:
+                e["payload"] = dict(e["payload"], purposes=step["set_purposes"]) if "set_purposes" in step else dict(e["payload"], reason="INCIDENT")
             prev = log.entries[step["index"] - 1]["hash"] if step["index"] else "0" * 64
             for x in log.entries[step["index"]:]:
                 x["prev_hash"] = prev
@@ -535,7 +538,7 @@ def run_control_scenario(initial, sc):
                 wit.hash_timeout_next = 1
             elif step["mode"] == "unflushed":
                 w2 = UnflushedWitness()  # 定期更新尚未 flush：report 只排入、不確認
-                w2.max_seq, w2.hash_at = wit.max_seq, dict(wit.hash_at)
+                w2.max_seq, w2.hash_at, w2.intent_at = wit.max_seq, dict(wit.hash_at), dict(wit.intent_at)
                 wit = w2
             elif step["mode"] == "down":
                 wit.available = False

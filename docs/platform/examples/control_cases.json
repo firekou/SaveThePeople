@@ -1264,7 +1264,7 @@
    ],
    "expect": {
     "quarantined": true,
-    "reason": "ANCHOR_MISSING_AT_1",
+    "reason": "INTENT_MISMATCH_AT_1",
     "state": {
      "referrals.r1.status": "SENT"
     }
@@ -1699,6 +1699,324 @@
     "reason": null,
     "mismatches": [],
     "watermark": 3
+   }
+  },
+  {
+   "id": "CS-33-r3-attack-A-missing-anchor-reduce-purposes-then-unrelated-request-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_purposes": [
+      "REMINDERS"
+     ]
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 503,
+     "expect_status": "INTENT_MISMATCH"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "objects.doc1.exists": true,
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "INTENT_MISMATCH_AT_1",
+    "watermark": 1,
+    "state": {
+     "referrals.r1.status": "SENT"
+    }
+   }
+  },
+  {
+   "id": "CS-34-r3-attack-B-missing-anchor-disguised-as-APPLIED-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_payload": {
+      "type": "APPLIED",
+      "ref": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "INTENT_MISMATCH_AT_1",
+    "state": {
+     "referrals.r1.status": "SENT"
+    }
+   }
+  },
+  {
+   "id": "CS-35-r3-attack-B-then-unrelated-request-still-refused",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_payload": {
+      "type": "APPLIED",
+      "ref": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 503,
+     "expect_status": "INTENT_MISMATCH"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "INTENT_MISMATCH_AT_1",
+    "state": {
+     "referrals.r1.status": "SENT"
+    }
+   }
+  },
+  {
+   "id": "CS-36-r3-anchored-applied-entry-rewritten-to-other-ref-is-caught-by-witness-hash",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 1,
+     "set_payload": {
+      "type": "APPLIED",
+      "ref": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_REWRITTEN_AT_2"
+   }
+  },
+  {
+   "id": "CS-37-r3-seq-bound-to-first-intent-different-retry-after-log-failure-refused",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "log_fail": true,
+     "expect_http": 503,
+     "expect_status": "NOT_RECORDED"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 503,
+     "expect_status": "INTENT_CONFLICT"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "objects.doc1.exists": true,
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 2,
+    "state": {
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED"
+    }
+   }
+  },
+  {
+   "id": "CS-38-r3-legitimate-original-intent-retry-after-anchor-failure-reanchors-then-unrelated-request-works",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 3,
+    "state": {
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED",
+     "objects.doc1.exists": false
+    }
    }
   }
  ]

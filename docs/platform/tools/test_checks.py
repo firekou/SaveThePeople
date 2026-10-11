@@ -282,7 +282,7 @@ def _control_run(RC, witness_mode):
     st, log = RC.new_state(initial), RC.ControlLog()
     wit = RC.Witness()
     if witness_mode == "unflushed":
-        wit.__class__ = type("U", (RC.Witness,), {"report": lambda self, seq: None})
+        wit.__class__ = type("U", (RC.Witness,), {"report": lambda self, seq, digest=None: None})
     rec = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}
     code, why, st2 = RC.request_control(st, log, wit, rec, db_fail=True)
     return code, len(log.entries), st2["notifications"]["n1"]["status"], log, wit, initial
@@ -301,7 +301,7 @@ def test_n03_mutation():
     if got == (503, 0, "SCHEDULED"):
         FAILS.append("N-03 mutation (witness ack ignored) was not caught")
     # 還原時見證雜湊比對：整段重寫但重算鏈，只有見證雜湊能抓到
-    for label, RCm, want_quarantined in (("baseline", RC, True), ("mutation", _mut("ref_control", [('log.entries[seq - 1]["hash"] != h', 'False')]), False)):
+    for label, RCm, want_quarantined in (("baseline", RC, True), ("mutation", _mut("ref_control", [('log.entries[seq - 1]["hash"] != h', 'False'), ('if wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            out["reason"] = f"INTENT_MISMATCH_AT_', 'if False:\n            out["reason"] = f"INTENT_MISMATCH_AT_')]), False)):
         initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
         st, log, wit = RCm.new_state(initial), RCm.ControlLog(), RCm.Witness()
         RCm.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})
@@ -348,13 +348,98 @@ def _n03_attack(RCx, rewrite=True):
     return code, out, out["state"]["referrals"]["r1"]["status"]
 
 
+def _anchor_only(RCx):
+    """只有錨點失敗、紀錄未被改動：還原必須因缺錨點隔離（意圖相符，所以只有缺錨點檢查能擋）。"""
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RCx.new_state(initial), RCx.ControlLog(), RCx.Witness()
+    wit.hash_fail_next = 1
+    code = RCx.request_control(st, log, wit, {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]})[0]
+    return code, RCx.recover(initial, log, wit)
+
+
+def _rechain(RCx, log):
+    prev = "0" * 64
+    for x in log.entries:
+        x["prev_hash"] = prev
+        x["hash"] = RCx._hash(prev, RCx._body(x))
+        prev = x["hash"]
+
+
+def _r3_attack(RCx, kind):
+    """第三輪兩條繞過。kind='A'：縮減用途重算鏈後送一個無關合法請求再還原；kind='B'：改成 APPLIED/ref0 重算鏈後直接還原。
+    回傳 (無關請求 http 或 None, 無關請求狀態, 還原結果, r1 狀態)。"""
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RCx.new_state(initial), RCx.ControlLog(), RCx.Witness()
+    wit.hash_fail_next = 1
+    rec = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}
+    RCx.request_control(st, log, wit, rec)
+    log.entries[0]["payload"] = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS"]} if kind == "A" else {"type": "APPLIED", "ref": 0}
+    _rechain(RCx, log)
+    http = why = None
+    if kind == "A":
+        http, why, _ = RCx.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})
+    out = RCx.recover(initial, log, wit)
+    return http, why, out, out["state"]["referrals"]["r1"]["status"]
+
+
+def test_n03_round3():
+    """N-03 第三輪：缺錨點不得由後續請求洗成可信，也不得偽裝成 APPLIED；移除各保護的破壞版本必須被抓到。"""
+    _, RC = _examples()
+    for kind, want in (("A", (503, "INTENT_MISMATCH", True, "INTENT_MISMATCH_AT_1", "SENT")), ("B", (None, None, True, "INTENT_MISMATCH_AT_1", "SENT"))):
+        http, why, out, ref = _r3_attack(RC, kind)
+        COUNT[0] += 1
+        got = (http, why, out["quarantined"], out["reason"], ref)
+        if got != want:
+            FAILS.append(f"N-03r3 baseline attack {kind}: want {want} got {got}")
+    # mutation a：補錨點不比對原始意圖 → 攻擊 A 的無關請求被放行（http 不再是 503）
+    ma = _mut("ref_control", [('wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            return False, "INTENT_MISMATCH"', 'False:\n            return False, "INTENT_MISMATCH"')])
+    http, why, out, ref = _r3_attack(ma, "A")
+    COUNT[0] += 1
+    if http != 200:
+        FAILS.append(f"N-03r3 mutation (reanchor ignores original intent) was not caught: http={http}")
+    # mutation b：還原不比對原始意圖 → 攻擊 B 放行
+    mb = _mut("ref_control", [('        if wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            out["reason"] = f"INTENT_MISMATCH_AT_', '        if False:\n            out["reason"] = f"INTENT_MISMATCH_AT_')])
+    http, why, out, ref = _r3_attack(mb, "B")
+    COUNT[0] += 1
+    if out["quarantined"] is not False:
+        FAILS.append("N-03r3 mutation (restore ignores original intent) was not caught by attack B")
+    # mutation a+b：完整攻擊 A 通過（對應 GPT 原重現：還原放行、r1 仍 SENT）
+    mab = _mut("ref_control", [('wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            return False, "INTENT_MISMATCH"', 'False:\n            return False, "INTENT_MISMATCH"'),
+                               ('        if wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            out["reason"] = f"INTENT_MISMATCH_AT_', '        if False:\n            out["reason"] = f"INTENT_MISMATCH_AT_')])
+    http, why, out, ref = _r3_attack(mab, "A")
+    COUNT[0] += 1
+    if (out["quarantined"], ref) != (False, "SENT"):
+        FAILS.append(f"N-03r3 mutation (no intent binding anywhere) should reproduce the original bypass, got {(out['quarantined'], ref)}")
+    # mutation c：APPLIED 免錨點與免意圖比對（只看當下 type）時，偽裝 APPLIED 不被補錨點擋下
+    mc = _mut("ref_control", [('    unanchored = [e for e in log.entries if e["seq"] not in wit.hash_at]', '    unanchored = [e for e in log.entries if e["seq"] not in wit.hash_at and e["payload"]["type"] != "APPLIED"]')])
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = mc.new_state(initial), mc.ControlLog(), mc.Witness()
+    wit.hash_fail_next = 1
+    mc.request_control(st, log, wit, {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]})
+    log.entries[0]["payload"] = {"type": "APPLIED", "ref": 0}
+    _rechain(mc, log)
+    COUNT[0] += 1
+    if mc.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})[0] != 200:
+        FAILS.append("N-03r3 mutation (APPLIED exempt from reanchor intent check) should let the unrelated request through (proves attack B coverage)")
+    # 合法控制：原始完整意圖 + 錨點失敗後，無關請求會先以原始意圖補錨點，之後正常完成並可還原
+    st, log, wit = RC.new_state(initial), RC.ControlLog(), RC.Witness()
+    wit.hash_fail_next = 1
+    rec = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}
+    RC.request_control(st, log, wit, rec)
+    code, why, st2 = RC.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})
+    out = RC.recover(initial, log, wit)
+    COUNT[0] += 1
+    if (code, out["quarantined"], out["state"]["referrals"]["r1"]["status"]) != (200, False, "CANCELLED"):
+        FAILS.append(f"N-03r3 legitimate control failed: {(code, why, out['quarantined'], out['reason'])}")
+
+
 def test_n03_round2():
     """N-03 第二輪：錨點補記失敗不得放行還原、TimeoutError 轉 503；移除各防護的破壞版本必須被抓到。"""
     _, RC = _examples()
     code, out, ref = _n03_attack(RC)
     COUNT[0] += 1
-    if (code, out["quarantined"], out["reason"], ref) != (503, True, "ANCHOR_MISSING_AT_1", "SENT"):
-        FAILS.append(f"N-03r2 baseline attack: want (503, True, ANCHOR_MISSING_AT_1, SENT) got {(code, out['quarantined'], out['reason'], ref)}")
+    if (code, out["quarantined"], out["reason"], ref) != (503, True, "INTENT_MISMATCH_AT_1", "SENT"):
+        FAILS.append(f"N-03r2 baseline attack: want (503, True, INTENT_MISMATCH_AT_1, SENT) got {(code, out['quarantined'], out['reason'], ref)}")
     # 合法控制：錨點成功的同樣撤回，不縮減 → 放行；縮減並重算 → LOG_REWRITTEN
     initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
     st, log, wit = RC.new_state(initial), RC.ControlLog(), RC.Witness()
@@ -364,10 +449,13 @@ def test_n03_round2():
         FAILS.append("N-03r2 legitimate control (anchor ok, DB failed) should be 202 and restorable")
     # mutation 1：還原不檢查缺錨點
     m1 = _mut("ref_control", [('        if e["payload"]["type"] != "APPLIED" and e["seq"] not in wit.hash_at:\n            out["reason"]', '        if False:\n            out["reason"]')])
-    code, out, ref = _n03_attack(m1)
+    code, out = _anchor_only(m1)
     COUNT[0] += 1
-    if out is None or out["quarantined"] is not False:
+    if out["quarantined"] is not False:
         FAILS.append("N-03r2 mutation (missing anchor not checked at restore) was not caught")
+    COUNT[0] += 1
+    if _anchor_only(RC)[1]["reason"] != "ANCHOR_MISSING_AT_1":
+        FAILS.append("N-03r2 baseline anchor-only case should be ANCHOR_MISSING_AT_1")
     # mutation 2：錨點未確認仍繼續（回 202）
     m2 = _mut("ref_control", [('    if anchored is not True:\n        return 503, "ANCHOR_UNCONFIRMED", st\n', '')])
     code, out, ref = _n03_attack(m2)
@@ -487,7 +575,7 @@ def test_n05_schema_counterexamples():
 
 
 def main():
-    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples, test_prose_policy_counterexamples, test_n02_mutation, test_n03_mutation, test_n03_round2, test_n04_counterexamples, test_n05_schema_counterexamples):
+    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples, test_prose_policy_counterexamples, test_n02_mutation, test_n03_mutation, test_n03_round2, test_n03_round3, test_n04_counterexamples, test_n05_schema_counterexamples):
         try:
             t()
         except Exception as e:  # 工具壞掉也要算失敗

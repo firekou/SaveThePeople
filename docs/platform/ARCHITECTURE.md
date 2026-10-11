@@ -140,7 +140,7 @@ flowchart TB
 | `POST /api/help-requests` | 請人聯絡 | token、聯絡方式、時段、CONTACT 同意 | HelpRequest id | R1·TOKEN、R2·TOKEN（需 CONTACT 同意） | Idempotency-Key；同 token 只建一筆 |
 | `POST /api/cases` | 建案 | 管道、household 基本、consent | case id、可能重複清單 | R3·ASG（建案者成為責任人） | Idempotency-Key；指紋相符回 409 附候選（需確認合併或強制新建並寫理由） |
 | `POST /api/cases/{id}/consents` | 建立同意 | 用途、對象、方式、代理 | consent id | R3·ASG | 同意書版本必填 |
-| `POST /api/consents/{id}/revoke` | 撤回 | 撤回用途、管道、撤回人 | 受影響項目清單、cleanup 任務 | R1·OWN、R2·SELF、R3·ASG（R1／R2 於試點後；試點初期由 R3 登錄） | 冪等；同一交易內：寫撤回欄位、取消排程通知、REFERRAL_SHARE 轉介走 RF-17、建立清除任務；**先**由獨立見證持久確認 seq、再附加外部 ControlRecord 並取得確認、再由見證同步持久確認該筆雜湊（錨點），見證未確認、紀錄寫入失敗或錨點未確認（含逾時）回 503 不改主庫，payload 不合法回 422，套用失敗回 202（OPERATIONS §1.3.3） |
+| `POST /api/consents/{id}/revoke` | 撤回 | 撤回用途、管道、撤回人 | 受影響項目清單、cleanup 任務 | R1·OWN、R2·SELF、R3·ASG（R1／R2 於試點後；試點初期由 R3 登錄） | 冪等；同一交易內：寫撤回欄位、取消排程通知、REFERRAL_SHARE 轉介走 RF-17、建立清除任務；**先**由獨立見證持久確認 seq 並綁定原始意圖摘要、再附加外部 ControlRecord 並取得確認、再由見證同步持久確認該筆雜湊（錨點），見證未確認、紀錄寫入失敗、錨點未確認（含逾時）或意圖不符／衝突回 503 不改主庫，缺錨點不由後續請求自動補成可信，payload 不合法回 422，套用失敗回 202（OPERATIONS §1.3.3） |
 | `PUT /api/cases/{id}/facts` | 更新事實 | `fact_key`（須在 FactKeyDefinition）、value、confirmation_level、source | 新 Fact 版本 | R1·OWN、R3·ASG（R1 於試點後） | 樂觀鎖；保留歷史；未登錄字彙拒絕 |
 | `POST /api/cases/{id}/assessments` | 評估 | 觸發原因、`as_of` | Assessment（含每資源 `recommendation`） | R3·ASG、R4·SITE-REV（R3／R4 才可見 MANUAL_CHECK_ONLY） | 相同 `(case, input_hash, 版本清單, as_of)` 60 秒內回既有結果；R3／R4 才可見 `MANUAL_CHECK_ONLY` |
 | `POST /api/assessments/{id}/reviews` | 複核（ReviewDecision） | decision、kind、reason | ReviewDecision | R4·SITE-REV（複核人≠承辦） | 版本已變 → 409 要求重評；理由必填 |
