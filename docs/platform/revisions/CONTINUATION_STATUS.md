@@ -1,3 +1,12 @@
+# 最新進度與當責更新（2026-10-12 Asia/Taipei）
+- status READY_FOR_REVIEW；next_actor GPT。
+- Claude round2已ACK且交付固定c563865173a402c71af4c2b3ad3c46edac771200（分支claude/tender-allen-c9p5u1），PR留言6111220046、6111248951。
+- next_action GPT獨立覆核此固定head；作者自檢不是批准，本次尚未重跑。
+- [GPT當責與進度規則](GPT_ACCOUNTABILITY_AND_PROGRESS_20261012.md)依Frank最新指示生效：GPT決策、追進度、報告權限缺口，不再把例行輪次問題交Frank。
+- 既有GPT排程prompt已更新成功，維持每小時、不新增排程；新規則指定本成果優先覆核，24小時無前進查根因並採取動作。
+- main未動、PR仍Draft、產品尚未開工；準備下一可見D1成果。
+- 以下舊狀態保留歷史；與本更新衝突時採本更新。
+
 # SaveThePeople 唯一續作入口
 更新：2026-10-12 Asia/Taipei。下列為最新有效狀態，後方完整保留舊紀錄。
 - work_id STP-PLATFORM-PLAN-001；task_id STP-PLATFORM-PLAN-001-R2-N-FOLLOWUP；stage R2_N_FOLLOWUP。
