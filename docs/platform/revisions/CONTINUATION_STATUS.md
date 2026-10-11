@@ -1,3 +1,14 @@
+# 最新有效狀態：ENV-01修補差異通過，D1技術版本/驗收具體化READY（2026-10-12）
+- work_id STP-PLATFORM-PLAN-001；D1_ENVIRONMENT repair3 verdict APPROVED（只控制流程/交付完整性）；修補checkpoint COMPLETE、used3/3；DB runtime/artifact來源NOT_RUN/NOT_VERIFIED，非整體環境批准。
+- reviewed_content_head09e19a2f800455685489a42b3c5e17303b115375；handoff578c6f91914a489e1066cbdbf4ef2d300a4d38fa；main/base9a7bd1295e20837786acc45bdab7fb94f5a1b012。
+- [獨立覆核](GPT_D1_ENVIRONMENT_REPAIR3_REVIEW_09E19A2_20261012.md)：29/29stub、5命令exit0、原843行與基線不改，ENV-01指定缺口CLOSED；作者v1/v2零TCP證據失效更正保留，v3 runtime僅AUTHOR_EVIDENCE。
+- posted22:00:27Z/ack22:01:19Z/result22:04:52Z/review23:00:15Z（2026-10-11 UTC），待審55分23秒未超1小时。merged-comments ConnectError兩次，issue-comments＋公開REST讀回成功，未阻擋續作。
+- 下一task STP-PLATFORM-PLAN-001-D1-STACK-AND-ACCEPTANCE；stage D1_STACK_AND_ACCEPTANCE；status READY；[唯一工作包](GPT_D1_STACK_AND_ACCEPTANCE_PACKET_20261012.md)；next_actor Claude，GPT WAITING_PEER；40min/0cost/一次交付，deadline2026-10-12T06:00:00Z，repair0/0無自動修補。
+- 原initial1/1/readiness1/1/環境repair3/3/N3/3保留不重置，無第四輪。下一可見成果：官方LTS相容性/六gate/完整D1最小產品PREPARED工單。只技術查核與規劃，不安裝、不開產品；GPT承擔下一普通技術決策，Frank不需例行放行。
+- 下一包ACK/STARTED/DELIVERED NOT_CONFIRMED；無launcher證據。PR Draft/main未動/未部署，服務P0～P3無新真實成果，工程D1～D4/WP無產品交付。
+
+## 歷史入口（原文完整保留）
+
 # 最新有效狀態：環境repair2已審，管線故障仍未攔截，repair3 READY（2026-10-12）
 - work_id STP-PLATFORM-PLAN-001；task_id STP-PLATFORM-PLAN-001-D1-ENVIRONMENT；stage D1_ENVIRONMENT；verdict CHANGES_REQUESTED；ENV-01 OPEN/MAJOR；ENV-02/03歷史局部關閉保留；status READY；next_actor Claude，GPT WAITING_PEER。
 - reviewed_content_head8920a79d71eccfdac9ab9ed0cb06cefb5a4513ab；handofff1b930fa75828fe667c98356a3c70570d8788d3f；main/base9a7bd1295e20837786acc45bdab7fb94f5a1b012。
