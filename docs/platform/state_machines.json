@@ -160,7 +160,7 @@
       "R4",
       "R7"
      ],
-     "pre": "risk_tier=HIGH 者立即；其他超過 14 天未完成查核，或查核發現問題",
+     "pre": "risk_tier=HIGH 者立即；其他超過 14 天未完成查核，或查核發現問題；同一交易清除 `recheck_started_at`（歷史留在 RV-07 的 AuditEvent）",
      "evidence": "理由；系統觸發時為逾期紀錄",
      "revocable": "no",
      "correction": "RV-11 恢復為 PUBLISHED（需新查核）"
@@ -209,7 +209,7 @@
      "actors": [
       "SYSTEM"
      ],
-     "pre": "同一 Resource 的新版本發布",
+     "pre": "同一 Resource 的新版本發布；自 NEEDS_RECHECK 離開者同一交易清除 `recheck_started_at`",
      "evidence": "新版本 ID",
      "revocable": "no",
      "correction": "新版有誤時暫停新版，並以 patch 版本重新發布舊內容"
@@ -226,7 +226,7 @@
      "actors": [
       "SYSTEM"
      ],
-     "pre": "effective_to 已過",
+     "pre": "effective_to 已過；自 NEEDS_RECHECK 離開者同一交易清除 `recheck_started_at`",
      "evidence": "每日排程紀錄",
      "revocable": "no",
      "correction": "effective_to 登錄錯誤時，建立 patch 版本更正並重新查核發布"

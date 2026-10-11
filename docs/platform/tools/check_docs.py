@@ -17,6 +17,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import prose_policy as PP  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[3]
 PLAT = ROOT / "docs" / "platform"
 FAILS = []
@@ -338,6 +341,14 @@ def check_misc():
             ok(f"R1_RESPONSE mentions R-{i:02d}", f"R-{i:02d}" in t)
 
 
+def check_prose_policy():
+    j, e, a, dm = (read(PLAT / n) for n in ("USER_JOURNEYS_AND_SCREENS.md", "RESOURCE_AND_ELIGIBILITY_ENGINE.md", "ARCHITECTURE.md", "DATA_MODEL_AND_STATE_MACHINES.md"))
+    probs = PP.p9_problems(j, e, a)
+    ok("P9 shows only resource-level impact summary (F-03)", not probs, "; ".join(probs))
+    probs = PP.recheck_lifecycle_problems(read(PLAT / "state_machines.json"), dm, e)
+    ok("recheck_started_at lifecycle is consistent (F-07)", not probs, "; ".join(probs))
+
+
 def main():
     sm = json.loads(read(PLAT / "state_machines.json"))
     check_links()
@@ -345,6 +356,7 @@ def main():
     check_fields()
     check_matrix()
     check_citations()
+    check_prose_policy()
     check_schemas()
     check_new_tests()
     check_hours()

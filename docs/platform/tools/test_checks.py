@@ -9,12 +9,14 @@
 import copy
 import json
 import sys
+import types
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gen_permissions as GP  # noqa: E402
 import schema_lite as SL  # noqa: E402
 import citation_check as CC  # noqa: E402
+import prose_policy as PP  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FAILS = []
@@ -208,8 +210,372 @@ def test_citation_counterexamples():
     expect_clean("current docs have no citation-context problems", allp)
 
 
+def test_prose_policy_counterexamples():
+    j = (ROOT / "USER_JOURNEYS_AND_SCREENS.md").read_text(encoding="utf-8")
+    e = (ROOT / "RESOURCE_AND_ELIGIBILITY_ENGINE.md").read_text(encoding="utf-8")
+    a = (ROOT / "ARCHITECTURE.md").read_text(encoding="utf-8")
+    dm = (ROOT / "DATA_MODEL_AND_STATE_MACHINES.md").read_text(encoding="utf-8")
+    sm = (ROOT / "state_machines.json").read_text(encoding="utf-8")
+    expect_clean("baseline P9 prose", PP.p9_problems(j, e, a))
+    expect_clean("baseline recheck lifecycle prose", PP.recheck_lifecycle_problems(sm, dm, e))
+    # F-03：把原本矛盾的文字放回去，必須被具體抓到
+    expect("P9 restored 'view affected cases'", PP.p9_problems(j.replace("查看**資源層級影響摘要**", "查看受影響案件", 1), e, a), "P9 promises case-level content")
+    expect("engine 8.2 restored per-case progress", PP.p9_problems(j, e.replace("**只顯示資源層級影響摘要**", "顯示每案處理進度", 1), a), "ENGINE §8.2 promises case-level content")
+    expect("architecture returns affected case list", PP.p9_problems(j, e, a.replace("資源層級影響摘要（彙總件數；不含逐案 ID 或個案內容）", "受影響案件清單")), "ARCHITECTURE transitions API")
+    expect("P9 summary wording removed", PP.p9_problems(j.replace("不含逐案", "含逐案", 1), e, a), "resource-level impact summary")
+    # F-07：恢復「暫停保留」或移除任一離開轉換的清除說明
+    expect("keep-on-suspend restored", PP.recheck_lifecycle_problems(sm, dm + "\nRV-09 暫停時保留供稽核", e), "kept when SUSPENDED")
+    for tid in PP.RECHECK_EXIT_TRANSITIONS:
+        d = json.loads(sm)
+        for t in d["machines"]["resource_version"]["transitions"]:
+            if t["id"] == tid:
+                t["pre"] = t["pre"].replace("清除 `recheck_started_at`", "")
+        expect(f"{tid} clear statement removed", PP.recheck_lifecycle_problems(json.dumps(d, ensure_ascii=False), dm, e), f"{tid} must state it clears")
+    expect("must-be-empty row removed", PP.recheck_lifecycle_problems(sm, dm.replace("其他狀態必為空", ""), e), "other states must be empty")
+
+
+def _mut(name, repls):
+    """載入「被人為破壞」的參考實作：把原始碼指定片段替換後執行。片段找不到就是測試本身壞了。"""
+    path = ROOT / "examples" / f"{name}.py"
+    src = path.read_text(encoding="utf-8")
+    for a, b in repls:
+        COUNT[0] += 1
+        if a not in src:
+            FAILS.append(f"mutation anchor for {name} not found: {a[:50]!r}")
+        src = src.replace(a, b)
+    mod = types.ModuleType(f"{name}_mutant")
+    mod.__file__ = str(path)
+    exec(compile(src, str(path), "exec"), mod.__dict__)
+    return mod
+
+
+def _examples():
+    sys.path.insert(0, str(ROOT / "examples"))
+    import ref_engine, ref_control  # noqa: E401
+    return ref_engine, ref_control
+
+
+def _in_school_result(E):
+    res = E.load_json("synthetic_resources.json")
+    hh = E.load_json("synthetic_households.json")["households"][0]
+    scopes = {x["scope_key"]: x for x in res["household_scopes"]}
+    c = {"criterion_id": "N02", "operator": "COUNT_MEMBERS_WHERE", "scope_key": "SCOPE-CO", "input_keys": ["person.age", "person.in_school"],
+         "threshold": {"where": {"age_between": [0, 17], "in_school": False}, "min_count": 2}, "min_confirmation_for_fail": "C2"}
+    return E.eval_criterion(c, hh, scopes, res["regions"])["result"]
+
+
+def test_n02_mutation():
+    """N-02：H1（0～17 歲、不在學）count=1 < 2 → FAIL_UNCONFIRMED（手算）；把 false 當未提供的舊寫法會得 PASS，必須被抓到。"""
+    E, _ = _examples()
+    COUNT[0] += 1
+    if _in_school_result(E) != "FAIL_UNCONFIRMED":
+        FAILS.append("N-02 baseline in_school=false should be FAIL_UNCONFIRMED")
+    mut = _mut("ref_engine", [('if "in_school" in where else', 'if where.get("in_school") else'),
+                              ('("in_school" not in where or sch["value"] is where["in_school"])', '(not where.get("in_school") or sch["value"])')])
+    COUNT[0] += 1
+    if _in_school_result(mut) != "PASS":
+        FAILS.append("N-02 mutation (truthiness) was expected to change the result to PASS, proving the counterexample is sensitive")
+
+
+def _control_run(RC, witness_mode):
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log = RC.new_state(initial), RC.ControlLog()
+    wit = RC.Witness()
+    if witness_mode == "unflushed":
+        wit.__class__ = type("U", (RC.Witness,), {"report": lambda self, seq, digest=None: None})
+    rec = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}
+    code, why, st2 = RC.request_control(st, log, wit, rec, db_fail=True)
+    return code, len(log.entries), st2["notifications"]["n1"]["status"], log, wit, initial
+
+
+def test_n03_mutation():
+    """N-03：見證未確認（含只排入定期更新）→ 503、控制紀錄不寫、主庫不動；移除該防護的破壞版本必須被抓到。"""
+    _, RC = _examples()
+    COUNT[0] += 1
+    got = _control_run(RC, "unflushed")[:3]
+    if got != (503, 0, "SCHEDULED"):
+        FAILS.append(f"N-03 baseline unflushed witness: want (503, 0, SCHEDULED) got {got}")
+    mut = _mut("ref_control", [('    if acked is not True:\n        return 503, "WITNESS_UNCONFIRMED", st\n', '')])
+    COUNT[0] += 1
+    got = _control_run(mut, "unflushed")[:3]
+    if got == (503, 0, "SCHEDULED"):
+        FAILS.append("N-03 mutation (witness ack ignored) was not caught")
+    # 還原時見證雜湊比對：整段重寫但重算鏈，只有見證雜湊能抓到
+    for label, RCm, want_quarantined in (("baseline", RC, True), ("mutation", _mut("ref_control", [('log.entries[seq - 1]["hash"] != h', 'False'), ('if wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            out["reason"] = f"INTENT_MISMATCH_AT_', 'if False:\n            out["reason"] = f"INTENT_MISMATCH_AT_')]), False)):
+        initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+        st, log, wit = RCm.new_state(initial), RCm.ControlLog(), RCm.Witness()
+        RCm.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})
+        e = log.entries[0]
+        e["payload"] = dict(e["payload"], reason="INCIDENT")
+        prev = "0" * 64
+        for x in log.entries:
+            x["prev_hash"] = prev
+            x["hash"] = RCm._hash(prev, RCm._body(x))
+            prev = x["hash"]
+        out = RCm.recover(initial, log, wit)
+        COUNT[0] += 1
+        if out["quarantined"] is not want_quarantined:
+            FAILS.append(f"N-03 rewritten-chain {label}: want quarantined={want_quarantined} got {out['quarantined']} ({out['reason']})")
+    # 還原時見證不可用不得放行
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RC.new_state(initial), RC.ControlLog(), RC.Witness()
+    RC.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})
+    wit.available = False
+    COUNT[0] += 1
+    if RC.recover(initial, log, wit)["reason"] != "WITNESS_UNAVAILABLE":
+        FAILS.append("N-03 unavailable witness must keep quarantine")
+
+
+def _n03_attack(RCx, rewrite=True):
+    """N-03 第二輪：合法撤回（REMINDERS＋REFERRAL_SHARE）、錨點補記失敗、縮減用途並重算合法鏈後還原。回傳 (http, 還原結果, 轉介狀態)。"""
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RCx.new_state(initial), RCx.ControlLog(), RCx.Witness()
+    wit.hash_fail_next = 1
+    rec = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}
+    try:
+        code, _, st2 = RCx.request_control(st, log, wit, rec, db_fail=True)
+    except Exception as exc:  # noqa: BLE001 - 破壞版本可能直接拋例外，視為與基準不同
+        return type(exc).__name__, None, None
+    if rewrite and log.entries:
+        e = log.entries[0]
+        e["payload"] = dict(e["payload"], purposes=["REMINDERS"])
+        prev = "0" * 64
+        for x in log.entries:
+            x["prev_hash"] = prev
+            x["hash"] = RCx._hash(prev, RCx._body(x))
+            prev = x["hash"]
+    out = RCx.recover(initial, log, wit)
+    return code, out, out["state"]["referrals"]["r1"]["status"]
+
+
+def _anchor_only(RCx):
+    """只有錨點失敗、紀錄未被改動：還原必須因缺錨點隔離（意圖相符，所以只有缺錨點檢查能擋）。"""
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RCx.new_state(initial), RCx.ControlLog(), RCx.Witness()
+    wit.hash_fail_next = 1
+    code = RCx.request_control(st, log, wit, {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]})[0]
+    return code, RCx.recover(initial, log, wit)
+
+
+def _rechain(RCx, log):
+    prev = "0" * 64
+    for x in log.entries:
+        x["prev_hash"] = prev
+        x["hash"] = RCx._hash(prev, RCx._body(x))
+        prev = x["hash"]
+
+
+def _r3_attack(RCx, kind):
+    """第三輪兩條繞過。kind='A'：縮減用途重算鏈後送一個無關合法請求再還原；kind='B'：改成 APPLIED/ref0 重算鏈後直接還原。
+    回傳 (無關請求 http 或 None, 無關請求狀態, 還原結果, r1 狀態)。"""
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RCx.new_state(initial), RCx.ControlLog(), RCx.Witness()
+    wit.hash_fail_next = 1
+    rec = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}
+    RCx.request_control(st, log, wit, rec)
+    log.entries[0]["payload"] = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS"]} if kind == "A" else {"type": "APPLIED", "ref": 0}
+    _rechain(RCx, log)
+    http = why = None
+    if kind == "A":
+        http, why, _ = RCx.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})
+    out = RCx.recover(initial, log, wit)
+    return http, why, out, out["state"]["referrals"]["r1"]["status"]
+
+
+def test_n03_round3():
+    """N-03 第三輪：缺錨點不得由後續請求洗成可信，也不得偽裝成 APPLIED；移除各保護的破壞版本必須被抓到。"""
+    _, RC = _examples()
+    for kind, want in (("A", (503, "INTENT_MISMATCH", True, "INTENT_MISMATCH_AT_1", "SENT")), ("B", (None, None, True, "INTENT_MISMATCH_AT_1", "SENT"))):
+        http, why, out, ref = _r3_attack(RC, kind)
+        COUNT[0] += 1
+        got = (http, why, out["quarantined"], out["reason"], ref)
+        if got != want:
+            FAILS.append(f"N-03r3 baseline attack {kind}: want {want} got {got}")
+    # mutation a：補錨點不比對原始意圖 → 攻擊 A 的無關請求被放行（http 不再是 503）
+    ma = _mut("ref_control", [('wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            return False, "INTENT_MISMATCH"', 'False:\n            return False, "INTENT_MISMATCH"')])
+    http, why, out, ref = _r3_attack(ma, "A")
+    COUNT[0] += 1
+    if http != 200:
+        FAILS.append(f"N-03r3 mutation (reanchor ignores original intent) was not caught: http={http}")
+    # mutation b：還原不比對原始意圖 → 攻擊 B 放行
+    mb = _mut("ref_control", [('        if wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            out["reason"] = f"INTENT_MISMATCH_AT_', '        if False:\n            out["reason"] = f"INTENT_MISMATCH_AT_')])
+    http, why, out, ref = _r3_attack(mb, "B")
+    COUNT[0] += 1
+    if out["quarantined"] is not False:
+        FAILS.append("N-03r3 mutation (restore ignores original intent) was not caught by attack B")
+    # mutation a+b：完整攻擊 A 通過（對應 GPT 原重現：還原放行、r1 仍 SENT）
+    mab = _mut("ref_control", [('wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            return False, "INTENT_MISMATCH"', 'False:\n            return False, "INTENT_MISMATCH"'),
+                               ('        if wit.intent_at.get(e["seq"]) != intent_digest(e["payload"]):\n            out["reason"] = f"INTENT_MISMATCH_AT_', '        if False:\n            out["reason"] = f"INTENT_MISMATCH_AT_')])
+    http, why, out, ref = _r3_attack(mab, "A")
+    COUNT[0] += 1
+    if (out["quarantined"], ref) != (False, "SENT"):
+        FAILS.append(f"N-03r3 mutation (no intent binding anywhere) should reproduce the original bypass, got {(out['quarantined'], ref)}")
+    # mutation c：APPLIED 免錨點與免意圖比對（只看當下 type）時，偽裝 APPLIED 不被補錨點擋下
+    mc = _mut("ref_control", [('    unanchored = [e for e in log.entries if e["seq"] not in wit.hash_at]', '    unanchored = [e for e in log.entries if e["seq"] not in wit.hash_at and e["payload"]["type"] != "APPLIED"]')])
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = mc.new_state(initial), mc.ControlLog(), mc.Witness()
+    wit.hash_fail_next = 1
+    mc.request_control(st, log, wit, {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]})
+    log.entries[0]["payload"] = {"type": "APPLIED", "ref": 0}
+    _rechain(mc, log)
+    COUNT[0] += 1
+    if mc.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})[0] != 200:
+        FAILS.append("N-03r3 mutation (APPLIED exempt from reanchor intent check) should let the unrelated request through (proves attack B coverage)")
+    # 合法控制：原始完整意圖 + 錨點失敗後，無關請求會先以原始意圖補錨點，之後正常完成並可還原
+    st, log, wit = RC.new_state(initial), RC.ControlLog(), RC.Witness()
+    wit.hash_fail_next = 1
+    rec = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}
+    RC.request_control(st, log, wit, rec)
+    code, why, st2 = RC.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})
+    out = RC.recover(initial, log, wit)
+    COUNT[0] += 1
+    if (code, out["quarantined"], out["state"]["referrals"]["r1"]["status"]) != (200, False, "CANCELLED"):
+        FAILS.append(f"N-03r3 legitimate control failed: {(code, why, out['quarantined'], out['reason'])}")
+
+
+def test_n03_round2():
+    """N-03 第二輪：錨點補記失敗不得放行還原、TimeoutError 轉 503；移除各防護的破壞版本必須被抓到。"""
+    _, RC = _examples()
+    code, out, ref = _n03_attack(RC)
+    COUNT[0] += 1
+    if (code, out["quarantined"], out["reason"], ref) != (503, True, "INTENT_MISMATCH_AT_1", "SENT"):
+        FAILS.append(f"N-03r2 baseline attack: want (503, True, INTENT_MISMATCH_AT_1, SENT) got {(code, out['quarantined'], out['reason'], ref)}")
+    # 合法控制：錨點成功的同樣撤回，不縮減 → 放行；縮減並重算 → LOG_REWRITTEN
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RC.new_state(initial), RC.ControlLog(), RC.Witness()
+    code, why, _ = RC.request_control(st, log, wit, {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}, db_fail=True)
+    COUNT[0] += 1
+    if (code, why) != (202, "RECORDED_PENDING_APPLY") or RC.recover(initial, log, wit)["quarantined"]:
+        FAILS.append("N-03r2 legitimate control (anchor ok, DB failed) should be 202 and restorable")
+    # mutation 1：還原不檢查缺錨點
+    m1 = _mut("ref_control", [('        if e["payload"]["type"] != "APPLIED" and e["seq"] not in wit.hash_at:\n            out["reason"]', '        if False:\n            out["reason"]')])
+    code, out = _anchor_only(m1)
+    COUNT[0] += 1
+    if out["quarantined"] is not False:
+        FAILS.append("N-03r2 mutation (missing anchor not checked at restore) was not caught")
+    COUNT[0] += 1
+    if _anchor_only(RC)[1]["reason"] != "ANCHOR_MISSING_AT_1":
+        FAILS.append("N-03r2 baseline anchor-only case should be ANCHOR_MISSING_AT_1")
+    # mutation 2：錨點未確認仍繼續（回 202）
+    m2 = _mut("ref_control", [('    if anchored is not True:\n        return 503, "ANCHOR_UNCONFIRMED", st\n', '')])
+    code, out, ref = _n03_attack(m2)
+    COUNT[0] += 1
+    if code == 503:
+        FAILS.append("N-03r2 mutation (anchor failure ignored) was not caught")
+    # mutation 3：TimeoutError 沒轉 503
+    m3 = _mut("ref_control", [('UNCONFIRMED = (WitnessUnavailable, TimeoutError)', 'UNCONFIRMED = (WitnessUnavailable,)')])
+    st, log, wit = m3.new_state(initial), m3.ControlLog(), m3.Witness()
+    wit.timeout_next = 1
+    COUNT[0] += 1
+    try:
+        got = m3.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})[:2]
+    except TimeoutError:
+        got = "TimeoutError"
+    if got != "TimeoutError":
+        FAILS.append(f"N-03r2 mutation (timeout not converted) should leak TimeoutError, got {got}")
+    st, log, wit = RC.new_state(initial), RC.ControlLog(), RC.Witness()
+    wit.timeout_next = 1
+    COUNT[0] += 1
+    if RC.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})[:2] != (503, "WITNESS_UNCONFIRMED"):
+        FAILS.append("N-03r2 baseline timeout should be 503 WITNESS_UNCONFIRMED")
+
+
+def test_n04_counterexamples():
+    d, m = base()
+    expect_clean("baseline N-04", GP.policy_problems(d, m))
+    api = next(a for a in d["api"] if a["endpoint"].endswith("/verify"))
+    # verify：結構化排除、note 只能由結構衍生
+    x = copy.deepcopy(d)
+    for a in x["api"]:
+        if a["endpoint"].endswith("/verify"):
+            a["note"] = "R4 可驗證自己登錄的成果；責任人也可驗證"
+    expect("verify note overridden", GP.policy_problems(x, m), "note must equal the text derived from verifier_must_not_be")
+    for dropped in GP.VERIFIER_REQUIRED:
+        x = copy.deepcopy(d)
+        for a in x["api"]:
+            if a["endpoint"].endswith("/verify"):
+                a["verifier_must_not_be"] = [k for k in a["verifier_must_not_be"] if k != dropped]
+                a["note"] = GP.verify_note(a)
+        expect(f"verify exclusion {dropped} dropped", GP.policy_problems(x, m), "verifier_must_not_be must be exactly")
+    x = copy.deepcopy(d)
+    for a in x["api"]:
+        if a["endpoint"].endswith("/verify"):
+            del a["verifier_must_not_be"]
+    expect("verify exclusion removed", GP.policy_problems(x, m), "verifier_must_not_be must be exactly")
+    rec = {"registrant": "U-REG", "case_owner": "U-OWN", "case_owner_delegates": ["U-DEL"]}
+    for who, want in (("U-REG", (False, "VERIFIER_IS_REGISTRANT")), ("U-OWN", (False, "VERIFIER_IS_CASE_OWNER")),
+                      ("U-DEL", (False, "VERIFIER_IS_CASE_OWNER_DELEGATE")), ("U-SECOND", (True, "ok"))):
+        COUNT[0] += 1
+        if GP.verifier_allowed(api, who, rec) != want:
+            FAILS.append(f"verifier_allowed({who}): want {want} got {GP.verifier_allowed(api, who, rec)}")
+    # 資源轉換：R4 不得有 RV-14（矩陣、狀態機、頁面、API 文字一致）
+    x = copy.deepcopy(d)
+    x["matrix"]["resource_internal"]["R4"][0]["transition_limits"] = ["RV-09", "RV-10", "RV-14"]
+    expect("R4 limits widened to RV-14", GP.policy_problems(x, m), "lists RV-14 but the state machine does not allow R4")
+    y = copy.deepcopy(m)
+    for t in y["resource_version"]["transitions"]:
+        if t["id"] == "RV-14":
+            t["actors"] = ["R4", "R5", "R7"]
+    expect("state machine gives RV-14 to R4", GP.policy_problems(d, y), "lets R4 perform RV-14")
+    x = copy.deepcopy(d)
+    for pg in x["pages"]:
+        if pg["page"] == "P9":
+            pg["sections"][0]["note"] = "R5 可編輯與發布（發布人≠查核人）；R4、R7 僅可暫停／停用；R9 唯讀；個案內容一律不可見"
+    expect("P9 old wording restored", GP.policy_problems(x, m), "page P9")
+    x = copy.deepcopy(d)
+    for a in x["api"]:
+        if a["endpoint"] == "POST /api/admin/versions/{id}/transitions":
+            a["note"] = "R4、R7 僅限暫停／停用轉換"
+    expect("transitions API old wording restored", GP.policy_problems(x, m), "transitions")
+    x = copy.deepcopy(d)
+    del x["matrix"]["resource_internal"]["R4"][0]["transition_limits"]
+    expect("R4 edit right without structured limits", GP.policy_problems(x, m), "edit right needs structured transition_limits")
+
+
+def test_n05_schema_counterexamples():
+    sc = SL.load_schema("control_record")
+    payload = sc["definitions"]["payload"]
+    ok = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS"]}
+    envelope = {"seq": 1, "prev_hash": "0" * 64, "hash": "a" * 64, "recorded_at": "2026-01-01T00:00:01Z", "payload": ok}
+    COUNT[0] += 1
+    if SL.validate(envelope, sc) or SL.validate(ok, payload, sc):
+        FAILS.append("N-05 legal envelope/payload rejected")
+    bad = {
+        "missing consent_id": {"type": "CONSENT_REVOKE", "purposes": ["REMINDERS"]},
+        "empty purposes": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": []},
+        "blank purpose": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": [""]},
+        "purposes wrong type": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": "REMINDERS"},
+        "retention_hold wrong type": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS"], "retention_hold": "yes"},
+        "unknown key": {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS"], "person_name": "x"},
+        "legacy consent key": {"type": "CONSENT_REVOKE", "consent": "c1", "purposes": ["REMINDERS"]},
+        "bad reason": {"type": "HARD_DELETE", "table": "facts", "id": "f1", "reason": "BECAUSE"},
+        "HARD_DELETE without id": {"type": "HARD_DELETE", "table": "facts"},
+        "HARD_DELETE with fields": {"type": "HARD_DELETE", "table": "facts", "id": "f1", "fields": ["value"]},
+        "REDACT without fields": {"type": "REDACT", "table": "facts", "id": "f1"},
+        "REDACT empty fields": {"type": "REDACT", "table": "facts", "id": "f1", "fields": []},
+        "REDACT with purposes": {"type": "REDACT", "table": "facts", "id": "f1", "fields": ["value"], "purposes": ["X"]},
+        "APPLIED without ref": {"type": "APPLIED"},
+        "APPLIED ref zero": {"type": "APPLIED", "ref": 0},
+        "APPLIED with table": {"type": "APPLIED", "ref": 1, "table": "facts"},
+        "unknown type": {"type": "SOMETHING"},
+        "type only": {"type": "CONSENT_REVOKE"},
+    }
+    for label, p in bad.items():
+        COUNT[0] += 1
+        if not SL.validate(p, payload, sc):
+            FAILS.append(f"N-05 payload not rejected: {label}")
+    for label, mutate in (("no seq", lambda e: e.pop("seq")), ("seq 0", lambda e: e.update(seq=0)), ("short hash", lambda e: e.update(hash="abc")),
+                          ("bad time", lambda e: e.update(recorded_at="yesterday")), ("flat payload fields", lambda e: e.update(type="CONSENT_REVOKE")),
+                          ("no payload", lambda e: e.pop("payload"))):
+        x = copy.deepcopy(envelope)
+        mutate(x)
+        COUNT[0] += 1
+        if not SL.validate(x, sc):
+            FAILS.append(f"N-05 envelope not rejected: {label}")
+
+
 def main():
-    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples):
+    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples, test_prose_policy_counterexamples, test_n02_mutation, test_n03_mutation, test_n03_round2, test_n03_round3, test_n04_counterexamples, test_n05_schema_counterexamples):
         try:
             t()
         except Exception as e:  # 工具壞掉也要算失敗

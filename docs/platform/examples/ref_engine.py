@@ -19,6 +19,7 @@ SUPPORTED_OPERATORS = {
 UNSUPPORTED_OPERATORS = {"AGE_BETWEEN", "DATE_WITHIN"}
 SUPPORTED_COMBINATORS = {"ALL", "ANY", "CUSTOM"}
 KNOWN_NODE_OPS = {"ALL", "ANY"}
+NODE_KEYS = {"op", "children"}  # expression 節點只允許這兩個鍵；任何其他鍵（含 not、空字串鍵）一律拒絕
 SUPPORTED_HUMAN_TRIGGERS = {"value_within_5_percent_of_threshold"}
 RESULTS = ("PASS", "FAIL", "FAIL_UNCONFIRMED", "UNKNOWN", "HUMAN")
 
@@ -241,6 +242,10 @@ def _expr_problems(node, out_ids, P, depth=0):
     if not isinstance(node, dict) or "op" not in node:
         P.append((ValidationError, f"bad expression node: {node!r}"))
         return
+    for k in node if _in(node["op"], KNOWN_NODE_OPS) else ():  # 不支援的 op（如 N_OF_M 的 n）只報 Unsupported，不混報鍵錯誤
+        if not isinstance(k, str) or k not in NODE_KEYS:
+            # 未知鍵所表達的限制若被忽略，就會在使用者看不到的情況下改變結果，所以逐節點、遞迴拒絕。
+            P.append((ValidationError, f"unknown expression node key {k!r} (allowed: op, children)"))
     if not _in(node["op"], KNOWN_NODE_OPS):
         P.append((UnsupportedError, f"unsupported combinator node op: {node['op']!r}"))
     children = node.get("children")
@@ -463,7 +468,8 @@ def eval_criterion(c, hh, scopes, regions):
         count, conf, miss = 0, scope_conf, []
         for p in members:
             age = _fact(p["facts"], "person.age")
-            sch = _fact(p["facts"], "person.in_school") if where.get("in_school") else {"value": True, "confirmation_level": "C3"}
+            # N-02：in_school 鍵「存在」即篩選（true＝在學、false＝不在學）；未提供鍵才不篩選，不得用真值判斷略過 false
+            sch = _fact(p["facts"], "person.in_school") if "in_school" in where else {"value": True, "confirmation_level": "C3"}
             if age is None:
                 miss.append(f"{p['id']}:person.age")
                 continue
@@ -471,7 +477,7 @@ def eval_criterion(c, hh, scopes, regions):
                 miss.append(f"{p['id']}:person.in_school")
                 continue
             conf = min(conf, _conf(age), _conf(sch))
-            if lo <= age["value"] <= hi and (not where.get("in_school") or sch["value"]):
+            if lo <= age["value"] <= hi and ("in_school" not in where or sch["value"] is where["in_school"]):
                 count += 1
         if miss:
             out.update(result="UNKNOWN", missing=sorted(miss))
@@ -572,6 +578,11 @@ def recommendation_status(res, sources_by_id, as_of, scopes):
         hard.append("VERSION_INVALID")  # effective_unknown 必須與 effective_to 是否為空一致（CHECK 約束）
         return {"status": "NOT_RECOMMENDED", "reasons": hard}
     status = v["status"]
+    if status != "NEEDS_RECHECK" and v.get("recheck_started_at") is not None:
+        # DATA_MODEL §2.4.1：recheck_started_at 只在 NEEDS_RECHECK 存在；離開該狀態（RV-08／09／12／13）即清除，
+        # 歷史留在 AuditEvent。其他狀態帶著起算日是不合法的狀態×欄位組合。
+        hard.append("VERSION_INVALID")
+        return {"status": "NOT_RECOMMENDED", "reasons": hard}
     risk = res.get("risk_tier", "MEDIUM")
     if status == "PUBLISHED":
         pass
@@ -738,6 +749,31 @@ def transition_allowed(machines, machine, current, tid, actor):
     if actor not in t["actors"]:
         return False, "actor not allowed"
     return True, "ok"
+
+
+def apply_version_transition(machines, version, tid, actor, trigger_date=None):
+    """ResourceVersion 轉換的欄位效果（DATA_MODEL §2.4.1 狀態×欄位生命週期）。回傳新的 version（不改原物件）。
+
+    recheck_started_at 只存在於 NEEDS_RECHECK：進入（RV-07）寫入 trigger_date（每次重新進入都是新的起算日），
+    離開（RV-08／09／12／13）一律清除，歷史留在 AuditEvent。非法轉換、缺或格式不合的 trigger_date 都拒絕。
+    """
+    ok, why = transition_allowed(machines, "resource_version", version["status"], tid, actor)
+    if not ok:
+        raise ValidationError(f"{tid}: {why}")
+    t = next(x for x in machines["resource_version"]["transitions"] if x["id"] == tid)
+    new = dict(version)
+    new["status"] = t["to"][0]
+    if new["status"] == "NEEDS_RECHECK":
+        try:
+            ok_date = isinstance(trigger_date, str) and date.fromisoformat(trigger_date) is not None
+        except ValueError:
+            ok_date = False
+        if not ok_date:
+            raise ValidationError(f"{tid}: entering NEEDS_RECHECK requires an ISO-date trigger_date")
+        new["recheck_started_at"] = trigger_date
+    else:
+        new["recheck_started_at"] = None
+    return new
 
 
 BLOCKING_EXCLUDED = {"DENIED", "WITHDRAWN", "LAPSED"}  # 非封鎖狀態：不核准、撤回、機關認定失效

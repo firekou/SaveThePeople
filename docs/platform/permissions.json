@@ -234,7 +234,11 @@
     {
      "actions": "VE",
      "scope": "INT",
-     "note": "僅限暫停轉換 RV-09、RV-10，不可編輯內容"
+     "note": "僅限暫停轉換 RV-09、RV-10，不可編輯內容",
+     "transition_limits": [
+      "RV-09",
+      "RV-10"
+     ]
     }
    ],
    "R5": [
@@ -248,7 +252,12 @@
     {
      "actions": "VE",
      "scope": "INT",
-     "note": "僅限暫停／停用轉換 RV-09、RV-10、RV-14，不可編輯內容"
+     "note": "僅限暫停／停用轉換 RV-09、RV-10、RV-14，不可編輯內容",
+     "transition_limits": [
+      "RV-09",
+      "RV-10",
+      "RV-14"
+     ]
     }
    ],
    "R9": [
@@ -1471,7 +1480,12 @@
     "R3·VERIFY",
     "R4·SITE-REV"
    ],
-   "note": "驗證人≠登錄人且≠案件責任人；R3 不因此取得該案其他資料"
+   "note": "驗證人≠登錄人、≠案件責任人、≠代班責任人；R3 不因此取得該案其他資料",
+   "verifier_must_not_be": [
+    "registrant",
+    "case_owner",
+    "case_owner_delegate"
+   ]
   },
   {
    "endpoint": "POST /api/outcomes/{id}/transitions",
@@ -1566,7 +1580,7 @@
     "R4·INT",
     "R7·INT"
    ],
-   "note": "R4、R7 僅限暫停／停用轉換"
+   "note": "R4 僅限暫停轉換 RV-09、RV-10；R7 僅限暫停／停用轉換 RV-09、RV-10、RV-14"
   },
   {
    "endpoint": "GET /api/admin/versions/{id}/recommendation",
@@ -1857,7 +1871,7 @@
       "R7·INT",
       "R9·INT"
      ],
-     "note": "R5 可編輯與發布（發布人≠查核人）；R4、R7 僅可暫停／停用；R9 唯讀；個案內容一律不可見"
+     "note": "R5 可編輯與發布（發布人≠查核人）；R4 僅可暫停轉換 RV-09、RV-10；R7 僅可暫停／停用轉換 RV-09、RV-10、RV-14；R9 唯讀；個案內容一律不可見"
     }
    ]
   },

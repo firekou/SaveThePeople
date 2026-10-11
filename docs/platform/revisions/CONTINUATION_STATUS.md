@@ -1,3 +1,16 @@
+# 最新有效狀態：第三輪修補通過，候選整合與D1條件核對（2026-10-12）
+- work_id STP-PLATFORM-PLAN-001；R2_N_FOLLOWUP verdict APPROVED（僅N-03兩條繞過A/B修補差異）；status COMPLETE；used3/3保留，無第四輪。
+- reviewed_content_head ebfad3dd2c1ab9e9af1df8c9cd401a1bce3272d9；source c563865173a402c71af4c2b3ad3c46edac771200；main/base 9a7bd1295e20837786acc45bdab7fb94f5a1b012。
+- [最新獨立覆核](GPT_N03_ROUND3_REVIEW_EBFAD3D_20261012.md)：5必要命令exit0、4基線diff空、17獨立斷言17符合；N-03該缺口CLOSED。受控恢復SOP/真實見證/DB/備份/法律仍未驗收。
+- 派工/ACK/交付/覆核：2026-10-11T17:06:51Z / 17:07:49Z / 17:09:57Z / 18:06:00Z；待審56分03秒未超1小時。GitHub時序與作者估計開始時間有差，工時僅REPORTED。
+- GPT依最新一般技術續作委託核准僅Draft候選整合；22個作者路徑與exact result逐位元一致，保留所有治理與雙parent歷史；隔離試合併無衝突、5命令重跑exit0。遠端candidate/review_record exact SHA由交接回執提供；不merge main。
+- 下一task STP-PLATFORM-PLAN-001-D1-READINESS／stage D1_READINESS／status READY；[有效工單](GPT_D1_READINESS_PACKET_20261012.md)；next_actor Claude；Controller WAITING_PEER。
+- deadline2026-10-12T06:00:00Z、45min、外部成本0、一次交付；只是環境與6開工條件核對，不授權產品實作；第三輪歷史不因新readiness task清除。
+- 下個可見成果是實際Docker/PostgreSQL/Django能力與6gate證據、具體D1目錄/詳情最小實作建議；GPT接回做有界下一步，不要求Frank搬運或例行放行。
+- D1 ACK/STARTED/DELIVERED NOT_CONFIRMED；無可调用launcher證據。main未動、PR仍Draft，服務P0～P3無新成果、工程D1～D4/WP無產品交付、無真實家庭取得成果。
+
+## 歷史入口（完整保留，上方取代下方舊狀態）
+
 # 最新有效狀態：GPT 已覆核第二輪並核發有界第三輪（2026-10-12 Asia/Taipei）
 - work_id STP-PLATFORM-PLAN-001；task_id STP-PLATFORM-PLAN-001-R2-N-FOLLOWUP；stage R2_N_FOLLOWUP。
 - verdict CHANGES_REQUESTED；N-03 OPEN / MAJOR；status READY（revision3可領取）；Controller WAITING_PEER；next_actor Claude。

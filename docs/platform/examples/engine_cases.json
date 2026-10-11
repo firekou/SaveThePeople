@@ -1761,13 +1761,79 @@
    }
   },
   {
-   "id": "F07-published-ignores-stale-recheck-start",
+   "id": "F07-published-with-stale-recheck-start-rejected",
    "override": {
     "version.recheck_started_at": "2026-01-01"
    },
    "expected": {
-    "status": "FORMAL",
-    "reasons": []
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-SUSPENDED-with-recheck-start-rejected",
+   "override": {
+    "version.status": "SUSPENDED",
+    "version.recheck_started_at": "2026-09-30"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-EXPIRED-with-recheck-start-rejected",
+   "override": {
+    "version.status": "EXPIRED",
+    "version.recheck_started_at": "2026-09-30"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-SUPERSEDED-with-recheck-start-rejected",
+   "override": {
+    "version.status": "SUPERSEDED",
+    "version.recheck_started_at": "2026-09-30"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-RETIRED-with-recheck-start-rejected",
+   "override": {
+    "version.status": "RETIRED",
+    "version.recheck_started_at": "2026-09-30"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
+   }
+  },
+  {
+   "id": "F07-published-with-garbage-recheck-start-rejected",
+   "override": {
+    "version.recheck_started_at": "last week"
+   },
+   "expected": {
+    "status": "NOT_RECOMMENDED",
+    "reasons": [
+     "VERSION_INVALID"
+    ]
    }
   },
   {
@@ -4926,6 +4992,67 @@
     "children": [
      "F1",
      "F2"
+    ]
+   }
+  },
+  {
+   "id": "F01-root-unknown-key-not",
+   "expression": {
+    "op": "ALL",
+    "children": [
+     "F1",
+     "F2",
+     "X"
+    ],
+    "not": true
+   }
+  },
+  {
+   "id": "F01-deep-unknown-key",
+   "expression": {
+    "op": "ALL",
+    "children": [
+     "F1",
+     {
+      "op": "ANY",
+      "children": [
+       "F2",
+       "X"
+      ],
+      "weight": 2
+     }
+    ]
+   }
+  },
+  {
+   "id": "F01-empty-key-name",
+   "expression": {
+    "op": "ALL",
+    "children": [
+     "F1",
+     "F2",
+     "X"
+    ],
+    "": 1
+   }
+  },
+  {
+   "id": "F01-children-wrong-type",
+   "expression": {
+    "op": "ALL",
+    "children": "F1"
+   }
+  },
+  {
+   "id": "F01-op-wrong-type",
+   "expression": {
+    "op": [
+     "ALL"
+    ],
+    "children": [
+     "F1",
+     "F2",
+     "X"
     ]
    }
   },
