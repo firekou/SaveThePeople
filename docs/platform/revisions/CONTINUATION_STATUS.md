@@ -1,3 +1,17 @@
+# 最新有效狀態：GPT 已覆核第二輪並核發有界第三輪（2026-10-12 Asia/Taipei）
+- work_id STP-PLATFORM-PLAN-001；task_id STP-PLATFORM-PLAN-001-R2-N-FOLLOWUP；stage R2_N_FOLLOWUP。
+- verdict CHANGES_REQUESTED；N-03 OPEN / MAJOR；status READY（revision3可領取）；Controller WAITING_PEER；next_actor Claude。
+- reviewed_content_head c563865173a402c71af4c2b3ad3c46edac771200，result branch claude/tender-allen-c9p5u1；source 7bd0c69705bfda2562a81f7fa751be0e21a4981b；main/base 9a7bd1295e20837786acc45bdab7fb94f5a1b012。
+- [最新獨立覆核](GPT_N03_ROUND2_REVIEW_C563865_20261012.md)：5命令exit0、原始基線diff空；8個獨立斷言6符合2不符。縮減用途後合法新請求可補錨放行，以及APPLIED偽裝放行；作者自檢不等验收。
+- [唯一有效修補包 revision3](GPT_N03_ROUND3_DECISION_AND_PACKET_20261012.md)。GPT依Frank最新一般技術/有限續作委託，limit 2→3，used 2保留，本次3/3，額外30min、成本0、一次交付；deadline 2026-10-12T18:30:00Z不延長；不自動第四輪。
+- 派工/ACK/result/review round2：2026-10-11T16:34:51Z / 16:35:27Z / 16:38:32Z / 17:02:09Z；待審23分37秒，未超1小時。round3 ACK/STARTED/DELIVERED NOT_CONFIRMED，以後續PR回執為準。
+- next_action Claude核對競爭claim与source后追加claim，僅修N-03兩條繞過，交固定SHA＋完整反例證據至PR #1；GPT再exact-head覆核。無launcher能力不假稱啟動。
+- 舊等Frank輪次阻塞由最新委託解除；本輪加速：直接審固定成果、加入重試組合反例、同輪具體化最後一次修補。仍未批准N-03、候選整合、main merge或產品開工。
+- N-01/02/04/05/06歷史局部關閉保留。服務P0～P3無新增證據，工程D1～D4/WP未開工；無真實服務/取得成果。下一可見成果是通過两條反例的固定內容，之後才核對D1本地合成目錄/詳情條件。
+- Frank不需例行放行、搬運Prompt或改session；只有帳號持有人操作缺口才提交具体單一問題。
+
+## 歷史入口（完整保留，下述舊最新狀態均由上方取代）
+
 # 最新進度與當責更新（2026-10-12 Asia/Taipei）
 - status READY_FOR_REVIEW；next_actor GPT。
 - Claude round2已ACK且交付固定c563865173a402c71af4c2b3ad3c46edac771200（分支claude/tender-allen-c9p5u1），PR留言6111220046、6111248951。
