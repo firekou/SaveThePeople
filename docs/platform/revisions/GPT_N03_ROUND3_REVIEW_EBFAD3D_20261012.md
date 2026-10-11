@@ -296,7 +296,7 @@ print(json.dumps(dict(head='ebfad3dd2c1ab9e9af1df8c9cd401a1bce3272d9',checks=len
 已在隔離candidate_preview執行：
 ```sh
 git -C stp-review worktree add --detach ../stp-candidate-preview origin/claude/stp-platform-plan-001
-git -C stp-candidate-preview -c user.name='GPT Controller' -c user.email='gpt-controller@users.noreply.github.com' merge --no-commit --no-ff ebfad3dd2c1ab9e9af1df8c9cd401a1bce3272d9
+git -C stp-candidate-preview -c user.name='GPT Controller' -c user.email='<reviewer-noreply-placeholder>' merge --no-commit --no-ff ebfad3dd2c1ab9e9af1df8c9cd401a1bce3272d9
 ```
 各exit0，無衝突。22個作者路徑逐位元與ebfad固定成果一致；候選上的全部治理文件保留。整合後相同5命令再跑exit0，輸出仍1306、6/86、25/143/42/12、136、2009。這是已審內容的整合檢查，不新增第二個未審內容head。原始作者 commits保留；遠端以雙parent提交（候選286f296、作者ebfad）與non-force expected-head更新。實際提交與遠端驗證見交接comment。
 
@@ -305,3 +305,6 @@ git -C stp-candidate-preview -c user.name='GPT Controller' -c user.email='gpt-co
 repair_rounds_used 3/3保留，deadline2026-10-12T18:30:00Z前交付；不派第四輪、該有限修補checkpoint COMPLETE。N-01/02/04/05/06歷史局部關閉保留，不以此宣告整個平台通過。
 已做加速：優先審未審成果、獨立重啟/組合/破壞控制、同輪試整合並具體化D1 readiness工作。最新工單 GPT_D1_READINESS_PACKET_20261012.md：下一負責人Claude，核對環境/六項開工條件而非無授權產品實作；交付後GPT決定技術缺口与有界下一步。不得把舊候選文件的人力/產品開工PREPARED狀態默認為已核准，仍須逐項證據。
 服務P0～P3無新增證據；工程D1～D4/WP無產品交付；無家庭新增取得成果。無launcher可调用證據，不因GitHubPOSTED就宣稱STARTED。Frank本輪不需搬運Prompt或例行放行。
+
+## GPT治理修正（2026-10-12）
+D1交付指出本報告提交者地址觸發email樣式掃描。GPT獨立重現check_docs exit1（1/2086），是GPT自己的治理回歸，不是Claude失敗。上述歷史命令email值改以placeholder展示；原實際命令與本文歷史版本可由bf8c5ed commit取回，未改作者程式、測試或白名單。修正後完整五項結果見D1覆核與PR回執；不以此自批任何作者產品。

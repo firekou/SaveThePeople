@@ -1,3 +1,14 @@
+# 最新有效狀態：D1 readiness交付通過，隔離環境驗證READY（2026-10-12）
+- work_id STP-PLATFORM-PLAN-001；D1_READINESS verdict APPROVED（交付文件/合成fixture/缺口核對，不是環境或全產品通過）；checkpoint COMPLETE，used1/1。
+- reviewed_content_head 9dd0c5d3c9c1293f6995e42f44b4607661631996；handoff bf8c5ed4a0cc592c239a92006264523e8754e3c6；main/base 9a7bd1295e20837786acc45bdab7fb94f5a1b012；N修補COMPLETE/3/3保留。
+- [覆核與決策](GPT_D1_READINESS_REVIEW_9DD0C5D_20261012.md)：作者Docker不可用/Django驅動缺少為AUTHOR_EVIDENCE、同runtime NOT_VERIFIED；隔離DB尚未運行。check_docs治理回歸由GPT自己的報告地址引入，GPT只修該展示值、不改作者或放寬掃描器。
+- 下一task STP-PLATFORM-PLAN-001-D1-ENVIRONMENT；stage D1_ENVIRONMENT；status READY；[唯一工作包](GPT_D1_ENVIRONMENT_PACKET_20261012.md)，next_actor Claude，GPT WAITING_PEER；deadline2026-10-12T06:00:00Z、45min、0cost、一次交付。
+- GPT依一般技術替代委託授權僅隔離venv套件與本地私人socket PostgreSQL煙霧/回滾/停止清理，未授權產品實作、main merge、部署或真實資料。下個可見成果是真實Django→PostgreSQL連線與負向/清理證據。
+- ACK18:12:02Z、DELIVERED18:13:36Z、review19:06:12Z（2026-10-11 UTC）；待審52分36秒未超1小时。本輪加速是選替代環境、修治理檢查與核發有界下一包；新包ACK/STARTED/DELIVERED NOT_CONFIRMED，無launcher能力證據。
+- 服務P0～P3無新增真實成果；工程D1～D4/WP無產品交付；main未動、PR仍Draft。Frank不需行動或搬運Prompt。
+
+## 歷史入口（完整保留，上方取代舊狀態）
+
 # 最新有效狀態：第三輪修補通過，候選整合與D1條件核對（2026-10-12）
 - work_id STP-PLATFORM-PLAN-001；R2_N_FOLLOWUP verdict APPROVED（僅N-03兩條繞過A/B修補差異）；status COMPLETE；used3/3保留，無第四輪。
 - reviewed_content_head ebfad3dd2c1ab9e9af1df8c9cd401a1bce3272d9；source c563865173a402c71af4c2b3ad3c46edac771200；main/base 9a7bd1295e20837786acc45bdab7fb94f5a1b012。
