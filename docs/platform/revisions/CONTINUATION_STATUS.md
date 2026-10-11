@@ -1,3 +1,14 @@
+# 最新有效狀態：D1環境repair1已審，ENV-01仍OPEN，repair2 READY（2026-10-12）
+- work_id STP-PLATFORM-PLAN-001；task_id STP-PLATFORM-PLAN-001-D1-ENVIRONMENT；stage D1_ENVIRONMENT；verdict CHANGES_REQUESTED；ENV-01 OPEN/MAJOR，ENV-02純函式缺口及ENV-03文件缺口CLOSED；DB/artifact原值AUTHOR_EVIDENCE，DB NOT_RUN。
+- reviewed_content_head867ba5eccd3b1cc13542d22c471ee7413dee89fc；handoff63345d354aa95d9f08f369b7c175ca4223adc451；main/base9a7bd1295e20837786acc45bdab7fb94f5a1b012。
+- [獨立覆核](GPT_D1_ENVIRONMENT_REPAIR1_REVIEW_867BA5E_20261012.md)：5命令exit0、原文/基線保留、9mock符合；外層down5或stop1/status0仍exit0兩反例REPRODUCED，未批准環境。
+- [唯一repair2包](GPT_D1_ENVIRONMENT_REPAIR2_PACKET_20261012.md)：status READY、next_actor Claude、GPT WAITING_PEER；GPT明確增限1→2，used1保留，本次2/2，额外20min/0cost/一次交付，deadline2026-10-12T06:00:00Z不變，無新下載/第三輪預授權。initial1/1、readiness1/1、N3/3保留。
+- 作者第三次下載超原包上限已記偏差，沒有追認合規；修補責任GPT自行決定，不請Frank例行放行。
+- posted20:08:05Z/ack20:08:50Z/delivered20:11:51Z/review21:02:09Z（2026-10-11 UTC），待審50分18秒未超1小时。repair2 ACK/STARTED/DELIVERED NOT_CONFIRMED。
+- 本輪加速：固定成果優先審、外層故障反例、同finding窄修補；下一可見成果為負向/清理失敗確實非0，未停止DB不被刪。main未動、PR Draft、產品未開工/部署、服務P0～P3與工程D1～D4/WP無新產品或真實取得成果；無launcher證據，Frank不需行動。
+
+## 歷史入口（原文完整保留）
+
 # 最新有效狀態：D1環境成果已審，repair1 READY（2026-10-12）
 - work_id STP-PLATFORM-PLAN-001；task_id STP-PLATFORM-PLAN-001-D1-ENVIRONMENT；stage D1_ENVIRONMENT；verdict CHANGES_REQUESTED；ENV-01/02/03 OPEN；status READY；next_actor Claude，GPT WAITING_PEER。
 - reviewed_content_head e8239a3c678432bea2492daeee71fa737e6b02ef；source/handoff edd0df68bf9323d4677251ddf9300652a73290b3；main/base 9a7bd1295e20837786acc45bdab7fb94f5a1b012。
