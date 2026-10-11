@@ -3,9 +3,10 @@
 這是**純邏輯模擬**，不是資料庫、物件儲存或備份整合演練。它只用來驗證規格中的順序與判斷是否自洽：
   0. 先驗證 payload（schema＋目標存在＋用途／欄位非空）；不合法回 422，不寫任何東西（N-05）；
   1. 先寫（write-ahead）：先讓**獨立見證持久確認**即將使用的 seq（N-03：見證確認在前、且必須同步持久，不可只靠定期回報），
-     再把控制意圖附加到外部僅附加的控制紀錄（含雜湊鏈）；任一未確認都不改主庫；
-  2. 主庫在單一交易內套用；失敗則回 202（已記錄、待套用），不回「完成」；
-  3. 還原：驗證控制紀錄鏈完整、尾端不短於獨立見證的水位，否則維持隔離；再把備份水位之後的紀錄全部重新套用；
+     再把控制意圖附加到外部僅附加的控制紀錄（含雜湊鏈），**再讓見證同步持久確認該筆雜湊（錨點）**；任一未確認都不改主庫；
+  2. 主庫在單一交易內套用；失敗則回 202（已記錄、待套用），不回「完成」；200／202 只在 seq 與雜湊錨點都已確認後才可能回覆；
+  3. 還原：驗證控制紀錄鏈完整、尾端不短於獨立見證的水位、**每筆非 APPLIED 紀錄都有見證錨點且雜湊相符**，否則維持隔離；
+     再把備份水位之後的紀錄全部重新套用；
   4. 驗證：HARD_DELETE 驗證物件不存在；REDACT 驗證指定欄位已遮蔽（列仍在）；用途撤回驗證通知取消、分享停止、存取限制。
 所有套用動作都是冪等的：重複套用結果相同。
 """
@@ -99,7 +100,11 @@ class Witness:
     - `report(seq)` 是**同步、持久**的確認：只有回傳 True 才算見證已持久記下「seq 即將使用」；
       例外、逾時、回傳 False／None（含只是排入「定期更新」尚未 flush）一律視為**未確認**，呼叫端必須 fail-closed（503，不改主庫）。
     - 見證記錄的是水位（max_seq）與各 seq 的雜湊（hash_at），用來偵測尾端遺失與整段重寫。
+    - `record_hash(seq, h)` 同樣是**同步、持久**的確認（雜湊錨點）：只有回傳 True 才算見證已記下該筆雜湊。
+      失敗、逾時或不可用＝錨點未確認：請求回 503（主庫不改），且還原時該筆因缺錨點而**維持隔離**；
+      缺錨點的紀錄不可被當成「已被見證」（否則攻擊者可縮減用途後重算鏈）。
     - `available=False` 表示還原時無法查詢見證：不得放行。
+    - 逾時（TimeoutError）與不可用一樣視為未確認，必須轉成規範的 503，不可往外拋。
     """
 
     def __init__(self):
@@ -107,8 +112,14 @@ class Witness:
         self.hash_at = {}
         self.available = True
         self.fail_next = 0
+        self.hash_fail_next = 0
+        self.timeout_next = 0
+        self.hash_timeout_next = 0
 
     def report(self, seq):
+        if self.timeout_next:
+            self.timeout_next -= 1
+            raise TimeoutError("witness timeout")
         if self.fail_next:
             self.fail_next -= 1
             raise WitnessUnavailable("witness unavailable")
@@ -118,9 +129,20 @@ class Witness:
         return True
 
     def record_hash(self, seq, h):
-        """寫入後補記雜湊（盡力而為；失敗只降低偵測力，不影響水位保護）。"""
-        if self.available:
-            self.hash_at[seq] = h
+        """同步持久記下雜湊錨點；失敗拋 WitnessUnavailable／TimeoutError，回傳 True 才算確認。"""
+        if self.hash_timeout_next:
+            self.hash_timeout_next -= 1
+            raise TimeoutError("witness timeout")
+        if self.hash_fail_next:
+            self.hash_fail_next -= 1
+            raise WitnessUnavailable("witness hash anchor failed")
+        if not self.available:
+            raise WitnessUnavailable("witness unavailable")
+        self.hash_at[seq] = h
+        return True
+
+
+UNCONFIRMED = (WitnessUnavailable, TimeoutError)
 
 
 KNOWN_TABLE_ID = ("table", "id")
@@ -264,18 +286,22 @@ def request_control(st, log, wit, rec, db_fail=False):
       1) 獨立見證**同步持久確認** seq；未確認（例外／逾時／未 flush／False）→503 WITNESS_UNCONFIRMED，控制紀錄與主庫都不動；
       2) 附加外部控制紀錄並取得確認；失敗→503 NOT_RECORDED，主庫不動（見證水位已先到 seq：同一 seq 重試即補上；
          若重試前就發生還原，水位大於紀錄尾端→維持隔離，由資料責任人與 R7 處理，這是刻意的 fail-closed）；
+      2b) 見證**同步持久確認該筆雜湊**；未確認（失敗／逾時／不可用）→503 ANCHOR_UNCONFIRMED，主庫不動。紀錄已在但缺錨點：
+         還原會因 ANCHOR_MISSING 維持隔離；下一次請求在任何新寫入前先補錨點（只補鏈完整、且 seq 不超過見證水位的紀錄），補不上同樣 503；
       3) 主庫單一交易套用；失敗→202 RECORDED_PENDING_APPLY（已記錄、待冪等重試，不得回完成）；
-      4) 盡力附加 APPLIED（見證未確認或紀錄不可用就略過，非必要）。
-    只有 1)～3) 都成功才回 200「完成」。
+      4) 盡力附加 APPLIED（見證未確認或紀錄不可用就略過，非必要；其錨點亦非必要）。
+    只有 1)～3) 都成功才回 200「完成」；202 也只在 1)～2b) 都成功後才回。
     """
     try:
         validate_payload(st, rec)
     except InvalidControl:
         return 422, "INVALID_CONTROL", st
+    if not reanchor_missing(log, wit):
+        return 503, "ANCHOR_UNCONFIRMED", st
     seq = log.next_seq()
     try:
         acked = wit.report(seq)
-    except WitnessUnavailable:
+    except UNCONFIRMED:
         acked = False
     if acked is not True:
         return 503, "WITNESS_UNCONFIRMED", st
@@ -283,7 +309,12 @@ def request_control(st, log, wit, rec, db_fail=False):
         log.append(rec)
     except LogUnavailable:
         return 503, "NOT_RECORDED", st
-    wit.record_hash(seq, log.entries[-1]["hash"])
+    try:
+        anchored = wit.record_hash(seq, log.entries[-1]["hash"])
+    except UNCONFIRMED:
+        anchored = False
+    if anchored is not True:
+        return 503, "ANCHOR_UNCONFIRMED", st
     try:
         if db_fail:
             raise DbCommitFailed()
@@ -298,9 +329,31 @@ def request_control(st, log, wit, rec, db_fail=False):
         if wit.report(s2) is True:
             log.append({"type": "APPLIED", "ref": seq})
             wit.record_hash(s2, log.entries[-1]["hash"])
-    except (LogUnavailable, WitnessUnavailable):
+    except (LogUnavailable, WitnessUnavailable, TimeoutError):
         pass
     return 200, "COMPLETE", st
+
+
+def reanchor_missing(log, wit):
+    """補上缺少的雜湊錨點（只在鏈完整時，對 seq ≤ 見證水位的非 APPLIED 紀錄）。全部補上或本來就齊全→True；補不上→False。
+
+    限制（模擬層級）：補錨點信任當下的紀錄內容；失敗到重試之間若有人改寫紀錄，無法由此偵測。
+    這個窗口期間的還原一律因 ANCHOR_MISSING 維持隔離，所以不會被放行。
+    """
+    missing = [e for e in log.entries if e["payload"]["type"] != "APPLIED" and e["seq"] not in wit.hash_at]
+    if not missing:
+        return True
+    if not log.verify_chain()[0]:
+        return False
+    for e in missing:
+        if e["seq"] > wit.max_seq:
+            return False
+        try:
+            if wit.record_hash(e["seq"], e["hash"]) is not True:
+                return False
+        except UNCONFIRMED:
+            return False
+    return True
 
 
 def reapply_all(st, entries, from_seq=0):
@@ -315,7 +368,8 @@ def reapply_all(st, entries, from_seq=0):
 def recover(snapshot, log, wit, skip_reapply=False):
     """由備份還原後的處理。回傳 dict：quarantined、reason、watermark、mismatches、state。
 
-    維持隔離（不恢復服務）的條件：控制紀錄鏈不完整；獨立見證無法查詢；紀錄尾端短於獨立見證的水位；見證記下的雜湊與紀錄不符（整段重寫）；套用後驗證仍有不符合。
+    維持隔離（不恢復服務）的條件：控制紀錄鏈不完整；獨立見證無法查詢；紀錄尾端短於獨立見證的水位；見證記下的雜湊與紀錄不符（整段重寫）；
+    任一非 APPLIED 紀錄缺見證錨點（N-03：不得只比對「已存在」的錨點）；套用後驗證仍有不符合。
     """
     st = new_state(snapshot)
     ok, why = log.verify_chain()
@@ -333,6 +387,10 @@ def recover(snapshot, log, wit, skip_reapply=False):
     for seq, h in sorted(wit.hash_at.items()):
         if seq <= log.last_seq() and log.entries[seq - 1]["hash"] != h:
             out["reason"] = f"LOG_REWRITTEN_AT_{seq}"
+            return out
+    for e in log.entries:
+        if e["payload"]["type"] != "APPLIED" and e["seq"] not in wit.hash_at:
+            out["reason"] = f"ANCHOR_MISSING_AT_{e['seq']}"
             return out
     if not skip_reapply:
         reapply_all(st, log.entries, from_seq=st["applied_seq"])

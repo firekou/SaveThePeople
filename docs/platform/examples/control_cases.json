@@ -1180,6 +1180,526 @@
      "objects.doc1.exists": false
     }
    }
+  },
+  {
+   "id": "CS-22-anchor-failure-returns-503-and-restore-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "ANCHOR_MISSING_AT_1",
+    "watermark": 1
+   }
+  },
+  {
+   "id": "CS-23-n03-attack-anchor-failed-then-purposes-reduced-and-chain-rebuilt-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED",
+     "db_fail": true
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_purposes": [
+      "REMINDERS"
+     ]
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "ANCHOR_MISSING_AT_1",
+    "state": {
+     "referrals.r1.status": "SENT"
+    }
+   }
+  },
+  {
+   "id": "CS-24-anchor-failure-then-legitimate-retry-repairs-anchor-and-completes",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [
+       "REFERRAL_SHARE",
+       "REMINDERS"
+      ],
+      "notifications.n1.status": "CANCELLED",
+      "referrals.r1.status": "CANCELLED"
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 3,
+    "state": {
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED"
+    }
+   }
+  },
+  {
+   "id": "CS-25-retry-cannot-repair-anchor-while-witness-still-failing-writes-nothing-new",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next",
+     "count": 2
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "ANCHOR_MISSING_AT_1",
+    "watermark": 1
+   }
+  },
+  {
+   "id": "CS-26-witness-timeout-on-seq-confirmation-is-503-and-nothing-changes",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "timeout_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "WITNESS_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 0
+   }
+  },
+  {
+   "id": "CS-27-witness-timeout-on-hash-anchor-is-503-and-restore-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_timeout_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "ANCHOR_MISSING_AT_1",
+    "watermark": 1
+   }
+  },
+  {
+   "id": "CS-28-anchor-failure-then-tail-loss-is-caught-by-seq-watermark",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "lose_log_tail",
+     "n": 1
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_INCOMPLETE:last=0<witness=1",
+    "watermark": 1
+   }
+  },
+  {
+   "id": "CS-29-main-db-failure-after-anchor-is-202-and-rewrite-is-caught",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 202,
+     "expect_status": "RECORDED_PENDING_APPLY",
+     "db_fail": true
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_purposes": [
+      "REMINDERS"
+     ]
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_REWRITTEN_AT_1"
+   }
+  },
+  {
+   "id": "CS-30-main-db-failure-after-anchor-is-202-and-restore-reapplies",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 202,
+     "expect_status": "RECORDED_PENDING_APPLY",
+     "db_fail": true
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 1,
+    "state": {
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED"
+    }
+   }
+  },
+  {
+   "id": "CS-31-hard-delete-and-redact-anchor-failures-also-503-and-stay-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "objects.doc1.exists": true,
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "ANCHOR_MISSING_AT_1"
+   }
+  },
+  {
+   "id": "CS-32-redact-anchor-failure-503-then-retry-completes-and-restores",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "value",
+       "note"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "facts.f1.value": "secret-income",
+      "facts.f1.note": "x",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "value",
+       "note"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 3
+   }
   }
  ]
 }

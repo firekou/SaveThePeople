@@ -516,7 +516,7 @@ def run_control_scenario(initial, sc):
         elif op == "rewrite_log_entry":
             # 攻擊模型：改寫某筆內容並重算其後整條雜湊鏈（鏈本身仍連續）；只有獨立見證記下的雜湊能抓到
             e = log.entries[step["index"]]
-            e["payload"] = dict(e["payload"], reason="INCIDENT")
+            e["payload"] = dict(e["payload"], purposes=step["set_purposes"]) if "set_purposes" in step else dict(e["payload"], reason="INCIDENT")
             prev = log.entries[step["index"] - 1]["hash"] if step["index"] else "0" * 64
             for x in log.entries[step["index"]:]:
                 x["prev_hash"] = prev
@@ -527,6 +527,12 @@ def run_control_scenario(initial, sc):
         elif op == "witness":
             if step["mode"] == "fail_next":
                 wit.fail_next = 1
+            elif step["mode"] == "hash_fail_next":
+                wit.hash_fail_next = step.get("count", 1)
+            elif step["mode"] == "timeout_next":
+                wit.timeout_next = 1
+            elif step["mode"] == "hash_timeout_next":
+                wit.hash_timeout_next = 1
             elif step["mode"] == "unflushed":
                 w2 = UnflushedWitness()  # 定期更新尚未 flush：report 只排入、不確認
                 w2.max_seq, w2.hash_at = wit.max_seq, dict(wit.hash_at)

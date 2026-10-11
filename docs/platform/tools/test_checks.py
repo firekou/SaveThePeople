@@ -326,6 +326,72 @@ def test_n03_mutation():
         FAILS.append("N-03 unavailable witness must keep quarantine")
 
 
+def _n03_attack(RCx, rewrite=True):
+    """N-03 第二輪：合法撤回（REMINDERS＋REFERRAL_SHARE）、錨點補記失敗、縮減用途並重算合法鏈後還原。回傳 (http, 還原結果, 轉介狀態)。"""
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RCx.new_state(initial), RCx.ControlLog(), RCx.Witness()
+    wit.hash_fail_next = 1
+    rec = {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}
+    try:
+        code, _, st2 = RCx.request_control(st, log, wit, rec, db_fail=True)
+    except Exception as exc:  # noqa: BLE001 - 破壞版本可能直接拋例外，視為與基準不同
+        return type(exc).__name__, None, None
+    if rewrite and log.entries:
+        e = log.entries[0]
+        e["payload"] = dict(e["payload"], purposes=["REMINDERS"])
+        prev = "0" * 64
+        for x in log.entries:
+            x["prev_hash"] = prev
+            x["hash"] = RCx._hash(prev, RCx._body(x))
+            prev = x["hash"]
+    out = RCx.recover(initial, log, wit)
+    return code, out, out["state"]["referrals"]["r1"]["status"]
+
+
+def test_n03_round2():
+    """N-03 第二輪：錨點補記失敗不得放行還原、TimeoutError 轉 503；移除各防護的破壞版本必須被抓到。"""
+    _, RC = _examples()
+    code, out, ref = _n03_attack(RC)
+    COUNT[0] += 1
+    if (code, out["quarantined"], out["reason"], ref) != (503, True, "ANCHOR_MISSING_AT_1", "SENT"):
+        FAILS.append(f"N-03r2 baseline attack: want (503, True, ANCHOR_MISSING_AT_1, SENT) got {(code, out['quarantined'], out['reason'], ref)}")
+    # 合法控制：錨點成功的同樣撤回，不縮減 → 放行；縮減並重算 → LOG_REWRITTEN
+    initial = json.loads((ROOT / "examples" / "control_cases.json").read_text(encoding="utf-8"))["initial_state"]
+    st, log, wit = RC.new_state(initial), RC.ControlLog(), RC.Witness()
+    code, why, _ = RC.request_control(st, log, wit, {"type": "CONSENT_REVOKE", "consent_id": "c1", "purposes": ["REMINDERS", "REFERRAL_SHARE"]}, db_fail=True)
+    COUNT[0] += 1
+    if (code, why) != (202, "RECORDED_PENDING_APPLY") or RC.recover(initial, log, wit)["quarantined"]:
+        FAILS.append("N-03r2 legitimate control (anchor ok, DB failed) should be 202 and restorable")
+    # mutation 1：還原不檢查缺錨點
+    m1 = _mut("ref_control", [('        if e["payload"]["type"] != "APPLIED" and e["seq"] not in wit.hash_at:\n            out["reason"]', '        if False:\n            out["reason"]')])
+    code, out, ref = _n03_attack(m1)
+    COUNT[0] += 1
+    if out is None or out["quarantined"] is not False:
+        FAILS.append("N-03r2 mutation (missing anchor not checked at restore) was not caught")
+    # mutation 2：錨點未確認仍繼續（回 202）
+    m2 = _mut("ref_control", [('    if anchored is not True:\n        return 503, "ANCHOR_UNCONFIRMED", st\n', '')])
+    code, out, ref = _n03_attack(m2)
+    COUNT[0] += 1
+    if code == 503:
+        FAILS.append("N-03r2 mutation (anchor failure ignored) was not caught")
+    # mutation 3：TimeoutError 沒轉 503
+    m3 = _mut("ref_control", [('UNCONFIRMED = (WitnessUnavailable, TimeoutError)', 'UNCONFIRMED = (WitnessUnavailable,)')])
+    st, log, wit = m3.new_state(initial), m3.ControlLog(), m3.Witness()
+    wit.timeout_next = 1
+    COUNT[0] += 1
+    try:
+        got = m3.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})[:2]
+    except TimeoutError:
+        got = "TimeoutError"
+    if got != "TimeoutError":
+        FAILS.append(f"N-03r2 mutation (timeout not converted) should leak TimeoutError, got {got}")
+    st, log, wit = RC.new_state(initial), RC.ControlLog(), RC.Witness()
+    wit.timeout_next = 1
+    COUNT[0] += 1
+    if RC.request_control(st, log, wit, {"type": "HARD_DELETE", "table": "objects", "id": "doc1"})[:2] != (503, "WITNESS_UNCONFIRMED"):
+        FAILS.append("N-03r2 baseline timeout should be 503 WITNESS_UNCONFIRMED")
+
+
 def test_n04_counterexamples():
     d, m = base()
     expect_clean("baseline N-04", GP.policy_problems(d, m))
@@ -421,7 +487,7 @@ def test_n05_schema_counterexamples():
 
 
 def main():
-    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples, test_prose_policy_counterexamples, test_n02_mutation, test_n03_mutation, test_n04_counterexamples, test_n05_schema_counterexamples):
+    for t in (test_permission_counterexamples, test_doc_inventory_counterexample, test_schema_counterexamples, test_citation_counterexamples, test_prose_policy_counterexamples, test_n02_mutation, test_n03_mutation, test_n03_round2, test_n04_counterexamples, test_n05_schema_counterexamples):
         try:
             t()
         except Exception as e:  # 工具壞掉也要算失敗
