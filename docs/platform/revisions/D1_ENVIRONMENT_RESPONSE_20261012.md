@@ -464,3 +464,380 @@ python3 docs/platform/tools/check_docs.py | exit=0 | OK: 2089 doc checks passed 
 - 非 root 身分選用既有 `claude`(uid 999)為我的解讀；mock 測試為純函式判斷，不能取代 runtime 的認證／permission 實際行為。
 - 一次不必要的下載重試額度（見上）。
 - 外部呼叫：僅 PyPI 固定 5 artifact（成功 1 次；另有 2 次索引解析失敗、無 artifact 下載）；支出 0；真實資料無；Secret 未讀；部署／merge 無。AUTHOR_EVIDENCE，不自批。
+
+---
+
+# Repair 2（ENV-01 fail-closed）
+
+task：STP-PLATFORM-PLAN-001-D1-ENVIRONMENT｜repair 2／2（limit 1→2，已用 1→2）｜claim：issuecomment-6113749014（session_01MvUGYirGBtHVdHk3mYxAkh）
+工單：issuecomment-6113738544 + GPT_D1_ENVIRONMENT_REPAIR2_PACKET_20261012.md｜handoff：f1b930fa75828fe667c98356a3c70570d8788d3f｜source：867ba5eccd3b1cc13542d22c471ee7413dee89fc｜base/main：9a7bd1295e20837786acc45bdab7fb94f5a1b012
+本段只追加；上方原 466 行未改。時間：2026-10-11 21:06～21:08Z（本 session 時鐘，REPORTED），遠低於 20 分鐘。**本段沒有任何外部下載或外部呼叫**（只用既存 task venv／wheelhouse／PG16）。層級：隔離 runtime（正常路與注入路）＋合成 stub 控制流程反例（**stub 不是 runtime**）。
+
+## 偏差說明（承接 GPT 裁定）
+repair1 的下載（2 次索引解析失敗＋第 3 次成功）超出原包「一次下載＋一次暫時網路安全重試」，已被 GPT 記為偏差；本輪不追認其合規、不重置 attempt、不再下載。程序改正：`verify` 的 preflight（Python 版本、既存 wheelhouse 與清單）不通過就停止，且完全不做下載。
+
+## ENV-01 對照（根因 → 修改 → 反例 → 命令 → 結果 → 缺口）
+- 根因（GPT 重現）：v1 編排只有 `set -u`，關鍵命令只印 exit 不阻斷；負向失敗被忽略（`down` exit 5 但整體 exit 0）；cleanup 不驗證停止就 `rm`（stop 1／status 0 仍刪資料）。
+- 修改：新編排 `orchestrate_v2.sh`（v1 保留為 `orchestrate_v1.sh` 歷史，不再使用）：
+  - `run_expect NAME WANT_RC cmd…`：每個關鍵步驟依 exit 判定，失敗記 `FAIL` 並中止後續步驟，不用最後的 cleanup 覆蓋；
+  - 設定寫入後以 `postgres -C` 讀回 `listen_addresses`／`unix_socket_directories`／`unix_socket_permissions`，不符即失敗；
+  - 正向、停止、`status`（必須 3）、`down` 負向都依預期值裁定；
+  - `cleanup`：先 `status`；非 3 才停止（stop#1，必要時 stop#2 `-m immediate`，僅限本 task 的 pgdata，各最多一次），再核對 status 3 與 task postgres 程序為 0；**只有確定已停止才 `rm`**，否則 `CLEANUP_FAILED`、資料保留、結束碼 9（BLOCKED_CAPABILITY／partial）；
+  - 結束碼：0 全成功；1 某步驟失敗；7 注入模式且一切符合預期；9 cleanup 失敗（優先於其他碼，不被掩蓋）。
+- 不重寫 ENV-02 純函式（`smokelib.py`／`negtests.py`／`smoke.py` 沿用 repair1 §C，不變）與 ENV-03 清單（沿用 repair1 §D，不重下載）。
+
+## 腳本：`orchestrate_v2.sh`
+```bash
+#!/bin/bash
+# D1 隔離環境編排 v2（fail-closed）。不下載任何東西：只使用既存 task venv／wheelhouse／PG16。
+# 用法：orchestrate_v2.sh verify            preflight＋離線安裝＋版本核對（不下載）
+#       orchestrate_v2.sh db ok|inject      私人 socket PG16 煙霧；每步依 exit／預期值裁定；cleanup 失敗不刪資料
+# 結束碼：0 全部成功；1 某步驟失敗（或預期值不符）；7 注入模式且一切符合預期（煙霧注入失敗 exit 7、cleanup 正常）；9 cleanup 失敗（資料保留）
+set -u
+umask 077
+D=${STP_D:-/tmp/stp-d1-env-r1}
+S=${STP_S:-/tmp/stp-d1-scripts}
+PGBIN=${STP_PGBIN:-/usr/lib/postgresql/16/bin}
+if [ -n "${STP_RUN_STUB:-}" ]; then                       # 合成 stub 測試用：不降權、不碰真實 PG
+  RUN=(env HOME="$D" PATH="$PATH")
+  CHOWN=:
+else
+  RUN=(setpriv --reuid=999 --regid=999 --clear-groups env HOME="$D" PATH=/usr/bin:/bin)
+  CHOWN="chown 999:999"
+fi
+VENVPY="$D/venv/bin/python"
+PIP="$D/venv/bin/pip"
+PINS="Django==6.1.2 psycopg==3.3.6 psycopg-binary==3.3.6 asgiref==3.12.1 sqlparse==0.6.0"
+EXPECT_FREEZE=$'Django==6.1.2\nasgiref==3.12.1\npsycopg-binary==3.3.6\npsycopg==3.3.6\nsqlparse==0.6.0'
+
+FAIL=""          # 第一個失敗原因
+MAIN_RC=0
+CLEAN_FAIL=0
+
+note_fail() { [ -z "$FAIL" ] && FAIL="$1"; echo "FAIL: $1"; }
+
+# run_expect <name> <expected_rc> <cmd...>：失敗時記錄並回傳 1，不吞錯
+run_expect() {
+  local name=$1 want=$2; shift 2
+  "$@"; local rc=$?
+  echo "$name exit=$rc (expected $want)"
+  [ $rc -eq "$want" ] || { note_fail "$name exit=$rc expected=$want"; return 1; }
+  return 0
+}
+
+verify_body() {
+  # preflight：固定 Python／既存 artifact／清單，不通過就不往下（且不下載）
+  local pyv; pyv=$("${RUN[@]}" "$VENVPY" -c 'import sys;print("%d.%d" % sys.version_info[:2])' 2>/dev/null); local rc=$?
+  echo "preflight venv python=[$pyv] exit=$rc (need >= 3.12)"
+  [ $rc -eq 0 ] || { note_fail "preflight python exit=$rc"; return 1; }
+  case "$pyv" in 3.1[2-9]|3.[2-9][0-9]) ;; *) note_fail "preflight python too old: $pyv"; return 1;; esac
+  [ -d "$D/wheelhouse" ] || { note_fail "preflight wheelhouse missing"; return 1; }
+  if [ -f "$S/wheelhouse.sha256" ]; then
+    ( cd "$D/wheelhouse" && sha256sum -c "$S/wheelhouse.sha256" ); rc=$?
+    echo "wheelhouse sha256 -c exit=$rc"; [ $rc -eq 0 ] || { note_fail "wheelhouse sha256 mismatch exit=$rc"; return 1; }
+  else
+    note_fail "preflight wheelhouse.sha256 missing"; return 1
+  fi
+  run_expect offline_install 0 "${RUN[@]}" "$PIP" --isolated --disable-pip-version-check install --no-input --no-index --find-links "$D/wheelhouse" --no-deps --force-reinstall $PINS > "$D/offline_install.log" 2>&1 || return 1
+  local fz; fz=$("${RUN[@]}" "$PIP" --isolated --disable-pip-version-check freeze 2>/dev/null | sort); rc=$?
+  echo "pip freeze exit=$rc"; echo "$fz"
+  [ $rc -eq 0 ] || { note_fail "pip freeze exit=$rc"; return 1; }
+  [ "$fz" = "$(printf '%s\n' "$EXPECT_FREEZE" | sort)" ] || { note_fail "installed versions differ from pinned list"; return 1; }
+  local ver; ver=$("${RUN[@]}" "$VENVPY" -c 'import django,psycopg;print(django.get_version(), psycopg.__version__)' 2>&1); rc=$?
+  echo "import check exit=$rc [$ver]"
+  [ $rc -eq 0 ] && [ "$ver" = "6.1.2 3.3.6" ] || { note_fail "import/version check failed: $ver"; return 1; }
+  return 0
+}
+
+db_body() {
+  local mode=$1
+  [ -d "$D" ] || { mkdir -p "$D" && chmod 700 "$D" && $CHOWN "$D"; } || { note_fail "task dir"; return 1; }
+  run_expect mkdir_sock 0 mkdir -m 700 "$D/sock" || return 1
+  $CHOWN "$D/sock"
+  "${RUN[@]}" "$PGBIN/initdb" -D "$D/pgdata" -A trust -U stp_smoke --no-sync -E UTF8 --locale=C.UTF-8 > "$D/initdb.log" 2>&1; local rc=$?
+  echo "initdb exit=$rc (expected 0)"; [ $rc -eq 0 ] || { note_fail "initdb exit=$rc"; return 1; }
+  "${RUN[@]}" sh -c 'printf "%s\n" "listen_addresses = '"''"'" "unix_socket_directories = '"'"'$1/sock'"'"'" "unix_socket_permissions = 0700" "fsync = off" >> "$1/pgdata/postgresql.conf"' _ "$D"; rc=$?
+  echo "config write exit=$rc (expected 0)"; [ $rc -eq 0 ] || { note_fail "config write exit=$rc"; return 1; }
+  local la sd sp
+  la=$("${RUN[@]}" "$PGBIN/postgres" -D "$D/pgdata" -C listen_addresses 2>&1); rc=$?; [ $rc -eq 0 ] || { note_fail "readback listen_addresses exit=$rc"; return 1; }
+  sd=$("${RUN[@]}" "$PGBIN/postgres" -D "$D/pgdata" -C unix_socket_directories 2>&1); rc=$?; [ $rc -eq 0 ] || { note_fail "readback unix_socket_directories exit=$rc"; return 1; }
+  sp=$("${RUN[@]}" "$PGBIN/postgres" -D "$D/pgdata" -C unix_socket_permissions 2>&1); rc=$?; [ $rc -eq 0 ] || { note_fail "readback unix_socket_permissions exit=$rc"; return 1; }
+  echo "readback listen_addresses=[$la] unix_socket_directories=[$sd] unix_socket_permissions=[$sp] (expected [] [$D/sock] [448])"
+  [ -z "$la" ] && [ "$sd" = "$D/sock" ] && [ "$sp" = "448" ] || { note_fail "config readback mismatch"; return 1; }
+  [ "$(stat -c %a "$D/sock")" = "700" ] || { note_fail "sock dir mode not 700"; return 1; }
+  run_expect pg_start 0 "${RUN[@]}" "$PGBIN/pg_ctl" -D "$D/pgdata" -l "$D/pg.log" -w -t 30 start || return 1
+  local tcp; tcp=$(ss -ltn 2>/dev/null | grep -c ':5432 ')
+  echo "tcp 5432 listeners: $tcp (expected 0)"; [ "$tcp" = "0" ] || { note_fail "unexpected TCP 5432 listener"; return 1; }
+  if [ "$mode" = inject ]; then
+    run_expect smoke_inject 7 "${RUN[@]}" "$VENVPY" "$S/smoke.py" "$D/sock" ok inject || return 1
+    MAIN_RC=7
+    return 0
+  fi
+  run_expect smoke_positive 0 "${RUN[@]}" "$VENVPY" "$S/smoke.py" "$D/sock" ok || return 1
+  run_expect pg_stop 0 "${RUN[@]}" "$PGBIN/pg_ctl" -D "$D/pgdata" -m fast -w stop || return 1
+  run_expect pg_status_after_stop 3 "${RUN[@]}" "$PGBIN/pg_ctl" -D "$D/pgdata" status >/dev/null 2>&1 || return 1
+  run_expect smoke_negative_down 0 "${RUN[@]}" "$VENVPY" "$S/smoke.py" "$D/sock" down || return 1
+  return 0
+}
+
+cleanup() {
+  echo "--- cleanup ---"
+  if [ -d "$D/pgdata" ]; then
+    "${RUN[@]}" "$PGBIN/pg_ctl" -D "$D/pgdata" status >/dev/null 2>&1; local st=$?
+    echo "cleanup status exit=$st (3 = not running)"
+    if [ $st -ne 3 ]; then
+      "${RUN[@]}" "$PGBIN/pg_ctl" -D "$D/pgdata" -m fast -w stop >/dev/null 2>&1; echo "cleanup stop#1 exit=$?"
+      "${RUN[@]}" "$PGBIN/pg_ctl" -D "$D/pgdata" status >/dev/null 2>&1; st=$?; echo "cleanup status exit=$st"
+      if [ $st -ne 3 ]; then
+        "${RUN[@]}" "$PGBIN/pg_ctl" -D "$D/pgdata" -m immediate -w stop >/dev/null 2>&1; echo "cleanup stop#2 (task pgdata only) exit=$?"
+        "${RUN[@]}" "$PGBIN/pg_ctl" -D "$D/pgdata" status >/dev/null 2>&1; st=$?; echo "cleanup status exit=$st"
+      fi
+    fi
+    local procs; procs=$(pgrep -f "^$PGBIN/postgres -D $D/pgdata" | wc -l)
+    echo "task postgres processes: $procs"
+    if [ $st -ne 3 ] || [ "$procs" != "0" ]; then
+      CLEAN_FAIL=1
+      echo "CLEANUP_FAILED: server not confirmed stopped; data RETAINED at $D (BLOCKED_CAPABILITY/partial)"
+      return
+    fi
+  fi
+  rm -rf "$D/pgdata" "$D/sock" "$D/pg.log" "$D/initdb.log"
+  for p in pgdata sock pg.log initdb.log; do
+    if [ -e "$D/$p" ]; then echo "LEFTOVER $p"; CLEAN_FAIL=1; else echo "removed $p"; fi
+  done
+}
+
+finish() {
+  local final
+  if [ "$CLEAN_FAIL" = 1 ]; then final=9
+  elif [ -n "$FAIL" ]; then final=1
+  else final=$MAIN_RC; fi
+  echo "RESULT: first_failure=[${FAIL:-none}] cleanup_failed=$CLEAN_FAIL final_exit=$final"
+  exit $final
+}
+
+case "${1:-}" in
+  verify) trap 'finish' EXIT; verify_body ;;
+  db) trap 'cleanup; finish' EXIT; db_body "${2:-ok}" ;;
+  *) echo "usage: $0 verify|db ok|inject"; exit 2 ;;
+esac
+```
+`wheelhouse.sha256`（與 repair1 §D 記錄的 hash 相同）：
+```
+fe386d1c2bff7259ea95929266d12a8cf9a8b5a1c2598402967d8792e7a7c094  asgiref-3.12.1-py3-none-any.whl
+141efee6ec64d1db6db90683bf734c550102450f444fb099063b0be1bd27d991  django-6.1.2-py3-none-any.whl
+a1db9f7148b06a28606767efaca51fa6f9398c5c0a3810519be69d7000bdb631  psycopg-3.3.6-py3-none-any.whl
+cec5ea900390897d0b46130f60bc2883bf19c314f9044235217c8be88b0ef269  psycopg_binary-3.3.6-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+b861c0288ce2fa56209a9a6412d2e066ac664b3873b89c26c9d8415e8e32996f  sqlparse-0.6.0-py3-none-any.whl
+```
+
+## §A 實際 PG16 runtime — 正常路與注入路（獨立於 stub）
+`verify`（不下載；離線重裝並核對版本）：
+```
+preflight venv python=[3.13] exit=0 (need >= 3.12)
+asgiref-3.12.1-py3-none-any.whl: OK
+django-6.1.2-py3-none-any.whl: OK
+psycopg-3.3.6-py3-none-any.whl: OK
+psycopg_binary-3.3.6-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl: OK
+sqlparse-0.6.0-py3-none-any.whl: OK
+wheelhouse sha256 -c exit=0
+pip freeze exit=0
+Django==6.1.2
+asgiref==3.12.1
+psycopg-binary==3.3.6
+psycopg==3.3.6
+sqlparse==0.6.0
+import check exit=0 [6.1.2 3.3.6]
+RESULT: first_failure=[none] cleanup_failed=0 final_exit=0
+script exit=0
+```
+`db ok`：
+```
+mkdir_sock exit=0 (expected 0)
+initdb exit=0 (expected 0)
+config write exit=0 (expected 0)
+readback listen_addresses=[] unix_socket_directories=[/tmp/stp-d1-env-r1/sock] unix_socket_permissions=[448] (expected [] [/tmp/stp-d1-env-r1/sock] [448])
+waiting for server to start.... done
+server started
+pg_start exit=0 (expected 0)
+tcp 5432 listeners: 0 (expected 0)
+server_version 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) | unix_only: True
+inside_tx=1 after_rollback=0 after_commit=1 all_synthetic=True -> POSITIVE_OK
+smoke_positive exit=0 (expected 0)
+waiting for server to shut down.... done
+server stopped
+pg_stop exit=0 (expected 0)
+NEGATIVE_OK connection unavailable on expected socket | connection is bad: connection to server on socket "/tmp/stp-d1-env-r1/sock/.s.PGSQL.5432" failed: No such file or directory
+smoke_negative_down exit=0 (expected 0)
+--- cleanup ---
+cleanup status exit=3 (3 = not running)
+task postgres processes: 0
+removed pgdata
+removed sock
+removed pg.log
+removed initdb.log
+RESULT: first_failure=[none] cleanup_failed=0 final_exit=0
+script exit=0
+```
+`db inject`（煙霧中注入失敗 exit 7；cleanup 仍完成；腳本 exit 7 為預期）：
+```
+mkdir_sock exit=0 (expected 0)
+initdb exit=0 (expected 0)
+config write exit=0 (expected 0)
+readback listen_addresses=[] unix_socket_directories=[/tmp/stp-d1-env-r1/sock] unix_socket_permissions=[448] (expected [] [/tmp/stp-d1-env-r1/sock] [448])
+waiting for server to start.... done
+server started
+pg_start exit=0 (expected 0)
+tcp 5432 listeners: 0 (expected 0)
+server_version 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) | unix_only: True
+INJECTED_FAILURE after table creation
+smoke_inject exit=7 (expected 7)
+--- cleanup ---
+cleanup status exit=0 (3 = not running)
+cleanup stop#1 exit=0
+cleanup status exit=3
+task postgres processes: 0
+removed pgdata
+removed sock
+removed pg.log
+removed initdb.log
+RESULT: first_failure=[none] cleanup_failed=0 final_exit=7
+script exit=7
+```
+
+## §B 合成 stub 控制流程反例（`stubtests.sh`；stub 明標合成，不連 DB）
+覆蓋工單要求的：down5、stop1/status0（不得刪）、initdb1、config 寫入失敗、讀回不符、start1、離線安裝 1、版本不符，另加 wheel hash 被改、Python 過舊、煙霧失敗、注入退出碼錯誤、注入路 cleanup 失敗。每項為 expected／actual／原因比對。
+```
+PASS genuine_db_ok                      expected_exit=0  actual_exit=0  reason_match=[final_exit=0] pgdata_retained(expected/actual)=no/no
+PASS genuine_db_inject                  expected_exit=7  actual_exit=7  reason_match=[final_exit=7] pgdata_retained(expected/actual)=no/no
+PASS down_exit5                         expected_exit=1  actual_exit=1  reason_match=[smoke_negative_down exit=5] pgdata_retained(expected/actual)=no/no
+PASS stop1_status0_no_delete            expected_exit=9  actual_exit=9  reason_match=[CLEANUP_FAILED] pgdata_retained(expected/actual)=yes/yes
+PASS initdb1                            expected_exit=1  actual_exit=1  reason_match=[initdb exit=1] pgdata_retained(expected/actual)=no/no
+PASS config_write_fail                  expected_exit=1  actual_exit=1  reason_match=[config write exit=] pgdata_retained(expected/actual)=no/no
+PASS config_readback_mismatch           expected_exit=1  actual_exit=1  reason_match=[config readback mismatch] pgdata_retained(expected/actual)=no/no
+PASS start1                             expected_exit=1  actual_exit=1  reason_match=[pg_start exit=1] pgdata_retained(expected/actual)=no/no
+PASS positive_smoke_fails               expected_exit=1  actual_exit=1  reason_match=[smoke_positive exit=4] pgdata_retained(expected/actual)=no/no
+PASS inject_wrong_exit                  expected_exit=1  actual_exit=1  reason_match=[smoke_inject exit=0] pgdata_retained(expected/actual)=no/no
+PASS inject_cleanup_fails               expected_exit=9  actual_exit=9  reason_match=[CLEANUP_FAILED] pgdata_retained(expected/actual)=yes/yes
+PASS verify_genuine                     expected_exit=0  actual_exit=0  reason_match=[final_exit=0] pgdata_retained(expected/actual)=na/no
+PASS verify_offline_install1            expected_exit=1  actual_exit=1  reason_match=[offline_install exit=1] pgdata_retained(expected/actual)=na/no
+PASS verify_version_mismatch            expected_exit=1  actual_exit=1  reason_match=[installed versions differ] pgdata_retained(expected/actual)=na/no
+PASS verify_import_mismatch             expected_exit=1  actual_exit=1  reason_match=[import/version check failed] pgdata_retained(expected/actual)=na/no
+PASS verify_python_too_old              expected_exit=1  actual_exit=1  reason_match=[preflight python too old] pgdata_retained(expected/actual)=na/no
+PASS verify_wheel_hash_tamper           expected_exit=1  actual_exit=1  reason_match=[wheelhouse sha256 mismatch]
+stubtests overall: ALL_PASS
+```
+`stubtests.sh` 原文：
+```bash
+#!/bin/bash
+# 合成 stub 控制流程反例（不連 DB、不降權、不碰真實 PG；stub 明標合成，不是 runtime）。
+# 每個情境：以 STP_RUN_STUB=1 執行真正的 orchestrate_v2.sh，stub 的 PG／python／pip 依 FAKE_* 回傳指定 exit，核對 expected/actual。
+set -u
+S=/tmp/stp-d1-scripts
+T=$(mktemp -d /tmp/stp-stub-XXXXXX)
+mk_fixture() {            # $1 = fixture dir
+  local F=$1; rm -rf "$F"; mkdir -p "$F/D/venv/bin" "$F/D/wheelhouse" "$F/S" "$F/pgbin"
+  echo synthetic > "$F/D/wheelhouse/pkg-1.0-py3-none-any.whl"
+  ( cd "$F/D/wheelhouse" && sha256sum pkg-1.0-py3-none-any.whl ) > "$F/S/wheelhouse.sha256"
+  cat > "$F/pgbin/pg_ctl" <<'X'
+#!/bin/bash
+ST="$STP_D/.state"; cmd=""
+for a in "$@"; do case $a in start|stop|status) cmd=$a;; esac; done
+case $cmd in
+  start) [ "${FAKE_START_RC:-0}" = 0 ] && touch "$ST"; exit ${FAKE_START_RC:-0};;
+  stop) [ "${FAKE_STOP_RC:-0}" = 0 ] && rm -f "$ST"; exit ${FAKE_STOP_RC:-0};;
+  status) [ -n "${FAKE_STATUS_FIXED:-}" ] && exit $FAKE_STATUS_FIXED; [ -f "$ST" ] && exit 0 || exit 3;;
+esac
+X
+  cat > "$F/pgbin/initdb" <<'X'
+#!/bin/bash
+while [ $# -gt 0 ]; do [ "$1" = -D ] && dir=$2; shift; done
+rc=${FAKE_INITDB_RC:-0}
+if [ $rc -eq 0 ]; then mkdir -p "$dir"; if [ -n "${FAKE_CONF_DIR:-}" ]; then mkdir -p "$dir/postgresql.conf"; else : > "$dir/postgresql.conf"; fi; fi
+exit $rc
+X
+  cat > "$F/pgbin/postgres" <<'X'
+#!/bin/bash
+case "$4" in
+  listen_addresses) echo "${FAKE_LISTEN:-}";;
+  unix_socket_directories) echo "$STP_D/sock";;
+  unix_socket_permissions) echo 448;;
+esac
+X
+  cat > "$F/D/venv/bin/python" <<'X'
+#!/bin/bash
+if [ "$1" = -c ]; then
+  case "$2" in *version_info*) echo "${FAKE_PYV:-3.13}";; *django*) echo "${FAKE_IMPORT:-6.1.2 3.3.6}";; esac; exit 0
+fi
+mode=$3; inj=${4:-}
+[ "$mode" = down ] && exit ${FAKE_DOWN_RC:-0}
+[ "$inj" = inject ] && exit ${FAKE_INJECT_RC:-7}
+exit ${FAKE_POS_RC:-0}
+X
+  cat > "$F/D/venv/bin/pip" <<'X'
+#!/bin/bash
+for a in "$@"; do case $a in install) exit ${FAKE_PIP_RC:-0};; freeze) printf '%s\n' ${FAKE_FREEZE:-Django==6.1.2 asgiref==3.12.1 psycopg-binary==3.3.6 psycopg==3.3.6 sqlparse==0.6.0}; exit 0;; esac; done
+X
+  chmod 755 "$F"/pgbin/* "$F"/D/venv/bin/*
+}
+bad=0
+# scenario <name> <subcommand...> -- <expected_exit> <expected_reason_substring> <expect_pgdata_retained:yes|no|na> [VAR=VAL ...]
+scenario() {
+  local name=$1; shift
+  local sub=(); while [ "$1" != -- ]; do sub+=("$1"); shift; done; shift
+  local want=$1 reason=$2 retained=$3; shift 3
+  local F="$T/$name"; mk_fixture "$F"
+  local out; out=$(env STP_RUN_STUB=1 STP_D="$F/D" STP_S="$F/S" STP_PGBIN="$F/pgbin" "$@" bash "$S/orchestrate_v2.sh" "${sub[@]}" 2>&1); local rc=$?
+  local ok=1
+  [ $rc -eq "$want" ] || ok=0
+  echo "$out" | grep -q -- "$reason" || ok=0
+  local kept=no; [ -d "$F/D/pgdata" ] && kept=yes
+  { [ "$retained" = na ] || [ "$retained" = "$kept" ]; } || ok=0
+  [ $ok -eq 1 ] && v=PASS || { v=FAIL; bad=1; }
+  printf '%s %-34s expected_exit=%-2s actual_exit=%-2s reason_match=[%s] pgdata_retained(expected/actual)=%s/%s\n' "$v" "$name" "$want" "$rc" "$reason" "$retained" "$kept"
+}
+scenario genuine_db_ok            db ok       -- 0 "final_exit=0" no
+scenario genuine_db_inject        db inject   -- 7 "final_exit=7" no
+scenario down_exit5               db ok       -- 1 "smoke_negative_down exit=5" no   FAKE_DOWN_RC=5
+scenario stop1_status0_no_delete  db ok       -- 9 "CLEANUP_FAILED" yes               FAKE_STOP_RC=1 FAKE_STATUS_FIXED=0
+scenario initdb1                  db ok       -- 1 "initdb exit=1" no                 FAKE_INITDB_RC=1
+scenario config_write_fail        db ok       -- 1 "config write exit=" no            FAKE_CONF_DIR=1
+scenario config_readback_mismatch db ok       -- 1 "config readback mismatch" no      FAKE_LISTEN="*"
+scenario start1                   db ok       -- 1 "pg_start exit=1" no               FAKE_START_RC=1
+scenario positive_smoke_fails     db ok       -- 1 "smoke_positive exit=4" no         FAKE_POS_RC=4
+scenario inject_wrong_exit        db inject   -- 1 "smoke_inject exit=0" no            FAKE_INJECT_RC=0
+scenario inject_cleanup_fails     db inject   -- 9 "CLEANUP_FAILED" yes               FAKE_STOP_RC=1 FAKE_STATUS_FIXED=0
+scenario verify_genuine           verify      -- 0 "final_exit=0" na
+scenario verify_offline_install1  verify      -- 1 "offline_install exit=1" na        FAKE_PIP_RC=1
+scenario verify_version_mismatch  verify      -- 1 "installed versions differ" na     FAKE_FREEZE="Django==6.0.1 asgiref==3.12.1 psycopg-binary==3.3.6 psycopg==3.3.6 sqlparse==0.6.0"
+scenario verify_import_mismatch   verify      -- 1 "import/version check failed" na   FAKE_IMPORT="6.0.1 3.3.6"
+scenario verify_python_too_old    verify      -- 1 "preflight python too old" na      FAKE_PYV=3.11
+# wheelhouse hash 被改動：fixture 後手動竄改
+F="$T/verify_hash_tamper"; mk_fixture "$F"; echo tampered > "$F/D/wheelhouse/pkg-1.0-py3-none-any.whl"
+out=$(env STP_RUN_STUB=1 STP_D="$F/D" STP_S="$F/S" STP_PGBIN="$F/pgbin" bash "$S/orchestrate_v2.sh" verify 2>&1); rc=$?
+if [ $rc -eq 1 ] && echo "$out" | grep -q "wheelhouse sha256 mismatch"; then v=PASS; else v=FAIL; bad=1; fi
+printf '%s %-34s expected_exit=1  actual_exit=%-2s reason_match=[wheelhouse sha256 mismatch]\n' "$v" verify_wheel_hash_tamper "$rc"
+rm -rf "$T"
+echo "stubtests overall: $([ $bad -eq 0 ] && echo ALL_PASS || echo SOME_FAIL)"
+exit $bad
+```
+
+## §C repo 必要檢查（於追加本段前的樹；皆 exit 0，stderr 空）
+```
+python3 docs/platform/examples/check_examples.py | exit=0 | OK: 1306 checks passed | stderr=0
+python3 docs/platform/tools/gen_state_machines.py --check | exit=0 | OK: 6 state machines, 86 transitions, doc in sync | stderr=0
+python3 docs/platform/tools/gen_permissions.py --check | exit=0 | OK: permissions policy (25 classes, 143 matrix cells, 42 API, 12 pages), docs in sync | stderr=0
+python3 docs/platform/tools/test_checks.py | exit=0 | OK: test_checks 136 counterexample checks passed | stderr=0
+python3 docs/platform/tools/check_docs.py | exit=0 | OK: 2094 doc checks passed | stderr=0
+```
+四份原始基線 `git diff 9a7bd1295e20837786acc45bdab7fb94f5a1b012 HEAD -- <四基線>` 為空；本 commit 只在本檔後追加（原 466 行逐位元不變）。
+
+## 資源、保留與清理
+保留：`/tmp/stp-d1-env-r1/{venv,wheelhouse}`（約 99 MB；/tmp 暫存，容器重啟即失，且本輪不再下載，重建需新的工單授權）與 `/tmp/stp-d1-scripts`（腳本與輸出）。已刪：pgdata／sock／log、offline_install.log；無 CA 複本、無下載 log、無遺留 postgres 程序。
+
+## 未證明／剩餘缺口
+- Docker／Compose、Django 專案／migration／HTTP、LTS 查核、供應鏈鎖定仍未驗證。
+- stub 驗證的是**編排的控制流程**，不是 PostgreSQL／pip 的實際行為；實際故障（真的 stop 失敗）仍只以 stub 模擬，沒有在真實 PG 上製造 stop 失敗。
+- cleanup 的「immediate」第二次停止僅用於本 task pgdata；若兩次仍失敗只保留與回報，未做 kill。
+- 測試 DB 為 trust 認證、fsync off，僅一次性隔離。
+- 外部呼叫：無；支出 0；真實資料無；Secret 未讀；部署／merge 無。AUTHOR_EVIDENCE，不自批。
