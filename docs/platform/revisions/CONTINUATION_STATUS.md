@@ -1,3 +1,13 @@
+# 最新有效狀態：LTS交付差異通過，可重建交付READY（2026-10-12）
+- work_id STP-PLATFORM-PLAN-001；D1_LTS_RUNTIME verdict APPROVED僅文件/差異/合成編排；checkpoint COMPLETE，delivery1/1、repair0/0；content_head6c87bebebe4473358c18867cd232734d5fd8bb76；base/main9a7bd1295e20837786acc45bdab7fb94f5a1b012；handoff380300e9abab29f76af73d4107e31cfa154d0493。
+- [獨立覆核](GPT_D1_LTS_REVIEW_6C87BEB_20261012.md)：5命令exit0/29LTS stub PASS/原文基線空diff。實檔與PG交易AUTHOR_EVIDENCE，Reviewer缺Django/psycopg/PG16，DB NOT_RUN/artifact NOT_VERIFIED；無CI結果不稱green。
+- ACK00:08:53Z/result00:10:49Z/review01:02:39Z（2026-10-12 UTC），待審51分50秒。派工時間UNKNOWN；作者估计完成時間晚於GitHub交付，工時REPORTED。24小时無checkpoint停滯未成立。
+- 下一task STP-PLATFORM-PLAN-001-D1-LTS-REPLAY；stage D1_LTS_REPLAY；status READY；[唯一工作包](GPT_D1_LTS_REPLAY_PACKET_20261012.md)；25min/0cost/一次交付、repair0/0、deadline2026-10-12T06:00:00Z；next_actor Claude，GPT WAITING_PEER。
+- 加速：不重跑已交作者runtime或無限環境修補；固化原文helper/manifest/乾淨checkout回放說明，補/tmp不持久與Reviewer重現缺口。禁下載/install/DB/HTTP/產品/部署。原ENV3/3、N3/3、stack1/1/readiness1/1等歷史保留。
+- D1-A仍PREPARED；明確產品開工/人力不是一般技術委託自動批准，六gate仍部分；本包不需Frank例行行動。服務P0～P3無真實成果、工程D1～D4/WP无产品验收。新包ACK/STARTED/DELIVERED NOT_CONFIRMED、無launcher；main未動、PR Draft。
+
+## 歷史入口（原文完整保留）
+
 # 最新有效狀態：版本/驗收規劃通過，GPT選LTS，隔離版本runtime READY（2026-10-12）
 - work_id STP-PLATFORM-PLAN-001；D1_STACK_AND_ACCEPTANCE verdict APPROVED（技術規劃/fixture/缺口交付）；checkpoint COMPLETE、delivery1/1、repair0/0保留；reviewed_content_head0622fbf1035c6d9fa1375f7d122ebb1c218d7e83、handoffff588059249f84c94fbbba43884a9974bfd36348、main/base9a7bd1295e20837786acc45bdab7fb94f5a1b012。
 - [獨立覆核與選型](GPT_D1_STACK_REVIEW_0622FBF_20261012.md)：5命令exit0、fixture5列表/過期排除/未知人工核對重現；GPT官方確認5.2.18 LTS/Python/PG最低相容/PG16支援日期及wheel metadata，採LTS。作者403缺口合法查詢補齊；實檔/新LTS runtime仍NOT_VERIFIED/NOT_RUN。
