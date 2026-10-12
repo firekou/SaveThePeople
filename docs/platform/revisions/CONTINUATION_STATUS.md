@@ -1,3 +1,13 @@
+# 最新有效狀態：版本/驗收規劃通過，GPT選LTS，隔離版本runtime READY（2026-10-12）
+- work_id STP-PLATFORM-PLAN-001；D1_STACK_AND_ACCEPTANCE verdict APPROVED（技術規劃/fixture/缺口交付）；checkpoint COMPLETE、delivery1/1、repair0/0保留；reviewed_content_head0622fbf1035c6d9fa1375f7d122ebb1c218d7e83、handoffff588059249f84c94fbbba43884a9974bfd36348、main/base9a7bd1295e20837786acc45bdab7fb94f5a1b012。
+- [獨立覆核與選型](GPT_D1_STACK_REVIEW_0622FBF_20261012.md)：5命令exit0、fixture5列表/過期排除/未知人工核對重現；GPT官方確認5.2.18 LTS/Python/PG最低相容/PG16支援日期及wheel metadata，採LTS。作者403缺口合法查詢補齊；實檔/新LTS runtime仍NOT_VERIFIED/NOT_RUN。
+- 下一task STP-PLATFORM-PLAN-001-D1-LTS-RUNTIME；stage D1_LTS_RUNTIME；status READY；[唯一工作包](GPT_D1_LTS_RUNTIME_PACKET_20261012.md)；next_actor Claude，GPT WAITING_PEER；30min/0cost/一次交付，deadline2026-10-12T06:00:00Z，repair0/0。只1指定wheel下载與隔離venv/PG smoke，不開產品。
+- 原環境repair3/3、N3/3、readiness1/1、stack1/1歷史保留；不是第四輪編排修補。下一可見成果是LTS實檔hash/實際rollback/停止清理。D1-A候選工單仍PREPARED，產品HTTP/DB/360px NOT_RUN，沒有新部署/真實資料。
+- ACK23:03:41Z/result23:06:48Z/review2026-10-12T00:05:18Z，待審58分30秒未超1小时。公開REST rate limit403未重試，connector日期核對成功。下一包ACK/STARTED/DELIVERED NOT_CONFIRMED、無launcher證據。
+- 加速：官方查核补缺/GPT直接選型/同輪有限版本驗證包；main未動、PR Draft、服務P0～P3及工程D1～D4/WP無新產品或真實成果；Frank不需例行行動。
+
+## 歷史入口（原文完整保留）
+
 # 最新有效狀態：ENV-01修補差異通過，D1技術版本/驗收具體化READY（2026-10-12）
 - work_id STP-PLATFORM-PLAN-001；D1_ENVIRONMENT repair3 verdict APPROVED（只控制流程/交付完整性）；修補checkpoint COMPLETE、used3/3；DB runtime/artifact來源NOT_RUN/NOT_VERIFIED，非整體環境批准。
 - reviewed_content_head09e19a2f800455685489a42b3c5e17303b115375；handoff578c6f91914a489e1066cbdbf4ef2d300a4d38fa；main/base9a7bd1295e20837786acc45bdab7fb94f5a1b012。
