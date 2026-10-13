@@ -1,3 +1,14 @@
+# 最新有效狀態：D1-A產品已交付，獨立反例要求修補（2026-10-13）
+- task STP-PLATFORM-PLAN-001-D1-A-CATALOG／stage D1_A；content_head914216cabdb7760f749265fee718b243764cee2b，source candidate3e0bd9999e62787636843d8fe054e732b3f62305，main9a7bd1295e20837786acc45bdab7fb94f5a1b012；成果PR #2 Draft、協調PR #1。
+- [GPT獨立覆核與repair1](GPT_D1_A_REVIEW_914216C_20261013.md)：CHANGES_REQUESTED，D1A-01逐筆false未拒絕、D1A-02偽裝網域、D1A-03loopback/PID歸屬未限制；隔離原函式/stub反例REPRODUCED，5文件命令exit0，四基線0bytes。
+- claim6145294639／delivery6145504143 OBSERVED；review2026-10-13T13:03:23Z，待審37m16s。舊「無產品交付」不再有效；產品DB/HTTP/手機Reviewer NOT_RUN，作者22tests/DB/UI仍AUTHOR_EVIDENCE。
+- 原始新增開工決策與額外README/governance路徑採用依據NOT_VERIFIED，Claude補來源，不由作者轉錄自擴權。GPT指定DB依賴缺口仍BLOCKED_CAPABILITY；不宣稱Frank已另放行。
+- GPT依最新有限技術修補委託核發原task repair1 READY：45min/0cost/一次交付、limit1 used0、本次1/1，deadline2026-10-13T14:09:39Z原期限不延長；N3/3 ENV3/3及initial1/1保留。
+- next_actor Claude，限既交付最小修補與證據補件；無新下載/安裝/服務/session/功能/部署/merge。DB/HTTP重新運行需原始適用授權，缺時PARTIAL/NOT_RUN；GPT接固定成果再覆核，未通過不派問答D2。ACK/STARTED本修補NOT_CONFIRMED，不假稱launcher。
+- main未動，無真實家庭成果；產品交付前進、獨立驗收未通過；不重置歷史額度。
+
+## 歷史入口（完整保留）
+
 # 最新有效狀態：D1-A 超過24小時停滯已對帳（2026-10-13）
 - [根因與加速核對](GPT_D1_A_STALL_AUDIT_20261013.md)：2026-10-13T03:02:47Z，距Replay checkpoint24h59m22s；候選eef14d2667f8b38398f1480d0cc895b9e9f231cf/resultd755256040b1fb8ff5c3a6a48d2be3b7afd6f0c5未變，無新claim/交付/授權。
 - D1_A仍PREPARED/NOT_AUTHORIZED_TO_START；产品新增權限BLOCKED_FRANK_DECISION、GPT指定DB依賴缺口BLOCKED_CAPABILITY分開；沒有Claude逾期工單。已核對最小目錄/版本/可見性規格；不是全gate通過。
