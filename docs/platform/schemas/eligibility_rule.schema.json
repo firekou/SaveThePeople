@@ -1,0 +1,160 @@
+{
+ "title": "EligibilityRule（資格規則）結構",
+ "x-note": "只驗結構；CUSTOM 運算式是否引用每個條件各一次、口徑範圍是否存在與被支援，由 ref_engine.validate_rule 驗證",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "rule_version",
+  "combinator",
+  "criteria",
+  "status"
+ ],
+ "properties": {
+  "rule_version": {
+   "type": "string",
+   "pattern": "^\\d+\\.\\d+\\.\\d+$"
+  },
+  "combinator": {
+   "enum": [
+    "ALL",
+    "ANY",
+    "CUSTOM"
+   ]
+  },
+  "expression": {
+   "$ref": "#/definitions/node"
+  },
+  "criteria": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "$ref": "#/definitions/criterion"
+   }
+  },
+  "status": {
+   "enum": [
+    "DRAFT",
+    "IN_REVIEW",
+    "PUBLISHED",
+    "RETIRED"
+   ]
+  },
+  "test_cases": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "authoring_origin": {
+   "enum": [
+    "HUMAN",
+    "AI_DRAFT_HUMAN_EDITED"
+   ]
+  },
+  "authored_by": {
+   "type": "string"
+  },
+  "reviewed_by": {
+   "type": "string"
+  }
+ },
+ "definitions": {
+  "node": {
+   "oneOf": [
+    {
+     "type": "string",
+     "minLength": 1
+    },
+    {
+     "type": "object",
+     "required": [
+      "op",
+      "children"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "op": {
+       "enum": [
+        "ALL",
+        "ANY"
+       ]
+      },
+      "children": {
+       "type": "array",
+       "minItems": 1,
+       "items": {
+        "$ref": "#/definitions/node"
+       }
+      }
+     }
+    }
+   ]
+  },
+  "criterion": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "criterion_id",
+    "operator",
+    "input_keys",
+    "source_ref"
+   ],
+   "properties": {
+    "criterion_id": {
+     "type": "string",
+     "minLength": 1
+    },
+    "label_plain": {
+     "type": "string"
+    },
+    "operator": {
+     "type": "string",
+     "minLength": 1
+    },
+    "input_keys": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "threshold": {
+     "type": "object"
+    },
+    "source_ref": {
+     "type": "string",
+     "minLength": 1
+    },
+    "scope_key": {
+     "type": "string",
+     "minLength": 1
+    },
+    "min_confirmation_for_fail": {
+     "enum": [
+      "C2",
+      "C3"
+     ]
+    },
+    "requires_human_when": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "discretionary": {
+     "type": "boolean"
+    },
+    "on_missing": {
+     "enum": [
+      "INSUFFICIENT",
+      "HUMAN",
+      "IGNORE"
+     ]
+    },
+    "explain_template": {
+     "type": "string"
+    }
+   }
+  }
+ }
+}

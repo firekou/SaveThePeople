@@ -1,0 +1,2023 @@
+{
+ "_notice": "SYNTHETIC. 撤回／停止處理／刪除的控制紀錄模擬案例（ref_control.py）。純邏輯模擬，不是資料庫、物件儲存或備份整合演練。預期值由規格（OPERATIONS §1.3.3）手算。",
+ "initial_state": {
+  "consents": {
+   "c1": {
+    "revoked": []
+   }
+  },
+  "notifications": {
+   "n1": {
+    "consent": "c1",
+    "purpose": "REMINDERS",
+    "status": "SCHEDULED"
+   },
+   "n2": {
+    "consent": "c1",
+    "purpose": "REMINDERS",
+    "status": "DELIVERED"
+   }
+  },
+  "referrals": {
+   "r1": {
+    "consent": "c1",
+    "status": "SENT"
+   }
+  },
+  "tasks": {},
+  "objects": {
+   "doc1": {
+    "consent": "c1",
+    "purpose": "DOCUMENT_STORAGE",
+    "exists": true
+   }
+  },
+  "facts": {
+   "f1": {
+    "value": "secret-income",
+    "note": "x",
+    "exists": true
+   },
+   "f9": {
+    "value": "gone",
+    "note": "y",
+    "exists": false
+   }
+  },
+  "household": {
+   "processing": "NORMAL",
+   "restriction": "NONE"
+  }
+ },
+ "scenarios": [
+  {
+   "id": "CS-01-revoke-after-backup-db-lost-before-any-export",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE",
+       "DOCUMENT_STORAGE"
+      ],
+      "consent_id": "c1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "value",
+       "note"
+      ]
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "state": {
+     "consents.c1.revoked": [
+      "DOCUMENT_STORAGE",
+      "REFERRAL_SHARE",
+      "REMINDERS"
+     ],
+     "notifications.n1.status": "CANCELLED",
+     "notifications.n2.status": "DELIVERED",
+     "referrals.r1.status": "CANCELLED",
+     "tasks.STOP_USE:r1.type": "STOP_USE_NOTICE",
+     "objects.doc1.exists": false,
+     "facts.f1.value": "■■■",
+     "facts.f1.note": "■■■"
+    },
+    "access": {
+     "REMINDERS": false,
+     "REFERRAL_SHARE": false,
+     "DOCUMENT_STORAGE": false,
+     "CONTACT": true
+    }
+   }
+  },
+  {
+   "id": "CS-02-reapply-is-idempotent",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE",
+       "DOCUMENT_STORAGE"
+      ],
+      "consent_id": "c1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "value",
+       "note"
+      ]
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    },
+    {
+     "op": "reapply_again"
+    },
+    {
+     "op": "reapply_again"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "state_unchanged_by_reapply": true,
+    "mismatches": []
+   }
+  },
+  {
+   "id": "CS-03-control-log-unavailable-nothing-changes",
+   "steps": [
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE",
+       "DOCUMENT_STORAGE"
+      ],
+      "consent_id": "c1"
+     },
+     "log_fail": true,
+     "expect_http": 503
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE",
+       "DOCUMENT_STORAGE"
+      ],
+      "consent_id": "c1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [
+       "DOCUMENT_STORAGE",
+       "REFERRAL_SHARE",
+       "REMINDERS"
+      ],
+      "notifications.n1.status": "CANCELLED"
+     }
+    }
+   ],
+   "expect": {}
+  },
+  {
+   "id": "CS-04-recorded-but-db-commit-failed-then-recovered",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE",
+       "DOCUMENT_STORAGE"
+      ],
+      "consent_id": "c1"
+     },
+     "db_fail": true,
+     "expect_http": 202
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED"
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "mismatches": [],
+    "state": {
+     "consents.c1.revoked": [
+      "DOCUMENT_STORAGE",
+      "REFERRAL_SHARE",
+      "REMINDERS"
+     ],
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED"
+    }
+   }
+  },
+  {
+   "id": "CS-05-control-log-tail-lost-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE",
+       "DOCUMENT_STORAGE"
+      ],
+      "consent_id": "c1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "lose_log_tail",
+     "n": 2
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_INCOMPLETE:last=2<witness=4",
+    "watermark": 4
+   }
+  },
+  {
+   "id": "CS-06-tampered-log-entry-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE",
+       "DOCUMENT_STORAGE"
+      ],
+      "consent_id": "c1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "corrupt_log",
+     "index": 0
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_INVALID:CHAIN_BROKEN_AT_1"
+   }
+  },
+  {
+   "id": "CS-07-missing-middle-entry-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE",
+       "DOCUMENT_STORAGE"
+      ],
+      "consent_id": "c1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "drop_log_entry",
+     "index": 1
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_INVALID:SEQ_GAP_AT_2"
+   }
+  },
+  {
+   "id": "CS-08-redact-must-be-masked-hard-delete-must-be-absent",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "value",
+       "note"
+      ]
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "recover",
+     "from": "b0",
+     "skip_reapply": true
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "VERIFY_FAILED",
+    "mismatches": [
+     "seq1:NOT_REDACTED:facts.f1.value",
+     "seq1:NOT_REDACTED:facts.f1.note",
+     "seq3:STILL_EXISTS:objects.doc1"
+    ]
+   }
+  },
+  {
+   "id": "CS-09-redact-then-hard-delete-same-row-is-consistent",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "value",
+       "note"
+      ]
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "facts",
+      "id": "f1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "mismatches": [],
+    "state": {
+     "facts.f1.exists": false
+    }
+   }
+  },
+  {
+   "id": "CS-10-redact-of-missing-row-without-hard-delete-is-flagged",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f9",
+      "fields": [
+       "value"
+      ]
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "VERIFY_FAILED",
+    "mismatches": [
+     "seq1:REDACT_TARGET_MISSING_WITHOUT_HARD_DELETE:facts.f9"
+    ]
+   }
+  },
+  {
+   "id": "CS-11-core-purpose-revoke-closes-processing-and-retention-hold",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "CASE_MANAGEMENT"
+      ],
+      "retention_hold": true,
+      "consent_id": "c1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "mismatches": [],
+    "state": {
+     "household.processing": "CLOSED",
+     "household.restriction": "RETENTION_HOLD"
+    },
+    "access": {
+     "CASE_MANAGEMENT": false,
+     "CONTACT": false
+    }
+   }
+  },
+  {
+   "id": "CS-12-overlapping-revocations-are-idempotent",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE",
+       "DOCUMENT_STORAGE"
+      ],
+      "consent_id": "c1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS"
+      ],
+      "consent_id": "c1"
+     },
+     "expect_http": 200
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "mismatches": [],
+    "state": {
+     "consents.c1.revoked": [
+      "DOCUMENT_STORAGE",
+      "REFERRAL_SHARE",
+      "REMINDERS"
+     ],
+     "tasks.STOP_USE:r1.type": "STOP_USE_NOTICE"
+    }
+   }
+  },
+  {
+   "id": "CS-13-witness-unflushed-periodic-update-is-not-confirmation",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "unflushed"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "WITNESS_UNCONFIRMED",
+     "db_fail": true
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 0,
+    "state": {
+     "notifications.n1.status": "SCHEDULED",
+     "referrals.r1.status": "SENT"
+    }
+   }
+  },
+  {
+   "id": "CS-14-witness-fails-once-nothing-changes-then-retry-completes",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "WITNESS_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [
+       "REFERRAL_SHARE",
+       "REMINDERS"
+      ],
+      "notifications.n1.status": "CANCELLED"
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 2,
+    "state": {
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED"
+    }
+   }
+  },
+  {
+   "id": "CS-15-witness-ahead-after-log-failure-stays-quarantined-until-resolved",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "log_fail": true,
+     "expect_http": 503,
+     "expect_status": "NOT_RECORDED"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_INCOMPLETE:last=0<witness=1",
+    "watermark": 1
+   }
+  },
+  {
+   "id": "CS-16-log-failure-then-retry-reuses-seq-and-recovers",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "log_fail": true,
+     "expect_http": 503,
+     "expect_status": "NOT_RECORDED"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 2,
+    "state": {
+     "notifications.n1.status": "CANCELLED"
+    }
+   }
+  },
+  {
+   "id": "CS-17-witness-unavailable-at-restore-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "witness",
+     "mode": "down"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "WITNESS_UNAVAILABLE",
+    "watermark": 2
+   }
+  },
+  {
+   "id": "CS-18-rewritten-log-with-rebuilt-chain-is-caught-by-witness-hash",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_REWRITTEN_AT_1"
+   }
+  },
+  {
+   "id": "CS-19-replayed-old-entry-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "replay_entry",
+     "index": 0
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_INVALID:SEQ_GAP_AT_3"
+   }
+  },
+  {
+   "id": "CS-20-hard-delete-and-redact-also-need-witness-confirmation",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 503,
+     "expect_status": "WITNESS_UNCONFIRMED"
+    },
+    {
+     "op": "witness",
+     "mode": "fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "value",
+       "note"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "WITNESS_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "objects.doc1.exists": true,
+      "facts.f1.value": "secret-income",
+      "facts.f1.note": "x",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 0
+   }
+  },
+  {
+   "id": "CS-21-invalid-control-payloads-rejected-before-any-write",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": []
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       ""
+      ]
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REMINDERS"
+      ]
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "nope",
+      "purposes": [
+       "REMINDERS"
+      ]
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "purposes": [
+       "REMINDERS"
+      ]
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent": "c1",
+      "purposes": [
+       "REMINDERS"
+      ]
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS"
+      ],
+      "person_name": "x"
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": []
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1"
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "exists"
+      ]
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "no_such_field"
+      ]
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "facts",
+      "id": "zzz"
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "no_table",
+      "id": "f1"
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "facts"
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "APPLIED",
+      "ref": 1
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "SOMETHING_ELSE"
+     },
+     "expect_http": 422,
+     "expect_status": "INVALID_CONTROL"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "applied_seq": 0,
+      "consents.c1.revoked": [],
+      "facts.f1.value": "secret-income",
+      "objects.doc1.exists": true
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1",
+      "reason": "CLIENT_REQUEST"
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 2,
+    "state": {
+     "objects.doc1.exists": false
+    }
+   }
+  },
+  {
+   "id": "CS-22-anchor-failure-returns-503-and-restore-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "ANCHOR_MISSING_AT_1",
+    "watermark": 1
+   }
+  },
+  {
+   "id": "CS-23-n03-attack-anchor-failed-then-purposes-reduced-and-chain-rebuilt-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED",
+     "db_fail": true
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_purposes": [
+      "REMINDERS"
+     ]
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "INTENT_MISMATCH_AT_1",
+    "state": {
+     "referrals.r1.status": "SENT"
+    }
+   }
+  },
+  {
+   "id": "CS-24-anchor-failure-then-legitimate-retry-repairs-anchor-and-completes",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [
+       "REFERRAL_SHARE",
+       "REMINDERS"
+      ],
+      "notifications.n1.status": "CANCELLED",
+      "referrals.r1.status": "CANCELLED"
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 3,
+    "state": {
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED"
+    }
+   }
+  },
+  {
+   "id": "CS-25-retry-cannot-repair-anchor-while-witness-still-failing-writes-nothing-new",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next",
+     "count": 2
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "ANCHOR_MISSING_AT_1",
+    "watermark": 1
+   }
+  },
+  {
+   "id": "CS-26-witness-timeout-on-seq-confirmation-is-503-and-nothing-changes",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "timeout_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "WITNESS_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 0
+   }
+  },
+  {
+   "id": "CS-27-witness-timeout-on-hash-anchor-is-503-and-restore-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_timeout_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "consents.c1.revoked": [],
+      "notifications.n1.status": "SCHEDULED",
+      "referrals.r1.status": "SENT",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "ANCHOR_MISSING_AT_1",
+    "watermark": 1
+   }
+  },
+  {
+   "id": "CS-28-anchor-failure-then-tail-loss-is-caught-by-seq-watermark",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "lose_log_tail",
+     "n": 1
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_INCOMPLETE:last=0<witness=1",
+    "watermark": 1
+   }
+  },
+  {
+   "id": "CS-29-main-db-failure-after-anchor-is-202-and-rewrite-is-caught",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 202,
+     "expect_status": "RECORDED_PENDING_APPLY",
+     "db_fail": true
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_purposes": [
+      "REMINDERS"
+     ]
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_REWRITTEN_AT_1"
+   }
+  },
+  {
+   "id": "CS-30-main-db-failure-after-anchor-is-202-and-restore-reapplies",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 202,
+     "expect_status": "RECORDED_PENDING_APPLY",
+     "db_fail": true
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 1,
+    "state": {
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED"
+    }
+   }
+  },
+  {
+   "id": "CS-31-hard-delete-and-redact-anchor-failures-also-503-and-stay-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "objects.doc1.exists": true,
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "ANCHOR_MISSING_AT_1"
+   }
+  },
+  {
+   "id": "CS-32-redact-anchor-failure-503-then-retry-completes-and-restores",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "value",
+       "note"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "facts.f1.value": "secret-income",
+      "facts.f1.note": "x",
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "REDACT",
+      "table": "facts",
+      "id": "f1",
+      "fields": [
+       "value",
+       "note"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 3
+   }
+  },
+  {
+   "id": "CS-33-r3-attack-A-missing-anchor-reduce-purposes-then-unrelated-request-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_purposes": [
+      "REMINDERS"
+     ]
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 503,
+     "expect_status": "INTENT_MISMATCH"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "objects.doc1.exists": true,
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "INTENT_MISMATCH_AT_1",
+    "watermark": 1,
+    "state": {
+     "referrals.r1.status": "SENT"
+    }
+   }
+  },
+  {
+   "id": "CS-34-r3-attack-B-missing-anchor-disguised-as-APPLIED-stays-quarantined",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_payload": {
+      "type": "APPLIED",
+      "ref": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "INTENT_MISMATCH_AT_1",
+    "state": {
+     "referrals.r1.status": "SENT"
+    }
+   }
+  },
+  {
+   "id": "CS-35-r3-attack-B-then-unrelated-request-still-refused",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 0,
+     "set_payload": {
+      "type": "APPLIED",
+      "ref": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 503,
+     "expect_status": "INTENT_MISMATCH"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "INTENT_MISMATCH_AT_1",
+    "state": {
+     "referrals.r1.status": "SENT"
+    }
+   }
+  },
+  {
+   "id": "CS-36-r3-anchored-applied-entry-rewritten-to-other-ref-is-caught-by-witness-hash",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "rewrite_log_entry",
+     "index": 1,
+     "set_payload": {
+      "type": "APPLIED",
+      "ref": 0
+     }
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": true,
+    "reason": "LOG_REWRITTEN_AT_2"
+   }
+  },
+  {
+   "id": "CS-37-r3-seq-bound-to-first-intent-different-retry-after-log-failure-refused",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "log_fail": true,
+     "expect_http": 503,
+     "expect_status": "NOT_RECORDED"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 503,
+     "expect_status": "INTENT_CONFLICT"
+    },
+    {
+     "op": "check_state",
+     "expect": {
+      "objects.doc1.exists": true,
+      "applied_seq": 0
+     }
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 2,
+    "state": {
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED"
+    }
+   }
+  },
+  {
+   "id": "CS-38-r3-legitimate-original-intent-retry-after-anchor-failure-reanchors-then-unrelated-request-works",
+   "steps": [
+    {
+     "op": "snapshot",
+     "name": "b0"
+    },
+    {
+     "op": "witness",
+     "mode": "hash_fail_next"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "CONSENT_REVOKE",
+      "consent_id": "c1",
+      "purposes": [
+       "REMINDERS",
+       "REFERRAL_SHARE"
+      ]
+     },
+     "expect_http": 503,
+     "expect_status": "ANCHOR_UNCONFIRMED"
+    },
+    {
+     "op": "control",
+     "rec": {
+      "type": "HARD_DELETE",
+      "table": "objects",
+      "id": "doc1"
+     },
+     "expect_http": 200,
+     "expect_status": "COMPLETE"
+    },
+    {
+     "op": "recover",
+     "from": "b0"
+    }
+   ],
+   "expect": {
+    "quarantined": false,
+    "reason": null,
+    "mismatches": [],
+    "watermark": 3,
+    "state": {
+     "notifications.n1.status": "CANCELLED",
+     "referrals.r1.status": "CANCELLED",
+     "objects.doc1.exists": false
+    }
+   }
+  }
+ ]
+}

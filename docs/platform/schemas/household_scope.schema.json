@@ -1,0 +1,36 @@
+{
+ "title": "HouseholdScopeDefinition（家庭口徑）結構",
+ "x-note": "只驗結構與頂層鍵；member_inclusion／income_definition 內的鍵是否被引擎支援（未支援者一律報錯）由 ref_engine.scope_problems 驗證",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "scope_key",
+  "label_plain",
+  "member_inclusion",
+  "income_definition",
+  "source_ref"
+ ],
+ "properties": {
+  "scope_key": {
+   "type": "string",
+   "pattern": "^SCOPE-"
+  },
+  "label_plain": {
+   "type": "string",
+   "minLength": 1
+  },
+  "member_inclusion": {
+   "type": "object"
+  },
+  "income_definition": {
+   "type": "object"
+  },
+  "property_definition": {
+   "type": "object"
+  },
+  "source_ref": {
+   "type": "string",
+   "minLength": 1
+  }
+ }
+}
