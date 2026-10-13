@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{% block title %}合成資源目錄{% endblock %}｜SaveThePeople 示範</title>
+<style>{% include "catalog/_style.css" %}</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到主要內容</a>
+<header class="site"><div class="wrap">
+<h1><a href="{% url 'catalog:list' %}" style="text-decoration:none;color:inherit">合成資源目錄（示範）</a></h1>
+<p>SaveThePeople 社會資源導航・D1-A 本機示範</p>
+</div></header>
+<main id="main" class="wrap" tabindex="-1">
+<div class="banner" role="note"><strong>合成資料，非真實個案。</strong>本頁所有資源、機構、地區與門檻皆為虛構，僅供流程示範。目錄展示不等於正式推薦；初篩不等於主管機關核定。</div>
+{% block content %}{% endblock %}
+<footer>評估基準日（as_of）：{{ as_of|date:"Y-m-d" }}。資料來源均為合成（example.invalid）。每項資源附來源與最後擷取日期；正式服務須另經查核人員確認。</footer>
+</main>
+</body>
+</html>

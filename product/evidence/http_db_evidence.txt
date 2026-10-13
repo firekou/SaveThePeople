@@ -1,0 +1,139 @@
+# D1-A HTTP / DB / lifecycle evidence (AUTHOR_EVIDENCE, synthetic only)
+captured_utc=2026-10-13T12:23:19Z
+python=Python 3.11.15 django=5.2.18 psycopg=3.3.6
+
+## pg start
+postgres started (socket only, no TCP)
+exit=0
+
+## migrate --check
+exit=0
+
+## import (idempotent re-run)
+OK file_sha256=c6f0f1526cec28ea24215f81da3e92bfc947bd48023a9e1f2196dce89e47b122 created={'regions': 0, 'sources': 0, 'scopes': 0, 'resources': 0, 'versions': 0} unchanged={'regions': 3, 'sources': 6, 'scopes': 2, 'resources': 6, 'versions': 6}
+exit=0
+
+## DB counts via psql
+resources|6
+versions|6
+sources|6
+scopes|2
+regions|3
+import_runs|4
+exit=0
+
+## DB listen_addresses (empty => unix socket only)
+
+exit=0
+
+## DB CHECK constraint negative: non-synthetic row must be rejected
+ERROR:  new row for relation "catalog_resource" violates check constraint "catalog_resource_synthetic_only"
+DETAIL:  Failing row contains (8, f, TW-REAL-999, x, LOCAL, [], LOW).
+exit=1 (non-zero expected)
+
+## server start (loopback)
+serving http://127.0.0.1:8765/ (pid 1633)
+exit=0
+
+## listener check via /proc/net/tcp (expect 127.0.0.1 only)
+LISTEN 127.0.0.1 8765
+
+## GET /?as_of=2026-10-13
+http_status=200 bytes=7555 content_type=text/html; charset=utf-8
+exit=0
+keys: TW-DEMO-CHILD-004 TW-DEMO-EDU-003 TW-DEMO-EMERG-002 TW-DEMO-FOOD-005 TW-DEMO-LIVING-001 
+共 5 項;期限未知;
+
+## GET /?region=DEMO-A&as_of=2026-10-13
+http_status=200 bytes=7581 content_type=text/html; charset=utf-8
+exit=0
+keys: TW-DEMO-CHILD-004 TW-DEMO-EDU-003 TW-DEMO-EMERG-002 TW-DEMO-FOOD-005 TW-DEMO-LIVING-001 
+共 5 項;期限未知;
+
+## GET /?region=DEMO-B&as_of=2026-10-13
+http_status=200 bytes=7089 content_type=text/html; charset=utf-8
+exit=0
+keys: TW-DEMO-CHILD-004 TW-DEMO-EMERG-002 TW-DEMO-FOOD-005 TW-DEMO-LIVING-001 
+共 4 項;期限未知;
+
+## GET /?region=DEMO-B&category=EDUCATION&as_of=2026-10-13
+http_status=200 bytes=5316 content_type=text/html; charset=utf-8
+exit=0
+keys: 
+尚無已查核資源;
+
+## GET /?category=FOOD_GOODS&as_of=2026-10-13
+http_status=200 bytes=5650 content_type=text/html; charset=utf-8
+exit=0
+keys: TW-DEMO-FOOD-005 
+共 1 項;期限未知;
+
+## GET /?status=EXPIRED&as_of=2026-10-13
+http_status=200 bytes=7555 content_type=text/html; charset=utf-8
+exit=0
+keys: TW-DEMO-CHILD-004 TW-DEMO-EDU-003 TW-DEMO-EMERG-002 TW-DEMO-FOOD-005 TW-DEMO-LIVING-001 
+共 5 項;期限未知;
+
+## GET /?region=NOWHERE
+http_status=200 bytes=5188 content_type=text/html; charset=utf-8
+exit=0
+keys: 
+查無此地區;
+
+## GET /?as_of=2026-07-01
+http_status=200 bytes=7639 content_type=text/html; charset=utf-8
+exit=0
+keys: TW-DEMO-CHILD-004 TW-DEMO-EDU-003 TW-DEMO-EMERG-002 TW-DEMO-FOOD-005 TW-DEMO-LIVING-001 
+2026-08-01 起適用;2026-10-01 起適用;共 5 項;期限未知;
+
+## GET /resources/TW-DEMO-FOOD-005/?as_of=2026-10-13
+http_status=200 bytes=5739 content_type=text/html; charset=utf-8
+exit=0
+keys: TW-DEMO-FOOD-005 
+截止日未知;期限未知;
+
+## GET /resources/TW-DEMO-RENT-006/?as_of=2026-10-13
+http_status=200 bytes=5644 content_type=text/html; charset=utf-8
+exit=0
+keys: TW-DEMO-RENT-006 
+不在公開列表;歷史版本：已過期;
+
+## GET /resources/TW-DEMO-NOPE-999/
+http_status=404 bytes=4066 content_type=text/html; charset=utf-8
+exit=0
+keys: 
+找不到這個頁面;
+
+## GET /api/public/resources
+count 5 is_synthetic True
+  TW-DEMO-LIVING-001 PUBLISHED [] eff_unknown= False last_src= 2026-10-01
+  TW-DEMO-EMERG-002 PUBLISHED [] eff_unknown= False last_src= 2026-10-01
+  TW-DEMO-EDU-003 PUBLISHED [] eff_unknown= False last_src= 2026-10-01
+  TW-DEMO-CHILD-004 PUBLISHED [] eff_unknown= False last_src= 2026-10-01
+  TW-DEMO-FOOD-005 PUBLISHED ['期限未知', '名額已滿'] eff_unknown= True last_src= 2026-10-02
+exit=0
+
+## DB-down negative: stop postgres, GET / must be a safe 500
+postgres stopped
+http_status=500 bytes=755
+curl_exit=0
+leak_scan (expect 0): 0
+資料暫時無法載入
+
+## postgres restart, GET / recovers
+postgres started (socket only, no TCP)
+http_status=200
+exit=0
+
+## 360px UI evidence (playwright)
+pages: 7 horizontal_scroll_failures: []
+exit=0
+
+## stop server and task postgres; cleanup check
+stopped pid 1633
+postgres stopped
+remaining task processes (expect none):
+grep_exit=1 (1 = none)
+post-stop curl exit=7 (non-zero expected)
+other postgres clusters untouched: 16 main 5432 down postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
+finished_utc=2026-10-13T12:23:28Z

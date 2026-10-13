@@ -1,0 +1,39 @@
+{% extends "catalog/base.html" %}
+{% block title %}{{ resource.canonical_name }}{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'catalog:list' %}">← 回資源列表</a>
+{% if is_history %}
+<div class="banner hist" role="alert"><strong>歷史版本：{{ vis.status_label }}。</strong>此頁僅供查閱紀錄，不在公開列表中，也不可依此申請。</div>
+{% endif %}
+<h2 style="font-size:1.3rem;margin:.4rem 0">{{ resource.canonical_name }}</h2>
+<ul class="badges">
+  <li class="{% if is_history %}hist{% endif %}">{{ vis.status_label }}</li>
+  {% for b in vis.badges %}{% if b != vis.status_label %}<li class="warn">{{ b }}</li>{% endif %}{% endfor %}
+  {% if capacity_label not in vis.badges %}<li>{{ capacity_label }}</li>{% endif %}
+</ul>
+{% if vis.notes %}
+<section class="notes" aria-label="注意事項"><strong>請先注意</strong><ul>{% for n in vis.notes %}<li>{{ n }}</li>{% endfor %}</ul></section>
+{% endif %}
+<p>{{ version.summary_plain }}</p>
+<dl>
+<div><dt>資源代碼／版本</dt><dd>{{ resource.resource_key }}／{{ version.version_label }}（{{ version.verification_level }}）</dd></div>
+<div><dt>層級・需求類別</dt><dd>{{ level_label }}・{{ category_labels|join:"、" }}</dd></div>
+<div><dt>適用地區</dt><dd>{{ region_names|join:"、" }}</dd></div>
+<div><dt>有效期間</dt><dd>{% if version.effective_from %}{{ version.effective_from|date:"Y-m-d" }}{% else %}未知{% endif %} 至 {% if version.effective_unknown %}<strong>未知（截止日未確認，需人工確認）</strong>{% else %}{{ version.effective_to|date:"Y-m-d" }}{% endif %}</dd></div>
+<div><dt>申請期間</dt><dd>
+{% if window_type == "ROLLING" %}隨時可申請（以提供單位公告為準）
+{% elif window_type == "FIXED" %}固定期間：{% for r in window_ranges %}{{ r.from }} 至 {{ r.to }}{% if not forloop.last %}；{% endif %}{% endfor %}
+{% elif window_type == "WITHIN_MONTHS_OF_EVENT" %}事件發生後 {{ window_months }} 個月內
+{% else %}未知，需人工確認{% endif %}</dd></div>
+<div><dt>給付或服務內容</dt><dd>{% if version.amount_or_service.unknown %}未知{% if version.amount_or_service.note %}（{{ version.amount_or_service.note }}）{% endif %}{% elif version.amount_or_service.service %}{{ version.amount_or_service.service }}{% else %}未知{% endif %}</dd></div>
+<div><dt>申請方式</dt><dd>{{ channels|join:"、" }}{% if version.how_to_apply.where %}・{{ version.how_to_apply.where }}{% endif %}・{{ proxy_label }}</dd></div>
+<div><dt>名額狀態</dt><dd>{{ capacity_label }}{% if version.capacity_confirmed_at %}（{{ version.capacity_confirmed_at|date:"Y-m-d" }} 確認）{% endif %}</dd></div>
+{% if excludes %}<div><dt>不可併領</dt><dd>{% for k in excludes %}<a href="{% url 'catalog:detail' k %}">{{ k }}</a>{% if not forloop.last %}、{% endif %}{% endfor %}（同期間）</dd></div>{% endif %}
+<div><dt>來源與最後擷取日期</dt><dd><ul style="margin:0;padding-left:1.1rem">
+{% for s in sources %}<li>{{ s.source_id }}・{{ s.source_type }}・{% if s.is_link %}<a href="{{ s.url_or_ref }}" rel="nofollow noopener">{{ s.url_or_ref }}</a>{% else %}{{ s.url_or_ref }}{% endif %}・擷取 {{ s.retrieved_at|date:"Y-m-d" }}・{{ s.status }}</li>{% endfor %}
+</ul></dd></div>
+<div><dt>來源衝突</dt><dd>{{ version.conflict_status }}</dd></div>
+{% if other_versions %}<div><dt>其他版本</dt><dd>{% for v in other_versions %}{{ v.version_label }}（{{ v.status }}）{% if not forloop.last %}、{% endif %}{% endfor %}</dd></div>{% endif %}
+</dl>
+<p class="meta" style="margin-top:1rem">本頁為目錄展示，不是資格判定或正式推薦；是否符合資格由提供單位依正式規定審核。</p>
+{% endblock %}

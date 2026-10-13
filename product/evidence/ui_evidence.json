@@ -1,0 +1,99 @@
+{
+  "captured_at": "2026-10-13T12:23:23.754916+00:00",
+  "base_url": "http://127.0.0.1:8765",
+  "viewport": {
+    "width": 360,
+    "height": 740
+  },
+  "synthetic_only": true,
+  "pages": [
+    {
+      "name": "01_list",
+      "path": "/?as_of=2026-10-13",
+      "status": 200,
+      "content_length_bytes": 7555,
+      "title": "資源列表｜SaveThePeople 示範",
+      "scrollWidth": 360,
+      "innerWidth": 360,
+      "no_horizontal_scroll": true,
+      "tab_focus_order": [
+        "A 跳到主要內容",
+        "A 合成資源目錄（示範）",
+        "SELECT#region 全部地區\n    示範縣示範縣甲區示範縣乙區",
+        "SELECT#category 全部類別\n    生活／急難救助急難救助兒少就學食物／物資居",
+        "BUTTON 篩選",
+        "A 【合成】示範縣家庭生活扶助",
+        "A 【合成】示範縣急難救助",
+        "A 【合成】示範縣甲區學童午餐補助",
+        "A 【合成】示範縣兒少家庭生活補助",
+        "A 【合成】示範食物互助協會物資箱",
+        "BODY 跳到主要內容\n\n合成資源目錄（示範）\nSaveThePeop",
+        "A 跳到主要內容"
+      ],
+      "keyboard_filter_result_url": "http://127.0.0.1:8765/?region=DEMO-B&category=",
+      "keyboard_filter_result_text": "共 4 項・示範縣乙區",
+      "keyboard_open_detail_url": "http://127.0.0.1:8765/resources/TW-DEMO-LIVING-001/"
+    },
+    {
+      "name": "02_list_filter_demo_a",
+      "path": "/?region=DEMO-A&as_of=2026-10-13",
+      "status": 200,
+      "content_length_bytes": 7581,
+      "title": "資源列表｜SaveThePeople 示範",
+      "scrollWidth": 360,
+      "innerWidth": 360,
+      "no_horizontal_scroll": true
+    },
+    {
+      "name": "03_list_empty_state",
+      "path": "/?region=DEMO-B&category=EDUCATION&as_of=2026-10-13",
+      "status": 200,
+      "content_length_bytes": 5316,
+      "title": "資源列表｜SaveThePeople 示範",
+      "scrollWidth": 360,
+      "innerWidth": 360,
+      "no_horizontal_scroll": true
+    },
+    {
+      "name": "04_detail_food_unknown_period",
+      "path": "/resources/TW-DEMO-FOOD-005/?as_of=2026-10-13",
+      "status": 200,
+      "content_length_bytes": 5739,
+      "title": "【合成】示範食物互助協會物資箱｜SaveThePeople 示範",
+      "scrollWidth": 360,
+      "innerWidth": 360,
+      "no_horizontal_scroll": true
+    },
+    {
+      "name": "05_detail_rent_expired_history",
+      "path": "/resources/TW-DEMO-RENT-006/?as_of=2026-10-13",
+      "status": 200,
+      "content_length_bytes": 5644,
+      "title": "【合成】示範縣 2026 上半年租屋補助｜SaveThePeople 示範",
+      "scrollWidth": 360,
+      "innerWidth": 360,
+      "no_horizontal_scroll": true
+    },
+    {
+      "name": "06_not_found",
+      "path": "/resources/TW-DEMO-NOPE-999/",
+      "status": 404,
+      "content_length_bytes": 4066,
+      "title": "找不到此資源｜SaveThePeople 示範",
+      "scrollWidth": 360,
+      "innerWidth": 360,
+      "no_horizontal_scroll": true
+    },
+    {
+      "name": "07_unknown_region",
+      "path": "/?region=NOWHERE",
+      "status": 200,
+      "content_length_bytes": 5188,
+      "title": "資源列表｜SaveThePeople 示範",
+      "scrollWidth": 360,
+      "innerWidth": 360,
+      "no_horizontal_scroll": true
+    }
+  ],
+  "browser": "141.0.7390.37"
+}

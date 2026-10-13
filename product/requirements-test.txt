@@ -1,0 +1,3 @@
+# Local UI acceptance evidence only (360px screenshots, keyboard walk). Not needed to run the site.
+-r requirements.txt
+playwright==1.63.0
