@@ -1,3 +1,10 @@
+# 最新有效狀態：D1-A 超過24小時停滯已對帳（2026-10-13）
+- [根因與加速核對](GPT_D1_A_STALL_AUDIT_20261013.md)：2026-10-13T03:02:47Z，距Replay checkpoint24h59m22s；候選eef14d2667f8b38398f1480d0cc895b9e9f231cf/resultd755256040b1fb8ff5c3a6a48d2be3b7afd6f0c5未變，無新claim/交付/授權。
+- D1_A仍PREPARED/NOT_AUTHORIZED_TO_START；产品新增權限BLOCKED_FRANK_DECISION、GPT指定DB依賴缺口BLOCKED_CAPABILITY分開；沒有Claude逾期工單。已核對最小目錄/版本/可見性規格；不是全gate通過。
+- next_actor GPT核對明確產品權限及獨立環境後啟用原task；原期限未生效不自動延長；120min/0cost/一次交付/repair0/0提案及歷史額度不變。本次治理對帳不算產品checkpoint，不重置停滯計時；同卡點不重複通知。
+
+## 歷史入口（完整保留）
+
 # 最新有效狀態：LTS回放文件已獨立通過，下一產品工單PREPARED（2026-10-12）
 - work_id STP-PLATFORM-PLAN-001；D1_LTS_REPLAY verdict APPROVED限原文/hash/語法/回放完整性；checkpoint COMPLETE，delivery1/1、repair0/0；content_headd755256040b1fb8ff5c3a6a48d2be3b7afd6f0c5；handoff333b6da7782cee5883dfb65a131bc485cb578bc6；base/main9a7bd1295e20837786acc45bdab7fb94f5a1b012。
 - [獨立覆核](GPT_D1_LTS_REPLAY_REVIEW_D755256_20261012.md)：6檔hash/語法提取成功，3負向控制正確拒絕；歷史原文相同；5命令exit0（doc2140），四基線空diff；DB/artifact仍NOT_RUN/NOT_VERIFIED。作者/tmp OBSERVED不冒稱GPT讀過。
