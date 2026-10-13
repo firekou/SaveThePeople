@@ -1,0 +1,9 @@
+{% extends "catalog/base.html" %}
+{% block title %}找不到此資源{% endblock %}
+{% block content %}
+<div class="empty" role="alert">
+<h2 style="margin-top:0">找不到這個頁面或資源</h2>
+<p>此資源代碼不存在，或該資源尚未公開查核完成。</p>
+<p><a href="{% url 'catalog:list' %}">回到資源列表</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "catalog/base.html" %}
+{% block title %}資源列表{% endblock %}
+{% block content %}
+<h2 style="font-size:1.15rem;margin:.5rem 0">查詢已查核資源</h2>
+<form class="filters" method="get" action="{% url 'catalog:list' %}">
+  <div><label for="region">地區</label>
+  <select id="region" name="region">
+    <option value="">全部地區</option>
+    {% for r in regions %}<option value="{{ r.code }}" {% if r.code == selected_region %}selected{% endif %}>{{ r.name }}</option>{% endfor %}
+  </select></div>
+  <div><label for="category">需求類別</label>
+  <select id="category" name="category">
+    <option value="">全部類別</option>
+    {% for code, label in categories %}<option value="{{ code }}" {% if code == selected_category %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select></div>
+  <div><label>&nbsp;</label><button class="primary" type="submit">篩選</button></div>
+</form>
+{% if unknown_region or unknown_category %}
+<div class="empty" role="status">
+  <p><strong>查無此{% if unknown_region %}地區{% else %}類別{% endif %}。</strong>目前目錄只涵蓋示範縣（甲區、乙區）與既定需求類別。</p>
+  <p><a href="{% url 'catalog:list' %}">回到全部資源</a></p>
+</div>
+{% elif not items %}
+<div class="empty" role="status">
+  <p><strong>目前此地區此類別尚無已查核資源。</strong></p>
+  <p>未查核的資源不會顯示。若有急迫需要，可撥打 1957 福利諮詢專線，或聯絡合作據點（示範環境未設定真實據點）。</p>
+  <p><a href="{% url 'catalog:list' %}">清除篩選</a></p>
+</div>
+{% else %}
+<p class="meta" role="status">共 {{ items|length }} 項{% if selected_region_obj %}・{{ selected_region_obj.name }}{% endif %}{% if selected_category %}・{{ category_label }}{% endif %}</p>
+<ul class="cards">
+{% for i in items %}
+<li class="card">
+  <h2><a href="{% url 'catalog:detail' i.resource.resource_key %}">{{ i.resource.canonical_name }}</a></h2>
+  <p class="meta">{{ i.level_label }}・{{ i.category_labels|join:"、" }}・適用：{{ i.region_names|join:"、" }}</p>
+  <p>{{ i.version.summary_plain }}</p>
+  <ul class="badges">
+    <li>{{ i.vis.status_label }}</li>
+    {% for b in i.vis.badges %}<li class="warn">{{ b }}</li>{% endfor %}
+    {% if i.capacity_label not in i.vis.badges %}<li>{{ i.capacity_label }}</li>{% endif %}
+  </ul>
+  <p class="meta">有效期間：{% if i.version.effective_from %}{{ i.version.effective_from|date:"Y-m-d" }}{% endif %} 至 {% if i.version.effective_unknown %}<strong>未知（需人工確認）</strong>{% else %}{{ i.version.effective_to|date:"Y-m-d" }}{% endif %}
+  ・來源 {{ i.version.sources.count }} 筆・最後擷取 {{ i.version.last_source_retrieved_at|date:"Y-m-d" }}</p>
+</li>
+{% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

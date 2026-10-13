@@ -1,0 +1,3 @@
+# D1-A synthetic catalog — pinned runtime dependencies (official PyPI).
+Django==5.2.18
+psycopg[binary]==3.3.6
