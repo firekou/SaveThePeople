@@ -1,0 +1,45 @@
+# Five repo tools + four-baseline diff (AUTHOR_EVIDENCE; doc tools are not product acceptance)
+captured_utc=2026-10-17T09:45:18Z code=0225e418c42f7a038d59f96d4ac1c5214dbbe3d8
+
+## $ python3 docs/platform/examples/check_examples.py
+--- stdout (tail 5)
+OK: 1306 checks passed
+--- stderr
+exit=0
+
+## $ python3 docs/platform/tools/gen_state_machines.py --check
+--- stdout (tail 5)
+OK: 6 state machines, 86 transitions, doc in sync
+--- stderr
+exit=0
+
+## $ python3 docs/platform/tools/gen_permissions.py --check
+--- stdout (tail 5)
+OK: permissions policy (25 classes, 143 matrix cells, 42 API, 12 pages), docs in sync
+--- stderr
+exit=0
+
+## $ python3 docs/platform/tools/test_checks.py
+--- stdout (tail 5)
+OK: test_checks 136 counterexample checks passed
+--- stderr
+exit=0
+
+## $ python3 docs/platform/tools/check_docs.py
+--- stdout (tail 5)
+OK: 2180 doc checks passed
+--- stderr
+exit=0
+
+## $ git diff 9a7bd1295e20837786acc45bdab7fb94f5a1b012 HEAD -- <four baselines> | wc -c
+0
+exit=0
+
+## diff 914216c..HEAD outside product/ (expect empty)
+exit=0
+
+## extra paths 9a7bd12..914216c in README / docs/governance (listed for reconciliation, not ratified)
+ README.md                                 |  20 ++
+ docs/governance/CLAUDE_EXECUTOR_PROMPT.md | 379 ++++++++++++++++++++++++++++++
+ 2 files changed, 399 insertions(+)
+exit=0

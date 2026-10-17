@@ -1,0 +1,71 @@
+# Product test suite + migrations (AUTHOR_EVIDENCE)
+captured_utc=2026-10-17T09:44:58Z code=0225e418c42f7a038d59f96d4ac1c5214dbbe3d8
+
+## $ python manage.py migrate --noinput
+Operations to perform:
+  Apply all migrations: catalog
+Running migrations:
+  No migrations to apply.
+exit=0
+
+## $ python manage.py migrate --check
+exit=0
+
+## $ python manage.py test -v 2
+Found 43 test(s).
+Creating test database for alias 'default' ('stp_catalog_test')...
+Operations to perform:
+  Apply all migrations: catalog
+Running migrations:
+  Applying catalog.0001_initial... OK
+System check identified no issues (0 silenced).
+test_category_filter_and_empty_state (catalog.tests.test_catalog.CatalogViewTests.test_category_filter_and_empty_state) ... ok
+test_database_failure_shows_safe_page (catalog.tests.test_catalog.CatalogViewTests.test_database_failure_shows_safe_page) ... ok
+test_expired_resource_direct_link_is_history (catalog.tests.test_catalog.CatalogViewTests.test_expired_resource_direct_link_is_history) ... ok
+test_first_screen_under_300kb (catalog.tests.test_catalog.CatalogViewTests.test_first_screen_under_300kb) ... ok
+test_food_box_shows_unknown_period_needs_manual_check (catalog.tests.test_catalog.CatalogViewTests.test_food_box_shows_unknown_period_needs_manual_check) ... ok
+test_internal_and_suspended_statuses (catalog.tests.test_catalog.CatalogViewTests.test_internal_and_suspended_statuses) ... ok
+test_list_shows_five_and_hides_expired (catalog.tests.test_catalog.CatalogViewTests.test_list_shows_five_and_hides_expired) ... ok
+test_missing_resource_is_404_page (catalog.tests.test_catalog.CatalogViewTests.test_missing_resource_is_404_page) ... ok
+test_not_yet_effective_is_listed_with_date_note (catalog.tests.test_catalog.CatalogViewTests.test_not_yet_effective_is_listed_with_date_note) ... ok
+test_public_api_matches_list (catalog.tests.test_catalog.CatalogViewTests.test_public_api_matches_list) ... ok
+test_region_filters (catalog.tests.test_catalog.CatalogViewTests.test_region_filters) ... ok
+test_status_query_cannot_bypass_visibility (catalog.tests.test_catalog.CatalogViewTests.test_status_query_cannot_bypass_visibility) ... ok
+test_unknown_region_or_category_gives_empty_state_not_500 (catalog.tests.test_catalog.CatalogViewTests.test_unknown_region_or_category_gives_empty_state_not_500) ... ok
+test_changed_version_content_is_rejected_without_partial_import (catalog.tests.test_catalog.ImportTests.test_changed_version_content_is_rejected_without_partial_import) ... ok
+test_database_rejects_inconsistent_effective_unknown (catalog.tests.test_catalog.ImportTests.test_database_rejects_inconsistent_effective_unknown) ... ok
+test_database_rejects_non_synthetic_row (catalog.tests.test_catalog.ImportTests.test_database_rejects_non_synthetic_row) ... ok
+test_external_source_url_is_rejected (catalog.tests.test_catalog.ImportTests.test_external_source_url_is_rejected) ... ok
+test_import_is_idempotent_and_keeps_history (catalog.tests.test_catalog.ImportTests.test_import_is_idempotent_and_keeps_history) ... ok
+test_mid_file_failure_rolls_back_everything (catalog.tests.test_catalog.ImportTests.test_mid_file_failure_rolls_back_everything) ... ok
+test_new_version_label_adds_history_without_overwriting (catalog.tests.test_catalog.ImportTests.test_new_version_label_adds_history_without_overwriting) ... ok
+test_non_synthetic_flag_is_rejected_and_nothing_written (catalog.tests.test_catalog.ImportTests.test_non_synthetic_flag_is_rejected_and_nothing_written) ... ok
+test_rules (catalog.tests.test_catalog.VisibilityUnitTests.test_rules) ... ok
+test_explicit_false_or_illegal_flag_rejected_on_empty_db (catalog.tests.test_import_repair.PerRecordSyntheticFlagTests.test_explicit_false_or_illegal_flag_rejected_on_empty_db) ... ok
+test_explicit_false_rejected_on_populated_db_without_any_change (catalog.tests.test_import_repair.PerRecordSyntheticFlagTests.test_explicit_false_rejected_on_populated_db_without_any_change) ... ok
+test_explicit_true_per_record_is_accepted (catalog.tests.test_import_repair.PerRecordSyntheticFlagTests.test_explicit_true_per_record_is_accepted) ... ok
+test_original_fixture_is_unchanged_and_still_imports (catalog.tests.test_import_repair.PerRecordSyntheticFlagTests.test_original_fixture_is_unchanged_and_still_imports) ... ok
+test_orm_default_cannot_relabel (catalog.tests.test_import_repair.PerRecordSyntheticFlagTests.test_orm_default_cannot_relabel) ... ok
+test_accepted_references (catalog.tests.test_import_repair.SourceUrlTests.test_accepted_references) ... ok
+test_reason_for_each_rejected_reference (catalog.tests.test_import_repair.SourceUrlTests.test_reason_for_each_rejected_reference) ... ok
+test_rejected_url_writes_nothing_on_empty_and_populated_db (catalog.tests.test_import_repair.SourceUrlTests.test_rejected_url_writes_nothing_on_empty_and_populated_db) ... ok
+test_validator_makes_no_network_calls (catalog.tests.test_import_repair.SourceUrlTests.test_validator_makes_no_network_calls) ... ok
+test_failed_health_check_stops_only_own_process (catalog.tests.test_serve_script.ServeScriptTests.test_failed_health_check_stops_only_own_process) ... ok
+test_foreign_pid_with_right_start_time_is_not_signalled (catalog.tests.test_serve_script.ServeScriptTests.test_foreign_pid_with_right_start_time_is_not_signalled) ... ok
+test_kill_failure_keeps_record_and_fails (catalog.tests.test_serve_script.ServeScriptTests.test_kill_failure_keeps_record_and_fails) ... ok
+test_normal_start_status_stop (catalog.tests.test_serve_script.ServeScriptTests.test_normal_start_status_stop) ... ok
+test_pid_1_is_never_signalled (catalog.tests.test_serve_script.ServeScriptTests.test_pid_1_is_never_signalled) ... ok
+test_pidfile_anomalies_are_refused_without_signals (catalog.tests.test_serve_script.ServeScriptTests.test_pidfile_anomalies_are_refused_without_signals) ... ok
+test_process_still_alive_after_signal_keeps_record (catalog.tests.test_serve_script.ServeScriptTests.test_process_still_alive_after_signal_keeps_record) ... ok
+test_record_from_another_checkout_is_refused (catalog.tests.test_serve_script.ServeScriptTests.test_record_from_another_checkout_is_refused) ... ok
+test_reused_pid_start_time_mismatch_is_not_signalled (catalog.tests.test_serve_script.ServeScriptTests.test_reused_pid_start_time_mismatch_is_not_signalled) ... ok
+test_stale_record_of_dead_own_process_is_cleared (catalog.tests.test_serve_script.ServeScriptTests.test_stale_record_of_dead_own_process_is_cleared) ... ok
+test_wildcard_lan_and_hostname_binds_are_refused_before_spawn (catalog.tests.test_serve_script.ServeScriptTests.test_wildcard_lan_and_hostname_binds_are_refused_before_spawn) ... ok
+test_wrong_token_is_refused (catalog.tests.test_serve_script.ServeScriptTests.test_wrong_token_is_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 43 tests in 7.459s
+
+OK
+Destroying test database for alias 'default' ('stp_catalog_test')...
+exit=0
