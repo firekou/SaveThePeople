@@ -38,7 +38,10 @@ python manage.py migrate --check
 python manage.py import_synthetic_catalog            # 第一次：created 3/6/2/6/6
 python manage.py import_synthetic_catalog            # 第二次：全部 unchanged，不新增、不覆蓋
 ```
-匯入規則：檔案必須宣告 `is_synthetic: true`，來源網址必須在 `example.invalid`，資源代碼必須是 `TW-DEMO-*`；
+匯入規則：檔案必須宣告 `is_synthetic: true`；任何記錄（地區、來源、範圍、資源、版本、規則）若自帶 `is_synthetic`，必須正好是布林 `true`，
+`false`、`"true"`、`1`、`null` 等一律拒絕；未帶旗標的記錄繼承檔案層宣告（輸出 `inherited_flag=` 計數），寫入時一律明確指定、不依賴 ORM 預設值。
+來源網址以 URL 解析器檢查：只允許 `http`/`https`、主機名稱必須「正好」是 `example.invalid`（不含子網域、不允許結尾點、userinfo 或連接埠）；
+非網址的合成說明文字允許，但不得夾帶網址。匯入不發出任何網路請求。資源代碼必須是 `TW-DEMO-*`；
 已匯入的版本內容不可變（同一 `version_label` 內容不同即拒絕，需用新的 `version_label` 新增版本）；
 任何拒絕都在交易內回滾，不留部分匯入。每張表都有資料庫 CHECK 約束 `is_synthetic = true`。
 
@@ -49,10 +52,23 @@ scripts/serve.sh status
 scripts/serve.sh stop
 scripts/pg_local.sh stop
 ```
+`serve.sh` 安全規則：`STP_BIND` 只接受 `127.0.0.1:<1024-65535>`，萬用位址、區網位址、主機名稱與空值在啟動前即拒絕（不產生程序）。
+啟動時寫入 0600 權限的紀錄檔（pid、程序啟動時間、checkout 路徑、bind、隨機 launch token、python 路徑）；停止前逐項核對
+`/proc` 中的啟動時間、工作目錄、完整命令列與環境中的 launch token，任何一項不符即視為外部程序，不送訊號。
+只有確認程序已結束才移除紀錄檔；健康檢查失敗只停止自己剛啟動的程序。
+結束碼：0 成功；1 啟動健康檢查失敗（已停止自身程序）；2 參數或 bind 不合法；3 紀錄檔異常／外部程序（未送任何訊號、紀錄保留）；
+4 停止未獲確認（紀錄保留）；5 啟動失敗且無法確認清理。
+
+## 端到端收證（HTTP／DB／DB 中斷／啟停）
+```bash
+STP_CHROMIUM=/path/to/chrome scripts/collect_http_evidence.sh   # 輸出 evidence/repair-recovery/http_db_evidence.txt
+```
+每一步都記錄結束碼並比對預期（含預期失敗的負向步驟）；只要任一步不符，最後 `SUMMARY` 列出失敗清單並以非零結束，
+後續成功的步驟不會掩蓋先前的失敗。輸出目錄可用 `STP_EVIDENCE_DIR` 改變。
 
 ## 測試
 ```bash
-python manage.py test          # 22 個測試：匯入冪等／不可變／拒絕非合成／回滾／DB 約束、列表與可見性、篩選、空態、404、500 安全頁、300KB
+python manage.py test          # 43 個測試：原 22 個＋serve.sh 12 個（stub）＋匯入修補 9 個；原 22 個涵蓋匯入冪等／不可變／拒絕非合成／回滾／DB 約束、列表與可見性、篩選、空態、404、500 安全頁、300KB
 ```
 手機與鍵盤證據（需 `pip install -r requirements-test.txt` 與可用的 Chromium）：
 ```bash
@@ -76,5 +92,5 @@ STP_CHROMIUM=/path/to/chrome python scripts/capture_evidence.py http://127.0.0.1
 - `catalog/visibility.py`：`catalog_visibility`（引擎 §0.1 的唯一展示判定；不做 §0.2 推薦判定）。
 - `catalog/importer.py`、`catalog/management/commands/import_synthetic_catalog.py`：冪等、fail-closed 匯入。
 - `catalog/views.py`、`catalog/templates/catalog/`：列表、詳情、API、404、500。
-- `scripts/`：`pg_local.sh`、`serve.sh`、`capture_evidence.py`。
-- `evidence/`：本次交付的實際畫面與 JSON 證據（合成）。
+- `scripts/`：`pg_local.sh`、`serve.sh`、`capture_evidence.py`、`collect_http_evidence.sh`。
+- `evidence/`：D1-A 原交付的實際畫面與 JSON 證據（合成，保留不覆寫）；`evidence/repair-recovery/`：D1A-01～03 修補回收的作者證據。

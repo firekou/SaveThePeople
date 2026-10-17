@@ -1,0 +1,32 @@
+# Original counterexamples: same inputs against ORIGINAL 914216c and REPAIRED working tree (AUTHOR_EVIDENCE)
+captured_utc=2026-10-17T09:43:15Z
+
+## ORIGINAL importer @ 914216cabdb7760f749265fee718b243764cee2b
+legal control (unchanged fixture): ACCEPTED created={'regions': 3, 'sources': 6, 'scopes': 2, 'resources': 6, 'versions': 6} rows_with_is_synthetic_false=0 S-0001.url_or_ref=https://example.invalid/demo-county/living-assistance-2026
+D1A-01 resources[0].is_synthetic=false: ACCEPTED created={'regions': 3, 'sources': 6, 'scopes': 2, 'resources': 6, 'versions': 6} rows_with_is_synthetic_false=0 S-0001.url_or_ref=https://example.invalid/demo-county/living-assistance-2026
+D1A-01 sources[2].is_synthetic='false': ACCEPTED created={'regions': 3, 'sources': 6, 'scopes': 2, 'resources': 6, 'versions': 6} rows_with_is_synthetic_false=0 S-0001.url_or_ref=https://example.invalid/demo-county/living-assistance-2026
+D1A-02 https://example.invalid.attacker.invalid/x: ACCEPTED created={'regions': 3, 'sources': 6, 'scopes': 2, 'resources': 6, 'versions': 6} rows_with_is_synthetic_false=0 S-0001.url_or_ref=https://example.invalid.attacker.invalid/x
+D1A-02 https://example.invalid@attacker.invalid/x: ACCEPTED created={'regions': 3, 'sources': 6, 'scopes': 2, 'resources': 6, 'versions': 6} rows_with_is_synthetic_false=0 S-0001.url_or_ref=https://example.invalid@attacker.invalid/x
+D1A-02 ftp://example.invalid/x: ACCEPTED created={'regions': 3, 'sources': 6, 'scopes': 2, 'resources': 6, 'versions': 6} rows_with_is_synthetic_false=0 S-0001.url_or_ref=ftp://example.invalid/x
+exit=0
+
+## REPAIRED importer (branch ccr-dd86219c-ijac1h working tree)
+legal control (unchanged fixture): ACCEPTED created={'regions': 3, 'sources': 6, 'scopes': 2, 'resources': 6, 'versions': 6} rows_with_is_synthetic_false=0 S-0001.url_or_ref=https://example.invalid/demo-county/living-assistance-2026
+D1A-01 resources[0].is_synthetic=false: REJECTED ImportRejected: non-synthetic or invalid per-record is_synthetic flag(s): $.resources[0].is_synthetic=False | resources=0 import_runs=0
+D1A-01 sources[2].is_synthetic='false': REJECTED ImportRejected: non-synthetic or invalid per-record is_synthetic flag(s): $.sources[2].is_synthetic='false' | resources=0 import_runs=0
+D1A-02 https://example.invalid.attacker.invalid/x: REJECTED ImportRejected: source S-0001: hostname 'example.invalid.attacker.invalid' is not exactly example.invalid; refusing non-synthetic data | resources=0 import_runs=0
+D1A-02 https://example.invalid@attacker.invalid/x: REJECTED ImportRejected: source S-0001: userinfo in URL is not allowed; refusing non-synthetic data | resources=0 import_runs=0
+D1A-02 ftp://example.invalid/x: REJECTED ImportRejected: source S-0001: scheme 'ftp' not allowed; refusing non-synthetic data | resources=0 import_runs=0
+exit=0
+
+## D1A-03 ORIGINAL serve.sh (static listing; not executed, to avoid a real wildcard bind or signalling a foreign PID)
+5:BIND="${STP_BIND:-127.0.0.1:8765}"
+6:PIDFILE="${STP_PIDFILE:-/var/tmp/stp_d1a_server.pid}"
+10:    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then echo "already running pid $(cat "$PIDFILE")"; exit 0; fi
+11:    cd "$HERE"; nohup python manage.py runserver "$BIND" --noreload >"$LOG" 2>&1 &
+12:    echo $! >"$PIDFILE"; sleep 2
+13:    if curl -fsS -o /dev/null "http://$BIND/"; then echo "serving http://$BIND/ (pid $(cat "$PIDFILE"))"; else echo "server failed to answer; see $LOG"; exit 1; fi;;
+15:    if [ -f "$PIDFILE" ]; then PID=$(cat "$PIDFILE"); if kill -0 "$PID" 2>/dev/null; then kill "$PID"; sleep 1; fi; rm -f "$PIDFILE"; echo "stopped pid $PID"; else echo "not running"; fi;;
+17:    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then echo "running pid $(cat "$PIDFILE") on $BIND"; else echo "not running"; fi;;
+Observed defects: BIND taken verbatim (0.0.0.0 accepted); pidfile trusted as a bare integer; kill -0/kill on any PID; rm -f pidfile even when the process was not confirmed stopped; failed health check leaves the spawned process running.
+Repaired behaviour is exercised by catalog/tests/test_serve_script.py with stubs (see test_output.txt) and live in http_db_evidence.txt.
