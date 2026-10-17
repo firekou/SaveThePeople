@@ -15,4 +15,4 @@ class Command(BaseCommand):
             run = import_dataset(opts["path"])
         except ImportRejected as exc:
             raise CommandError(f"REJECTED: {exc} (no rows written)")
-        self.stdout.write(f"OK file_sha256={run.file_sha256} created={run.created} unchanged={run.unchanged}")
+        self.stdout.write(f"OK file_sha256={run.file_sha256} created={run.created} unchanged={run.unchanged} inherited_flag={run.inherited_flag}")
