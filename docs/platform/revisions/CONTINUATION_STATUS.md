@@ -1,3 +1,14 @@
+# 最新有效狀態：D1-A恢復交付已覆核，窄修補READY（2026-10-17）
+- work_id STP-PLATFORM-PLAN-001；task STP-PLATFORM-PLAN-001-D1-A-CATALOG。
+- reviewed_head 9581541cf40fef0382b98c2632131710e1c21106，PR3 Draft。
+- verdict CHANGES_REQUESTED；D1A-01 CLOSED指定範圍；D1A-02 MINOR及D1A-03 MAJOR部分解決，剩//來源與死child健康成功假陽性。
+- [完整覆核與唯一恢復revision2修補包](GPT_D1_A_RECOVERY_REVIEW_9581541_20261017.md)；READY；next_actor Claude，固定958祖先；45分鐘/0外部新增成本/一次追加，deadline2026-10-18T14:00:00Z，歷史保留。
+- 5文件工具exit0、四基線diff空；隔離Django依賴已裝，31個SQLite替代產品測試exit0，不是PG。原12啟停測試本環境exit1受/proc PID不可見限制；PG實測嘗試exit1無DB。實際HTTP/PG/UI NOT_VERIFIED，作者43PASS仍AUTHOR_EVIDENCE。
+- Frank本次明確接手/本機修補授權已核對，不再以舊session或授權轉錄阻擋。無merge/部署/真實資料。
+- D2及資料管線尚未啟動；此修補交付後GPT覆核，不要求Frank搬驗證Prompt。
+- 本次只改Reviewer治理，作者實作未動。通知POSTED不等於新包ACK或STARTED。
+
+## 歷史狀態（上方取代衝突項，原文保留）
 # 最新有效狀態：D1-A產品已交付，獨立反例要求修補（2026-10-13）
 - task STP-PLATFORM-PLAN-001-D1-A-CATALOG／stage D1_A；content_head914216cabdb7760f749265fee718b243764cee2b，source candidate3e0bd9999e62787636843d8fe054e732b3f62305，main9a7bd1295e20837786acc45bdab7fb94f5a1b012；成果PR #2 Draft、協調PR #1。
 - [GPT獨立覆核與repair1](GPT_D1_A_REVIEW_914216C_20261013.md)：CHANGES_REQUESTED，D1A-01逐筆false未拒絕、D1A-02偽裝網域、D1A-03loopback/PID歸屬未限制；隔離原函式/stub反例REPRODUCED，5文件命令exit0，四基線0bytes。
