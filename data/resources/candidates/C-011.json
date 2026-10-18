@@ -72,16 +72,17 @@
   "documents": [
     "未知"
   ],
-  "application_method": "由各縣（市）政府以方案方式辦理；請洽戶籍地縣市社會局（處）。",
-  "contact": "各直轄市、縣（市）政府社會局（處）；1957福利諮詢專線",
+  "application_method": "未知（新聞稿載「各縣（市）政府皆以方案方式執行」，未載申請方式）",
+  "contact": "未知",
   "source_url": "https://www.mohw.gov.tw/cp-2625-19290-1.html",
   "source_published_date": "2016-03-01",
   "last_checked_date": "2026-10-18",
   "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
   "version": "v1-2026-10-18",
-  "status": "候選",
+  "status": "暫停",
   "capacity_confirmation": "未確認",
   "uncertainty_notes": [
+    "暫停：屬社會救助法第15-1條地方主管機關裁量事項，來源為2016年新聞稿，僅供參考，不得正式推薦。",
     "來源為2016年新聞稿，內容可能已過時；其中金額（生活補助等）已不採用。",
     "使用者指定「家庭發展帳戶」未找到現行統一的中央官方頁面，替代為「脫貧自立」資料；各縣市方案與提撥細節須逐一確認。",
     "已有兒少教育發展帳戶見 C-007。",

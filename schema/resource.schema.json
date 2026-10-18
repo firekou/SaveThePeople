@@ -4,41 +4,234 @@
   "title": "SaveThePeople 資源資料 v1",
   "description": "對齊 docs/DATA_AND_PRODUCT_SPEC.md §2 最低欄位。不含任何個案資料。",
   "type": "object",
-  "required": ["resource_id","name","provider","level","regions","need_categories","service_content","eligibility","exclusions_cumulation","household_calculation_basis","validity_period","application_deadline","documents","application_method","contact","source_url","source_published_date","last_checked_date","checked_by","version","status","capacity_confirmation","uncertainty_notes"],
+  "required": [
+    "resource_id",
+    "name",
+    "provider",
+    "level",
+    "regions",
+    "need_categories",
+    "service_content",
+    "eligibility",
+    "exclusions_cumulation",
+    "household_calculation_basis",
+    "validity_period",
+    "application_deadline",
+    "documents",
+    "application_method",
+    "contact",
+    "source_url",
+    "source_published_date",
+    "last_checked_date",
+    "checked_by",
+    "version",
+    "status",
+    "capacity_confirmation",
+    "uncertainty_notes"
+  ],
   "properties": {
-    "resource_id": {"type":"string","pattern":"^C-[0-9]{3}$","description":"中央層級 C-nnn；地方 L-縣市碼-nnn；民間 P-nnn"},
-    "name": {"type":"string"},
-    "provider": {"type":"string","description":"提供機構"},
-    "level": {"enum":["中央","地方","民間"]},
-    "regions": {"type":"array","items":{"type":"string"},"description":"適用地區；全國寫 [\"全國\"]"},
-    "need_categories": {"type":"array","items":{"enum":["生活/急難救助","兒少/就學","食物/物資","居住","就業","醫療/健康","必要支持服務"]}},
-    "service_content": {"type":"string","description":"逐字或近乎逐字的來源描述；不得補充來源沒有的內容"},
-    "eligibility": {"type":"array","items":{"type":"object",
-      "required":["condition_id","value","source_excerpt","source_locator","required_input","data_source","judgment_method","manual_confirm_point"],
-      "properties":{
-        "condition_id":{"type":"string"},
-        "value":{"enum":["已摘錄","未知"],"description":"已摘錄=source_excerpt 為來源原文；未知=來源未載明或無法對應，source_excerpt 留空"},
-        "source_excerpt":{"type":"string","description":"來源原文逐字摘錄，不改寫、不補全、不推論"},
-        "source_locator":{"type":"string","description":"條號／章節／頁面標題等定位"},
-        "source_url":{"type":"string","description":"若與頂層 source_url 不同才填"},
-        "required_input":{"type":"string"},
-        "data_source":{"type":"string"},
-        "judgment_method":{"type":"string"},
-        "manual_confirm_point":{"type":"string"}}}},
-    "exclusions_cumulation": {"type":"array","items":{"type":"object","required":["value","source_excerpt","source_locator"],"properties":{"value":{"enum":["已摘錄","未知"]},"source_excerpt":{"type":"string"},"source_locator":{"type":"string"}}}},
-    "household_calculation_basis": {"type":"object","required":["value","source_excerpt","source_locator"],"properties":{"value":{"enum":["已摘錄","未知"]},"source_excerpt":{"type":"string"},"source_locator":{"type":"string"}},"description":"各方案各自記錄，不統一口徑"},
-    "validity_period": {"type":"string","description":"來源載明的期間；未載明寫「未知」"},
-    "application_deadline": {"type":"string"},
-    "documents": {"type":"array","items":{"type":"string"}},
-    "application_method": {"type":"string"},
-    "contact": {"type":"string","description":"機構層級公開窗口，不含個人資料"},
-    "source_url": {"type":"string","format":"uri"},
-    "source_published_date": {"type":"string","description":"來源發布／更新日期 YYYY-MM-DD；來源未標示寫「未標示」"},
-    "last_checked_date": {"type":"string","pattern":"^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
-    "checked_by": {"type":"string","description":"桌面蒐集者，並非現場人工查核；人工查核人於 P1-4 填寫"},
-    "version": {"type":"string"},
-    "status": {"enum":["候選","已查核","暫停","過期"]},
-    "capacity_confirmation": {"enum":["未確認"],"description":"候選階段一律未確認；已查核階段由人工改"},
-    "uncertainty_notes": {"type":"array","items":{"type":"string"}}
+    "resource_id": {
+      "type": "string",
+      "pattern": "^(C-[0-9]{3}|L-[A-Za-z0-9]+-[0-9]{3}|P-[0-9]{3})$",
+      "description": "中央層級 C-nnn；地方 L-縣市碼-nnn；民間 P-nnn"
+    },
+    "name": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string",
+      "description": "提供機構"
+    },
+    "level": {
+      "enum": [
+        "中央",
+        "地方",
+        "民間"
+      ]
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "適用地區；全國寫 [\"全國\"]"
+    },
+    "need_categories": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "生活/急難救助",
+          "兒少/就學",
+          "食物/物資",
+          "居住",
+          "就業",
+          "醫療/健康",
+          "必要支持服務"
+        ]
+      }
+    },
+    "service_content": {
+      "type": "string",
+      "description": "逐字或近乎逐字的來源描述；不得補充來源沒有的內容"
+    },
+    "eligibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "condition_id",
+          "value",
+          "source_excerpt",
+          "source_locator",
+          "required_input",
+          "data_source",
+          "judgment_method",
+          "manual_confirm_point"
+        ],
+        "properties": {
+          "condition_id": {
+            "type": "string"
+          },
+          "value": {
+            "enum": [
+              "已摘錄",
+              "未知"
+            ],
+            "description": "已摘錄=source_excerpt 為來源原文；未知=來源未載明或無法對應，source_excerpt 留空"
+          },
+          "source_excerpt": {
+            "type": "string",
+            "description": "來源原文逐字摘錄，不改寫、不補全、不推論"
+          },
+          "source_locator": {
+            "type": "string",
+            "description": "條號／章節／頁面標題等定位"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "若與頂層 source_url 不同才填"
+          },
+          "required_input": {
+            "type": "string"
+          },
+          "data_source": {
+            "type": "string"
+          },
+          "judgment_method": {
+            "type": "string"
+          },
+          "manual_confirm_point": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "exclusions_cumulation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "value",
+          "source_excerpt",
+          "source_locator"
+        ],
+        "properties": {
+          "value": {
+            "enum": [
+              "已摘錄",
+              "未知"
+            ]
+          },
+          "source_excerpt": {
+            "type": "string"
+          },
+          "source_locator": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "household_calculation_basis": {
+      "type": "object",
+      "required": [
+        "value",
+        "source_excerpt",
+        "source_locator"
+      ],
+      "properties": {
+        "value": {
+          "enum": [
+            "已摘錄",
+            "未知"
+          ]
+        },
+        "source_excerpt": {
+          "type": "string"
+        },
+        "source_locator": {
+          "type": "string"
+        }
+      },
+      "description": "各方案各自記錄，不統一口徑"
+    },
+    "validity_period": {
+      "type": "string",
+      "description": "來源載明的期間；未載明寫「未知」"
+    },
+    "application_deadline": {
+      "type": "string"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "application_method": {
+      "type": "string"
+    },
+    "contact": {
+      "type": "string",
+      "description": "機構層級公開窗口，不含個人資料"
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "source_published_date": {
+      "type": "string",
+      "description": "來源發布／更新日期 YYYY-MM-DD；來源未標示寫「未標示」"
+    },
+    "last_checked_date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "checked_by": {
+      "type": "string",
+      "description": "桌面蒐集者，並非現場人工查核；人工查核人於 P1-4 填寫"
+    },
+    "version": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "候選",
+        "已查核",
+        "暫停",
+        "過期"
+      ]
+    },
+    "capacity_confirmation": {
+      "enum": [
+        "未確認"
+      ],
+      "description": "候選階段一律未確認；已查核階段由人工改"
+    },
+    "uncertainty_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
   }
 }

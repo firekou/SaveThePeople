@@ -42,6 +42,26 @@
       "manual_confirm_point": "—"
     },
     {
+      "condition_id": "C025-7",
+      "value": "已摘錄",
+      "source_excerpt": "一、非自願離職者。",
+      "source_locator": "第2條第1項第1款",
+      "required_input": "非自願離職事實",
+      "data_source": "非自願離職證明文件（見第5條第8款）",
+      "judgment_method": "比對",
+      "manual_confirm_point": "適用對象二者擇一"
+    },
+    {
+      "condition_id": "C025-8",
+      "value": "已摘錄",
+      "source_excerpt": "二、本法第二十四條第一項各款所列之失業者。",
+      "source_locator": "第2條第1項第2款",
+      "required_input": "是否屬就業服務法第24條第1項各款所列失業者",
+      "data_source": "證明文件",
+      "judgment_method": "比對",
+      "manual_confirm_point": "「本法」指就業服務法（第1條）；各款內容本檔未摘錄"
+    },
+    {
       "condition_id": "C025-4",
       "value": "已摘錄",
       "source_excerpt": "前項所定人員須具有工作能力及工作意願。",
@@ -75,8 +95,23 @@
   "exclusions_cumulation": [
     {
       "value": "已摘錄",
+      "source_excerpt": "前條第一項所定人員有下列情事之一者，不適用本辦法：",
+      "source_locator": "第3條第1項（首段）"
+    },
+    {
+      "value": "已摘錄",
       "source_excerpt": "一、已領取公教人員保險養老給付或勞工保險老年給付。",
       "source_locator": "第3條第1項第1款"
+    },
+    {
+      "value": "已摘錄",
+      "source_excerpt": "二、已領取軍人退休俸或公營事業退休金。",
+      "source_locator": "第3條第1項第2款"
+    },
+    {
+      "value": "已摘錄",
+      "source_excerpt": "前項人員符合社會救助法低收入戶或中低收入戶資格、領取中低收入老人生活津貼或身心障礙者生活補助費者，得適用本辦法。",
+      "source_locator": "第3條第2項（上述第1項排除之例外）"
     }
   ],
   "household_calculation_basis": {

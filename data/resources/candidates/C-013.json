@@ -41,35 +41,13 @@
       "data_source": "",
       "judgment_method": "",
       "manual_confirm_point": "「家庭經濟條件」具體區分標準本頁未載，須查補助作業要點"
-    },
-    {
-      "condition_id": "ch6",
-      "value": "已摘錄",
-      "source_excerpt": "法定代理人或實際照顧兒童之人，就家中未滿二歲幼兒，送請與縣（市）政府簽訂合作契約之下列人員或場所照顧者，得依中央主管機關所定未滿二歲兒童托育準公共化服務與費用申報及支付相關規定，申請托育費用補助：",
-      "source_locator": "弱勢兒少辦法第6條第1項（低收入戶等之托育補助）",
-      "required_input": "幼兒年齡、托育人員／機構是否簽約",
-      "data_source": "",
-      "judgment_method": "",
-      "manual_confirm_point": "此為弱勢身分托育費用補助之另一法源",
-      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050180"
-    },
-    {
-      "condition_id": "ch6-2",
-      "value": "已摘錄",
-      "source_excerpt": "一、低收入戶。二、中低收入戶。三、因懷孕或生育而遭遇困境之未成年人。四、其他經縣（市）主管機關評估無力撫育及無扶養義務人或撫養義務人無力維持其生活之幼兒。",
-      "source_locator": "同辦法第6條第2項",
-      "required_input": "",
-      "data_source": "",
-      "judgment_method": "",
-      "manual_confirm_point": "",
-      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050180"
     }
   ],
   "exclusions_cumulation": [
     {
       "value": "已摘錄",
       "source_excerpt": "補助資格：112年1月起取消排富限制，只要是未滿2歲之幼兒，在我國完成出生登記或初設戶籍登記；且未同時請領托育補助、公費安置，都具備資格。",
-      "source_locator": "衛福部專區（說明育兒津貼與托育補助不可同時請領）"
+      "source_locator": "衛福部專區「育兒津貼」補助資格段（文內載未同時請領托育補助；與 C-008 同一來源句，在此僅為併領參考）"
     }
   ],
   "household_calculation_basis": {
@@ -78,7 +56,7 @@
     "source_locator": "頁面未載家庭計算口徑"
   },
   "validity_period": "未知",
-  "application_deadline": "未知（弱勢身分托育補助依辦法第8條須自托育事實發生日起十五日內申請）",
+  "application_deadline": "未知（弱勢身分托育補助另有申請期限，見 C-027 第8條）",
   "documents": [
     "未知（見未滿2歲兒童托育補助問答集）"
   ],
@@ -92,9 +70,11 @@
   "status": "候選",
   "capacity_confirmation": "未確認",
   "uncertainty_notes": [
+    "範圍界定：本檔僅涵蓋衛福部專區頁面所載準公共托育補助。辦法第6條所定弱勢身分托育費用補助原摘錄已移至 C-027，本檔不再重複。",
     "替代說明：使用者指定「幼兒就學補助或準公共托育津貼擇一」，本檔選未滿2歲托育補助（準公共）。2至5歲就學補助另案。",
     "不同家庭經濟條件的補助金額表本次未取得。",
     "育兒津貼與托育補助不得同時請領（見資格說明）。",
-    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。",
+    "「取消不得與育嬰留職停薪津貼、其他弱勢生活補助同時領取之限制」（托育補助段）與「未同時請領托育補助」（育兒津貼段）所指併領範圍不同，須人工確認。"
   ]
 }

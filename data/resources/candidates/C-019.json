@@ -42,16 +42,6 @@
       "manual_confirm_point": "—"
     },
     {
-      "condition_id": "C019-4",
-      "value": "已摘錄",
-      "source_excerpt": "但不包括低收入戶、中低收入戶及本辦法第三條第二項所定已享有政府其他各類就學所需相關費用（包括學費）補助或減免之學生。",
-      "source_locator": "二",
-      "required_input": "是否低收入戶／中低收入戶、是否已享其他補助",
-      "data_source": "學校",
-      "judgment_method": "若屬之則不適用本要點（另循低收入戶規定）",
-      "manual_confirm_point": "—"
-    },
-    {
       "condition_id": "C019-5",
       "value": "已摘錄",
       "source_excerpt": "就讀公立學校者，每學期不得超過新臺幣五千元，就讀私立學校者，每學期不得超過新臺幣二萬元",
@@ -76,7 +66,9 @@
   },
   "validity_period": "未知",
   "application_deadline": "於就讀學校所定申請期限內（來源：四、(一)1）",
-  "documents": "申請表（附件）及證明文件、資料（種類來源未逐項載明）",
+  "documents": [
+    "申請表（附件）及證明文件、資料（種類來源未逐項載明）"
+  ],
   "application_method": "向就讀學校提出申請，填具申請表並檢附證明文件",
   "contact": "未知",
   "source_url": "https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001337",

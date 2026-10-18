@@ -15,9 +15,15 @@ for f in files:
         if k not in d: err(f, f"missing {k}")
     if d.get("resource_id") in ids: err(f, "duplicate id")
     ids.add(d.get("resource_id"))
-    if not re.match(P["resource_id"]["pattern"], d.get("resource_id", "")): err(f, "bad id")
+    if not re.match(r"^(C-[0-9]{3}|L-[A-Za-z0-9]+-[0-9]{3}|P-[0-9]{3})$", str(d.get("resource_id", ""))): err(f, "bad id")
+    for k in ("regions", "need_categories", "eligibility", "exclusions_cumulation", "documents", "uncertainty_notes"):
+        if k in d and not isinstance(d[k], list): err(f, f"{k} must be an array")
+    for k in ("name", "provider", "service_content", "validity_period", "application_deadline", "application_method", "contact", "version"):
+        if k in d and not isinstance(d[k], str): err(f, f"{k} must be a string")
+    if isinstance(d.get("documents"), list) and any(not isinstance(x, str) for x in d["documents"]): err(f, "documents items must be strings")
+    if not isinstance(d.get("household_calculation_basis"), dict): err(f, "household_calculation_basis must be an object")
     if d.get("level") not in P["level"]["enum"]: err(f, "bad level")
-    if d.get("status") != "候選": err(f, "status must be 候選 in this batch")
+    if d.get("status") not in ("候選", "暫停"): err(f, "status must be 候選 or 暫停 in this batch (已查核 requires P1-4 human check)")
     if d.get("capacity_confirmation") != "未確認": err(f, "capacity must be 未確認")
     if not re.match(P["last_checked_date"]["pattern"], d.get("last_checked_date", "")): err(f, "bad check date")
     if not str(d.get("source_url", "")).startswith("https://"): err(f, "source_url not https")

@@ -60,6 +60,26 @@
       "data_source": "中央公告",
       "judgment_method": "",
       "manual_confirm_point": "開戶金與相對提撥上限條文未載金額，須查公告"
+    },
+    {
+      "condition_id": "def-match",
+      "value": "已摘錄",
+      "source_excerpt": "政府相對提撥款：指政府依兒少教育發展帳戶開戶人自存款金額，相對撥付存入之款項。",
+      "source_locator": "第3條第5款",
+      "required_input": "每月自存款",
+      "data_source": "家庭",
+      "judgment_method": "—",
+      "manual_confirm_point": "自存款金額由中央公告可擇定金額"
+    },
+    {
+      "condition_id": "monthly",
+      "value": "已摘錄",
+      "source_excerpt": "開戶人、其法定代理人或最近親屬，應每月依擇定之自存款金額存入兒少教育發展帳戶，至開戶人滿十八歲止。",
+      "source_locator": "第12條第1項",
+      "required_input": "是否有餘力每月存款",
+      "data_source": "家庭",
+      "judgment_method": "—",
+      "manual_confirm_point": "須確認家庭是否有每月存款能力"
     }
   ],
   "exclusions_cumulation": [
@@ -86,9 +106,9 @@
     "儲金用途證明（滿十八歲請領時，第16條）"
   ],
   "application_method": "由法定代理人或最近親屬任一人向直轄市、縣（市）主管機關申請，經審查核准後開立帳戶並撥入開戶金（第11條）。",
-  "contact": "戶籍所在地直轄市、縣（市）政府；諮詢可洽1957福利諮詢專線（見 https://www.mohw.gov.tw/cp-88-79005-1.html）",
+  "contact": "未知（本欄所引來源未載明承辦窗口；窗口待 P1-4 人工確認）",
   "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050205",
-  "source_published_date": "未標示",
+  "source_published_date": "2018-06-06",
   "last_checked_date": "2026-10-18",
   "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
   "version": "v1-2026-10-18",
@@ -96,8 +116,10 @@
   "capacity_confirmation": "未確認",
   "uncertainty_notes": [
     "家長需每月自存款，家庭財務能力須評估。",
+    "公布日期2018-06-06（頁面僅標示公布日期，未標示修正日期）。",
     "開戶金、每月自存款選項與年度上限由中央公告，條文未載金額。",
     "第6條第1款限105年1月1日以後出生者，較早出生者不適用。",
-    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。",
+    "原題「法律扶助」：法律扶助法由法務部／法律扶助基金會辦理，屬司法救濟性質，非中央現金／服務方案，故改為本方案（衛福部）。原 C-028 與本檔重複，已併入本檔並刪除 C-028。"
   ]
 }

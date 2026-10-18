@@ -35,7 +35,7 @@
       "condition_id": "C020-3",
       "value": "已摘錄",
       "source_excerpt": "家庭年所得按家庭成員人數平均分配，每人每月不超過最低生活費二點五倍，如附表二。",
-      "source_locator": "第6條第1款",
+      "source_locator": "住宅補貼對象一定所得及財產標準第6條第1款",
       "required_input": "家庭年所得、人口數",
       "data_source": "財稅資料",
       "judgment_method": "對照當年度最低生活費二點五倍",
@@ -46,7 +46,7 @@
       "condition_id": "C020-4",
       "value": "已摘錄",
       "source_excerpt": "動產限額應低於中央、直轄市社政主管機關於計畫年度公告中低收入戶家庭財產之動產金額二倍，如附表二。",
-      "source_locator": "第6條第2款第1目",
+      "source_locator": "住宅補貼對象一定所得及財產標準第6條第2款第1目",
       "required_input": "家庭動產",
       "data_source": "財稅資料",
       "judgment_method": "對照附表二",
@@ -85,11 +85,6 @@
     }
   ],
   "exclusions_cumulation": [
-    {
-      "value": "已摘錄",
-      "source_excerpt": "申請租金補貼者，除應具備第九條第一款及第三款條件外，並應符合下列各款條件：",
-      "source_locator": "第16條"
-    },
     {
       "value": "已摘錄",
       "source_excerpt": "申請時家庭成員均未接受政府其他住宅補貼；或家庭成員正接受政府其他租金補貼、為社會住宅或政府興辦之出租住宅承租戶，該家庭成員切結取得租金補貼資格之日起，自願放棄原租金補貼、承租社會住宅或政府興辦之出租住宅；",

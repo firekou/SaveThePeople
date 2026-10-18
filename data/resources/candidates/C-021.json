@@ -86,7 +86,9 @@
   },
   "validity_period": "未知",
   "application_deadline": "未知（由各主管機關／興辦人公告）",
-  "documents": "未知（來源未載明）",
+  "documents": [
+    "未知（來源未載明）"
+  ],
   "application_method": "中央主管機關應建置全國統一之申請登記平臺（第18條）；實際申請依各社會住宅招租公告",
   "contact": "未知",
   "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070195",

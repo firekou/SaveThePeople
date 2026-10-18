@@ -87,7 +87,9 @@
   },
   "validity_period": "最長六個月（第12條）；中央主管機關得公告停止發給（第4條第3項）",
   "application_deadline": "未知",
-  "documents": "身分證正反面影本、同意代為查詢保險資料委託書，及依身分別之證明文件（第5條）",
+  "documents": [
+    "身分證正反面影本、同意代為查詢保險資料委託書，及依身分別之證明文件（第5條）"
+  ],
   "application_method": "向公立就業服務機構辦理求職登記，經諮詢後由其指派至用人單位",
   "contact": "未知",
   "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0090025",

@@ -67,7 +67,9 @@
   },
   "validity_period": "未知",
   "application_deadline": "未知",
-  "documents": "未知",
+  "documents": [
+    "未知"
+  ],
   "application_method": "向就讀國民小學洽詢（來源未載明申請程序）",
   "contact": "未知",
   "source_url": "https://edu.law.moe.gov.tw/LawContent.aspx?id=FL047648",
