@@ -1,0 +1,105 @@
+{
+  "resource_id": "C-018",
+  "name": "學產基金急難慰問金（學生及幼兒）",
+  "provider": "教育部（學產基金）",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "生活/急難救助",
+    "兒少/就學"
+  ],
+  "service_content": "教育部（以下簡稱本部）為運用學產基金辦理學生及幼兒急難慰問金之發放，特訂定本要點。",
+  "eligibility": [
+    {
+      "condition_id": "C018-1",
+      "value": "已摘錄",
+      "source_excerpt": "本要點之適用對象為在中華民國設有戶籍之國民，並就讀各級學校（包括進修學校）在學學生（以下簡稱學生）及教保服務機構在學幼兒（以下簡稱幼兒）。",
+      "source_locator": "二",
+      "required_input": "戶籍、就學身分",
+      "data_source": "戶政、學校",
+      "judgment_method": "確認設籍且在學／在園",
+      "manual_confirm_point": "排除對象見下一條"
+    },
+    {
+      "condition_id": "C018-2",
+      "value": "已摘錄",
+      "source_excerpt": "但不包括就讀大學校院碩士班、博士班、空中進修學院與空中大學研究所碩士班、空中大學及其附設專科部，或年齡滿二十五歲之學生。",
+      "source_locator": "二",
+      "required_input": "學制、年齡",
+      "data_source": "學校",
+      "judgment_method": "若屬所列則不適用",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C018-3",
+      "value": "已摘錄",
+      "source_excerpt": "因傷病住院七日以上或發生意外死亡者，核給新臺幣（以下同）一萬元；持有全民健康保險重大傷病證明者，核給二萬元。",
+      "source_locator": "三、(一)1",
+      "required_input": "事故類型",
+      "data_source": "醫療證明",
+      "judgment_method": "比對事故",
+      "manual_confirm_point": "金額以來源當日版本為準"
+    },
+    {
+      "condition_id": "C018-4",
+      "value": "已摘錄",
+      "source_excerpt": "失蹤達六個月以上、入獄服刑或非自願離職者，核給一萬元。",
+      "source_locator": "三、(二)1",
+      "required_input": "父母或監護人事故",
+      "data_source": "相關證明",
+      "judgment_method": "比對事故",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C018-5",
+      "value": "已摘錄",
+      "source_excerpt": "申請急難慰問金者之家庭總收入，依第二項計算最近一年綜合所得總額達一百四十八萬元以上，或不動產價值合計達一千萬元以上，不予核給。",
+      "source_locator": "四",
+      "required_input": "家庭總收入、不動產價值",
+      "data_source": "財稅資料",
+      "judgment_method": "是否未達門檻",
+      "manual_confirm_point": "門檻可能修正"
+    },
+    {
+      "condition_id": "C018-6",
+      "value": "已摘錄",
+      "source_excerpt": "應於事實發生之日起六個月內，向所屬學校或教保服務機構申請。",
+      "source_locator": "五、(一)",
+      "required_input": "事實發生日",
+      "data_source": "申請人",
+      "judgment_method": "計算是否在期限內",
+      "manual_confirm_point": "特殊原因可專案報部"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "依前項各款各目申請者，每年以核給一次為限。",
+      "source_locator": "三"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "學生未婚者：與其父母或法定監護人合計。",
+    "source_locator": "四、第二項第(一)款"
+  },
+  "validity_period": "未知",
+  "application_deadline": "事實發生之日起六個月內",
+  "documents": "未知（來源僅稱檢具相關證明文件、資料）",
+  "application_method": "向所屬學校或教保服務機構申請，由學校彙整送部審查核定",
+  "contact": "未知",
+  "source_url": "https://edu.law.moe.gov.tw/LawContent.aspx?id=FL035980",
+  "source_published_date": "2026-07-06",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "原題「學產基金急難紓困助學金」未找到同名現行要點，以現行「學產基金設置急難慰問金實施要點」替代；另有「學產基金設置低收入戶學生助學金實施要點」（GL000019）。",
+    "資料取自教育部主管法規共用系統頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "另核給低收入戶／中低收入戶加給之規定未列入逐條摘錄，須人工補。"
+  ]
+}

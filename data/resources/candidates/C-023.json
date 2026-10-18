@@ -1,0 +1,88 @@
+{
+  "resource_id": "C-023",
+  "name": "職業訓練生活津貼（就業保險）",
+  "provider": "勞動部（勞工保險局承辦就業保險）；公立就業服務機構",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "就業",
+    "生活/急難救助"
+  ],
+  "service_content": "被保險人非自願離職，向公立就業服務機構辦理求職登記，經公立就業服務機構安排參加全日制職業訓練，於受訓期間，每月按申請人離職辦理本保險退保之當月起前六個月平均月投保薪資百分之六十發給職業訓練生活津貼，最長發給六個月。",
+  "eligibility": [
+    {
+      "condition_id": "C023-1",
+      "value": "已摘錄",
+      "source_excerpt": "職業訓練生活津貼：被保險人非自願離職，向公立就業服務機構辦理求職登記，經公立就業服務機構安排參加全日制職業訓練。",
+      "source_locator": "第11條第1項第3款",
+      "required_input": "就業保險被保險人身分、離職原因、求職登記、是否參加全日制職業訓練",
+      "data_source": "勞保局、公立就業服務機構、訓練單位",
+      "judgment_method": "逐項比對",
+      "manual_confirm_point": "全日制訓練之定義見職訓相關規定，本頁未載明"
+    },
+    {
+      "condition_id": "C023-2",
+      "value": "已摘錄",
+      "source_excerpt": "本法所稱非自願離職，指被保險人因投保單位關廠、遷廠、休業、解散、破產宣告離職；或因勞動基準法第十一條、第十三條但書、第十四條及第二十條規定各款情事之一離職。",
+      "source_locator": "第11條第3項",
+      "required_input": "離職原因",
+      "data_source": "離職證明",
+      "judgment_method": "比對",
+      "manual_confirm_point": "定期契約屆滿者視為非自願離職之條件見第11條第2項"
+    },
+    {
+      "condition_id": "C023-3",
+      "value": "已摘錄",
+      "source_excerpt": "年滿十五歲以上，六十五歲以下之下列受僱勞工，應以其雇主或所屬機構為投保單位，參加本保險為被保險人：",
+      "source_locator": "第5條第1項",
+      "required_input": "年齡、受僱狀況",
+      "data_source": "勞保資料",
+      "judgment_method": "確認為被保險人",
+      "manual_confirm_point": "第5條第2項有不得參加之情形"
+    },
+    {
+      "condition_id": "C023-4",
+      "value": "已摘錄",
+      "source_excerpt": "有受其扶養之眷屬者，每一人按申請人離職辦理本保險退保之當月起前六個月平均月投保薪資百分之十加給給付或津貼，最多計至百分之二十。",
+      "source_locator": "第19-1條第1項",
+      "required_input": "受扶養眷屬",
+      "data_source": "戶籍、扶養證明",
+      "judgment_method": "加給計算",
+      "manual_confirm_point": "眷屬定義見第19-1條第2項；此條件為加給而非資格"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "領取勞工保險傷病給付、職業訓練生活津貼、臨時工作津貼、創業貸款利息補貼或其他促進就業相關津貼者，領取相關津貼期間，不得同時請領失業給付。",
+      "source_locator": "第17條第2項"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "受扶養眷屬，指受被保險人扶養之無工作收入之父母、配偶、未成年子女或身心障礙子女。",
+    "source_locator": "第19-1條第2項（僅用於加給，非資格門檻）"
+  },
+  "validity_period": "最長發給六個月（第19條）",
+  "application_deadline": "領取保險給付之請求權，自得請領之日起，因二年間不行使而消滅。（第24條）",
+  "documents": [
+    "離職或定期契約證明文件及國民身分證或其他足資證明身分之證件（第25條，求職登記時）"
+  ],
+  "application_method": "親自向公立就業服務機構辦理求職登記，經安排參加全日制職業訓練；訓練單位通知保險人發放（第19條）",
+  "contact": "未知",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050021",
+  "source_published_date": "2022-01-12",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "資料取自全國法規資料庫頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "頁面修正日期為民國111年（2022-01-12）；是否有後續修正須人工比對。",
+    "「全日制職業訓練」之訓練條件、與就業促進津貼辦法同名津貼的重疊領取規定（見 C-022 所列來源）須人工確認。",
+    "申請所需文件僅摘第25條求職登記文件，職訓津貼申請書等未載明。"
+  ]
+}

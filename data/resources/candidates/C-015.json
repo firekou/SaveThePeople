@@ -1,0 +1,98 @@
+{
+  "resource_id": "C-015",
+  "name": "低收入戶學生及中低收入戶學生就讀高級中等以上學校學雜費減免",
+  "provider": "教育部（辦法）；就讀學校受理",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "兒少/就學"
+  ],
+  "service_content": "低收入戶學生及中低收入戶學生於修業年限內，得減免學雜費；其減免基準如下：",
+  "eligibility": [
+    {
+      "condition_id": "C015-1",
+      "value": "已摘錄",
+      "source_excerpt": "指經申請戶籍所在地直轄市、縣（市）主管機關依本法第四條及第四條之一規定，審核認定為低收入戶及中低收入戶之家庭成員，就讀國立與教育部（以下簡稱本部）主管之私立高級中等以上學校，具有學籍之學生。",
+      "source_locator": "第2條第1款",
+      "required_input": "學生低收入戶／中低收入戶身分、就讀學校類別、學籍",
+      "data_source": "衛福部電子查驗系統或證明文件；學校學籍",
+      "judgment_method": "比對是否經社政機關認定且就讀國立或教育部主管之私立高級中等以上學校",
+      "manual_confirm_point": "地方政府主管之私立學校是否適用，來源未載明，須向學校確認"
+    },
+    {
+      "condition_id": "C015-2",
+      "value": "已摘錄",
+      "source_excerpt": "低收入戶學生：免除全部學雜費。",
+      "source_locator": "第3條第1項第1款",
+      "required_input": "是否為低收入戶學生",
+      "data_source": "同上",
+      "judgment_method": "符合 C015-1 者適用",
+      "manual_confirm_point": "實際減免金額依學校收費確認"
+    },
+    {
+      "condition_id": "C015-3",
+      "value": "已摘錄",
+      "source_excerpt": "中低收入戶學生：減免學雜費百分之六十。",
+      "source_locator": "第3條第1項第2款",
+      "required_input": "是否為中低收入戶學生",
+      "data_source": "同上",
+      "judgment_method": "符合 C015-1 者適用",
+      "manual_confirm_point": "同上"
+    },
+    {
+      "condition_id": "C015-4",
+      "value": "已摘錄",
+      "source_excerpt": "低收入戶學生及中低收入戶學生因延長修業年限、重修及補修之學雜費，不予減免。",
+      "source_locator": "第4條",
+      "required_input": "是否延長修業年限／重修／補修",
+      "data_source": "學校學籍紀錄",
+      "judgment_method": "若屬之則該部分不減免",
+      "manual_confirm_point": "學校認定"
+    },
+    {
+      "condition_id": "C015-5",
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "第2條（國中小階段）",
+      "required_input": "就讀學制",
+      "data_source": "—",
+      "judgment_method": "本辦法適用「高級中等以上學校」；來源未載明國民中小學階段是否另有費用減免，任務原題為「高中職以下」",
+      "manual_confirm_point": "須另查國中小階段規定，不得推定"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "第三條減免之學雜費，於學生享有政府其他相關學雜費減免、補助或與減免、補助學雜費性質相當之給付者，除法令另有規定外，應擇一申請，不得重複。",
+      "source_locator": "第7條"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "低收入戶學生及中低收入戶學生：指經申請戶籍所在地直轄市、縣（市）主管機關依本法第四條及第四條之一規定，審核認定為低收入戶及中低收入戶之家庭成員",
+    "source_locator": "第2條第1款（身分由社會救助法認定，本辦法未另定家計口徑）"
+  },
+  "validity_period": "未知（來源未載明；辦法自一百年八月一日施行）",
+  "application_deadline": "依就讀學校所定申請期限（來源：第6條）",
+  "documents": [
+    "申請表",
+    "低收入戶證明文件或中低收入戶證明文件（未檢附者由學校經衛福部電子查驗系統查驗）"
+  ],
+  "application_method": "向就讀學校提出申請，填具申請表及檢附低收入戶證明文件或中低收入戶證明文件",
+  "contact": "未知",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=H0060037",
+  "source_published_date": "2016-03-08",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "資料取自全國法規資料庫頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "辦法最後修正日期為民國105年，可能已有後續制度（如高級中等學校免學費）影響實際適用，須人工確認現行是否仍適用。",
+    "本辦法對象為高級中等以上學校，與任務原題「高中職以下」不完全對應；國中小階段不在本辦法範圍。",
+    "低收入戶／中低收入戶資格門檻由社會救助法及地方政府公告決定，本項未摘錄具體金額。"
+  ]
+}

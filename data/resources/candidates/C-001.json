@@ -1,0 +1,102 @@
+{
+  "resource_id": "C-001",
+  "name": "低收入戶／中低收入戶資格認定（社會救助法）",
+  "provider": "衛生福利部（中央主管機關）；戶籍所在地直轄市、縣（市）政府（審核認定）",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "生活/急難救助"
+  ],
+  "service_content": "本法所稱低收入戶，指經申請戶籍所在地直轄市、縣（市）主管機關審核認定，符合家庭總收入平均分配全家人口，每人每月在最低生活費以下，且家庭財產未超過中央、直轄市主管機關公告之當年度一定金額者。",
+  "eligibility": [
+    {
+      "condition_id": "low-income-def",
+      "value": "已摘錄",
+      "source_excerpt": "本法所稱低收入戶，指經申請戶籍所在地直轄市、縣（市）主管機關審核認定，符合家庭總收入平均分配全家人口，每人每月在最低生活費以下，且家庭財產未超過中央、直轄市主管機關公告之當年度一定金額者。",
+      "source_locator": "社會救助法第4條第1項",
+      "required_input": "家庭總收入、家庭人口、家庭動產與不動產",
+      "data_source": "申請人自述＋財稅資料＋戶政資料（由主管機關查核）",
+      "judgment_method": "由地方主管機關依當年度最低生活費與財產公告金額審核",
+      "manual_confirm_point": "實際比對金額必須取自戶籍地縣市當年度公告；本系統不得自行判定是否合格"
+    },
+    {
+      "condition_id": "middle-low-income-1",
+      "value": "已摘錄",
+      "source_excerpt": "一、家庭總收入平均分配全家人口，每人每月不超過最低生活費一點五倍，且不得超過前條第三項之所得基準。",
+      "source_locator": "社會救助法第4-1條第1項第1款",
+      "required_input": "家庭總收入、家庭人口",
+      "data_source": "同上",
+      "judgment_method": "同上",
+      "manual_confirm_point": "中低收入戶門檻為倍數規定，實際金額須查當年度公告"
+    },
+    {
+      "condition_id": "middle-low-income-2",
+      "value": "已摘錄",
+      "source_excerpt": "二、家庭財產未超過中央、直轄市主管機關公告之當年度一定金額。",
+      "source_locator": "社會救助法第4-1條第1項第2款",
+      "required_input": "家庭動產、不動產",
+      "data_source": "同上",
+      "judgment_method": "同上",
+      "manual_confirm_point": "財產金額未見於本法條文，須查公告"
+    },
+    {
+      "condition_id": "residence",
+      "value": "已摘錄",
+      "source_excerpt": "依第一項規定申請時，其申請戶之戶內人口均應實際居住於戶籍所在地之直轄市、縣（市），且最近一年居住國內超過一百八十三日；其申請時設籍之期間，不予限制。",
+      "source_locator": "社會救助法第4條第6項",
+      "required_input": "戶內人口居住地與居住天數",
+      "data_source": "戶政／出入境資料",
+      "judgment_method": "逐人確認",
+      "manual_confirm_point": "「實際居住」之認定方式未見條文，須向主管機關確認"
+    },
+    {
+      "condition_id": "threshold-amounts",
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "社會救助法第4條第2、3項（僅載計算方式，未載金額）",
+      "required_input": "當年度最低生活費金額、財產公告金額",
+      "data_source": "直轄市、縣（市）政府年度公告",
+      "judgment_method": "",
+      "manual_confirm_point": "最低生活費與財產金額每年公告，來源條文未載具體金額，須向戶籍地縣市政府取得最新公告並版本化"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "受社會救助者有下列情形之一，主管機關應停止其社會救助，並得以書面行政處分命其返還所領取之補助：",
+      "source_locator": "社會救助法第9條第2項"
+    },
+    {
+      "value": "已摘錄",
+      "source_excerpt": "依本法或其他法令每人每月所領取政府核發之救助總金額，不得超過當年政府公告之基本工資。",
+      "source_locator": "社會救助法第8條"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "第四條第一項及前條所定家庭，其應計算人口範圍，除申請人外，包括下列人員：一、配偶。二、一親等之直系血親。三、同一戶籍或共同生活之其他直系血親。四、前三款以外，認列綜合所得稅扶養親屬免稅額之納稅義務人。",
+    "source_locator": "社會救助法第5條第1項"
+  },
+  "validity_period": "資格經核定後，主管機關每年定期辦理調查（社會救助法第13條第1項）；具體有效期間未載明，視為未知",
+  "application_deadline": "未知（來源未載申請期限）",
+  "documents": [
+    "未知（社會救助法第4條第5項：申請應檢附之文件、審核認定程序由直轄市、縣（市）主管機關定之）"
+  ],
+  "application_method": "向戶籍所在地直轄市、縣（市）主管機關申請（社會救助法第4條第1項）；各縣市程序依地方規定。",
+  "contact": "各戶籍地直轄市、縣（市）政府社會局（處）；電話未於本來源載明（本欄僅記載機構層級窗口）",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078",
+  "source_published_date": "未標示",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "核定、金額標準及申請文件多由直轄市、縣（市）政府訂定，各地實際作法與數額可能不同，須向戶籍所在地主管機關確認。",
+    "家庭總收入計算依第5-1條，另有第5條第3項不列入計算人口之例外，須由主管機關認定。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。",
+    "本條文為認定資格之法源，不等於各項給付；各項福利是否採此資格須逐項確認。"
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "resource_id": "C-017",
+  "name": "國民小學兒童課後照顧服務（弱勢學生補助，國民及學前教育署弱勢學生實施要點）",
+  "provider": "教育部國民及學前教育署",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "兒少/就學",
+    "必要支持服務"
+  ],
+  "service_content": "鼓勵國民小學辦理兒童課後照顧服務，以促進兒童健康成長、支持婦女婚育及使父母安心就業。",
+  "eligibility": [
+    {
+      "condition_id": "C017-1",
+      "value": "已摘錄",
+      "source_excerpt": "國民小學兒童課後照顧服務：低收入戶、身心障礙及原住民學生。",
+      "source_locator": "三、(二)1",
+      "required_input": "學生身分：低收入戶／身心障礙／原住民",
+      "data_source": "戶政、社政或學校證明",
+      "judgment_method": "比對是否為所列三類學生之一",
+      "manual_confirm_point": "補助內容（費用減免比例）本要點節錄段落是否載明，須讀完整要點確認"
+    },
+    {
+      "condition_id": "C017-2",
+      "value": "已摘錄",
+      "source_excerpt": "夜光天使點燈專案計畫：經學校召開專案小組會議認定確屬低收入、單親、失親、隔代教養等之經濟弱勢家庭國小學童，且下課後確實無人予以照顧，以致有影響其身心健康與發展之虞者。",
+      "source_locator": "三、(二)2",
+      "required_input": "家庭狀況（低收入／單親／失親／隔代教養）、課後照顧情形",
+      "data_source": "學校專案小組認定",
+      "judgment_method": "學校認定，不自動判斷",
+      "manual_confirm_point": "由學校專案小組認定"
+    },
+    {
+      "condition_id": "C017-3",
+      "value": "已摘錄",
+      "source_excerpt": "對於需要接受課業輔導之弱勢學生，應以自願為原則，尊重家長之意願。",
+      "source_locator": "四、(四)",
+      "required_input": "家長意願",
+      "data_source": "家長",
+      "judgment_method": "需家長同意",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C017-4",
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "—",
+      "required_input": "補助金額、家庭收入門檻",
+      "data_source": "—",
+      "judgment_method": "來源未載明具體減免額度或收入門檻",
+      "manual_confirm_point": "須查課後照顧辦法及學校／縣市公告"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "來源未載明併領排除"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": ""
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知",
+  "documents": "未知",
+  "application_method": "向就讀國民小學洽詢（來源未載明申請程序）",
+  "contact": "未知",
+  "source_url": "https://edu.law.moe.gov.tw/LawContent.aspx?id=FL047648",
+  "source_published_date": "2024-07-17",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "資料取自教育部主管法規共用系統頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "要點為對地方政府、學校的補助規定，學生／家長申請流程與實際收費減免須向學校或縣市政府確認。",
+    "學習扶助另有「補助辦理國民小學及國民中學學生學習扶助作業要點」（GL001436），其補助對象為地方政府等而非個別學生，故本筆以課後照顧為主。",
+    "來源未載明名額與各校是否開辦。"
+  ]
+}

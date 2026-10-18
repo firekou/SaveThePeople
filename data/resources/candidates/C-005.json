@@ -1,0 +1,150 @@
+{
+  "resource_id": "C-005",
+  "name": "特殊境遇家庭扶助",
+  "provider": "衛生福利部（中央主管機關）；戶籍所在地直轄市、縣（市）政府",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "生活/急難救助",
+    "兒少/就學",
+    "醫療/健康"
+  ],
+  "service_content": "本條例所定特殊境遇家庭扶助，包括緊急生活扶助、子女生活津貼、子女教育補助、傷病醫療補助、兒童托育津貼、法律訴訟補助及創業貸款補助。",
+  "eligibility": [
+    {
+      "condition_id": "income-property",
+      "value": "已摘錄",
+      "source_excerpt": "本條例所稱特殊境遇家庭，指申請人其家庭總收入按全家人口平均分配，每人每月未超過政府當年公布最低生活費二點五倍及臺灣地區平均每人每月消費支出一點五倍，且家庭財產未超過中央主管機關公告之一定金額，並具有下列情形之一者：",
+      "source_locator": "特殊境遇家庭扶助條例第4條第1項首段",
+      "required_input": "家庭總收入、家庭人口、財產",
+      "data_source": "財稅／戶政資料",
+      "judgment_method": "倍數比較（金額須取當年度公告）",
+      "manual_confirm_point": "最低生活費與消費支出金額須查當年度公告；財產金額須查中央公告"
+    },
+    {
+      "condition_id": "c1",
+      "value": "已摘錄",
+      "source_excerpt": "一、六十五歲以下，其配偶死亡，或失蹤經向警察機關報案協尋未獲達六個月以上。",
+      "source_locator": "特殊境遇家庭扶助條例第4條第1項第1款",
+      "required_input": "年齡、配偶狀況",
+      "data_source": "戶政／報案證明",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "c2",
+      "value": "已摘錄",
+      "source_excerpt": "二、因配偶惡意遺棄或受配偶不堪同居之虐待，經判決離婚確定或已完成協議離婚登記。",
+      "source_locator": "特殊境遇家庭扶助條例第4條第1項第2款",
+      "required_input": "婚姻狀態、判決或登記",
+      "data_source": "戶政／法院文書",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "c3",
+      "value": "已摘錄",
+      "source_excerpt": "三、家庭暴力受害。",
+      "source_locator": "特殊境遇家庭扶助條例第4條第1項第3款",
+      "required_input": "受害事實",
+      "data_source": "相關證明",
+      "judgment_method": "",
+      "manual_confirm_point": "證明方式未載"
+    },
+    {
+      "condition_id": "c4",
+      "value": "已摘錄",
+      "source_excerpt": "四、未婚懷孕婦女，懷胎三個月以上至分娩二個月內。",
+      "source_locator": "特殊境遇家庭扶助條例第4條第1項第4款",
+      "required_input": "懷孕週數",
+      "data_source": "醫療證明",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "c5",
+      "value": "已摘錄",
+      "source_excerpt": "五、因離婚、喪偶、未婚生子獨自扶養十八歲以下子女或祖父母扶養十八歲以下父母無力扶養之孫子女，其無工作能力，或雖有工作能力，因遭遇重大傷病或照顧六歲以下子女或孫子女致不能工作。",
+      "source_locator": "特殊境遇家庭扶助條例第4條第1項第5款",
+      "required_input": "扶養狀況、子女年齡、工作能力",
+      "data_source": "戶政、診斷證明",
+      "judgment_method": "",
+      "manual_confirm_point": "「獨自扶養」「不能工作」之認定須主管機關確認"
+    },
+    {
+      "condition_id": "c6",
+      "value": "已摘錄",
+      "source_excerpt": "六、配偶處一年以上之徒刑或受拘束人身自由之保安處分一年以上，且在執行中。",
+      "source_locator": "特殊境遇家庭扶助條例第4條第1項第6款",
+      "required_input": "配偶受刑狀況",
+      "data_source": "矯正機關證明",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "c7",
+      "value": "已摘錄",
+      "source_excerpt": "七、其他經直轄市、縣市政府評估因三個月內生活發生重大變故導致生活、經濟困難者，且其重大變故非因個人責任、債務、非因自願性失業等事由。",
+      "source_locator": "特殊境遇家庭扶助條例第4條第1項第7款",
+      "required_input": "重大變故事實",
+      "data_source": "社工評估",
+      "judgment_method": "地方政府評估",
+      "manual_confirm_point": "由地方政府評估，不可自動判定"
+    },
+    {
+      "condition_id": "child-allowance",
+      "value": "已摘錄",
+      "source_excerpt": "符合第四條第一項第一款至第三款、第五款或第六款規定，並有十五歲以下子女或孫子女者，得申請子女生活津貼。",
+      "source_locator": "特殊境遇家庭扶助條例第7條第1項",
+      "required_input": "子女年齡、符合之情形款次",
+      "data_source": "戶政",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "annual-reapply",
+      "value": "已摘錄",
+      "source_excerpt": "申請子女生活津貼、子女教育補助及兒童托育津貼者，前項特殊境遇家庭，應每年申請認定之。",
+      "source_locator": "特殊境遇家庭扶助條例第4條第2項",
+      "required_input": "",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "每年須重新認定"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "特殊境遇家庭得依第二條所定家庭扶助項目申請，不以單一項目為限。但得依其他法令規定取得生活扶助、給付或安置者，除得補助生活扶助、給付與本條例之差額外，不予重複扶助。",
+      "source_locator": "特殊境遇家庭扶助條例第5條第1項"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "前條第一項所稱全家人口，其應計算人口範圍，包括下列人員：一、申請人。二、負扶養義務之直系血親卑親屬及其配偶。三、前款以外，認列綜合所得稅扶養親屬免稅額之納稅義務人。",
+    "source_locator": "特殊境遇家庭扶助條例第4-1條第3項"
+  },
+  "validity_period": "未知（子女生活津貼等須每年申請認定；緊急生活扶助以三個月為原則，見第6條）",
+  "application_deadline": "申請緊急生活扶助，應於事實發生後六個月內（特殊境遇家庭扶助條例第6條第2項）；其他項目期限依第7、9、10、11條各自規定",
+  "documents": [
+    "戶口名簿影本及其他相關證明文件（條例第6條第2項、第7條第5項）",
+    "醫療項目另需診斷證明書、健保卡影本、醫療費用收據正本（第9條第3項）"
+  ],
+  "application_method": "向戶籍所在地直轄市、縣（市）主管機關提出申請，或由鄉（鎮、市、區）公所、社會福利機構轉介申請（條例第6條第2項、第7條第5項）。",
+  "contact": "戶籍所在地直轄市、縣（市）政府社會局（處）",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050075",
+  "source_published_date": "未標示",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "子女生活津貼金額為「當年度最低工資之十分之一」，實際金額須依當年度公告計算，未載入本檔。",
+    "符合條件者多為單親或遭逢家庭變故者，但是否適用須逐款確認；本檔僅摘錄條文，不判斷個案。",
+    "核定、金額標準及申請文件多由直轄市、縣（市）政府訂定，各地實際作法與數額可能不同，須向戶籍所在地主管機關確認。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "resource_id": "C-003",
+  "name": "急難救助（社會救助法第21條；含衛福部急難紓困）",
+  "provider": "戶籍所在地直轄市、縣（市）政府；衛生福利部（急難紓困、中央急難救助金）",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "生活/急難救助"
+  ],
+  "service_content": "當您家中負擔家庭主要生計者死亡、失蹤、罹患重傷病、失業或因其他原因無法工作，導致家庭生活陷於困境，此時您可申請「速訪、速核、速發」的急難紓困：受理通報後訪視小組即會進行實地訪視，核定機關對符合規定者，得依認定基準表發放關懷救助金一至三萬。",
+  "eligibility": [
+    {
+      "condition_id": "a1",
+      "value": "已摘錄",
+      "source_excerpt": "一、戶內人口死亡無力殮葬。",
+      "source_locator": "社會救助法第21條第1款",
+      "required_input": "事實與證明文件",
+      "data_source": "申請人提供證明",
+      "judgment_method": "逐款比對",
+      "manual_confirm_point": "「無力」之認定由主管機關為之",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    },
+    {
+      "condition_id": "a2",
+      "value": "已摘錄",
+      "source_excerpt": "二、戶內人口遭受意外傷害或罹患重病，致生活陷於困境。",
+      "source_locator": "社會救助法第21條第2款",
+      "required_input": "事實與診斷等證明",
+      "data_source": "申請人提供證明",
+      "judgment_method": "逐款比對",
+      "manual_confirm_point": "「生活陷於困境」認定標準未載，須向主管機關確認",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    },
+    {
+      "condition_id": "a3",
+      "value": "已摘錄",
+      "source_excerpt": "三、負家庭主要生計責任者，失業、失蹤、應徵集召集入營服兵役或替代役現役、入獄服刑、因案羈押、依法拘禁或其他原因，無法工作致生活陷於困境。",
+      "source_locator": "社會救助法第21條第3款",
+      "required_input": "主要生計者及其狀況",
+      "data_source": "申請人提供證明",
+      "judgment_method": "逐款比對",
+      "manual_confirm_point": "何人為主要生計者須主管機關認定",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    },
+    {
+      "condition_id": "a4",
+      "value": "已摘錄",
+      "source_excerpt": "四、財產或存款帳戶因遭強制執行、凍結或其他原因未能及時運用，致生活陷於困境。",
+      "source_locator": "社會救助法第21條第4款",
+      "required_input": "帳戶／財產狀況",
+      "data_source": "申請人提供證明",
+      "judgment_method": "逐款比對",
+      "manual_confirm_point": "",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    },
+    {
+      "condition_id": "a5",
+      "value": "已摘錄",
+      "source_excerpt": "五、已申請福利項目或保險給付，尚未核准期間生活陷於困境。",
+      "source_locator": "社會救助法第21條第5款",
+      "required_input": "已申請之福利項目及進度",
+      "data_source": "申請人提供證明",
+      "judgment_method": "逐款比對",
+      "manual_confirm_point": "",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    },
+    {
+      "condition_id": "a6",
+      "value": "已摘錄",
+      "source_excerpt": "六、其他因遭遇重大變故，致生活陷於困境，經直轄市、縣（市）主管機關訪視評估，認定確有救助需要。",
+      "source_locator": "社會救助法第21條第6款",
+      "required_input": "事件經過",
+      "data_source": "社工訪視評估",
+      "judgment_method": "主管機關訪視認定",
+      "manual_confirm_point": "需訪視評估後認定，不可由本系統自行判定",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    },
+    {
+      "condition_id": "apply-to",
+      "value": "已摘錄",
+      "source_excerpt": "具有下列情形之一者，得檢同有關證明，向戶籍所在地主管機關申請急難救助：",
+      "source_locator": "社會救助法第21條首段",
+      "required_input": "戶籍所在地、相關證明",
+      "data_source": "戶政資料",
+      "judgment_method": "",
+      "manual_confirm_point": "證明文件種類未載，須確認",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    },
+    {
+      "condition_id": "amount-threshold",
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "社會救助法第23條（金額標準由直轄市、縣（市）主管機關定之）",
+      "required_input": "",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "急難救助金額與給付方式由地方訂定；須向戶籍地縣市取得標準；「馬上關懷」名稱未見於本頁面"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "依本法或其他法令每人每月所領取政府核發之救助總金額，不得超過當年政府公告之基本工資。",
+      "source_locator": "社會救助法第8條",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    },
+    {
+      "value": "已摘錄",
+      "source_excerpt": "急難紓困的救助對象以急迫、家庭主要生計責任者遇到急難者為主；若經救助後家庭生活仍陷於困境者，再行申請地方政府急難救助、衛生福利部急難救助。",
+      "source_locator": "衛福部「急難救助」頁面"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": "頁面未載家庭計算口徑"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知（頁面未載申請期限）",
+  "documents": [
+    "衛福部急難救助申請書（頁面列為附件，內容未取得）",
+    "戶籍資料與相關證明（社會救助法第21條：檢同有關證明）"
+  ],
+  "application_method": "遭逢急難可向戶籍所在地主管機關申請（社會救助法第21條）；急難紓困採「速訪、速核、速發」，受理通報後訪視小組實地訪視；可撥1957福利諮詢專線。",
+  "contact": "1957福利諮詢專線（頁面載明每天上午8點至晚上10點提供諮詢）；戶籍地縣市政府",
+  "source_url": "https://www.mohw.gov.tw/cp-190-226-1.html",
+  "source_published_date": "2026-07-14",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "使用者指定的「馬上關懷」名稱未出現於所取得之官方頁面，本檔以頁面所載「急難紓困」與社會救助法第21條為準。",
+    "頁面亦載「一至三萬」關懷救助金，實際數額依認定基準表，基準表未取得。",
+    "核定、金額標準及申請文件多由直轄市、縣（市）政府訂定，各地實際作法與數額可能不同，須向戶籍所在地主管機關確認。",
+    "頁面日期為民國115年7月14日更新（換算為2026-07-14）。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

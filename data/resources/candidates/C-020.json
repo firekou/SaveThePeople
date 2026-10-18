@@ -1,0 +1,128 @@
+{
+  "resource_id": "C-020",
+  "name": "住宅補貼：承租住宅租金補貼",
+  "provider": "內政部（住宅法）；直轄市、縣（市）政府受理",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "居住"
+  ],
+  "service_content": "租金補貼以實際租金金額核計，每戶每月最高補貼金額如附表二，以一年為限。",
+  "eligibility": [
+    {
+      "condition_id": "C020-1",
+      "value": "已摘錄",
+      "source_excerpt": "申請租金補貼者，除應具備第九條第一款及第三款條件外，並應符合下列各款條件：",
+      "source_locator": "第16條",
+      "required_input": "國籍／戶籍、年齡或身分（引用第9條第1款）",
+      "data_source": "戶政",
+      "judgment_method": "須併讀第9條第1款",
+      "manual_confirm_point": "第9條第1款內容：一、中華民國國民在國內設有戶籍，且符合下列規定之一：（一）已成年。（二）未成年，已於安置教養機構或寄養家庭結束安置無法返家。"
+    },
+    {
+      "condition_id": "C020-2",
+      "value": "已摘錄",
+      "source_excerpt": "家庭成員均無自有住宅。",
+      "source_locator": "第16條第1款",
+      "required_input": "家庭成員名下住宅",
+      "data_source": "地政／財稅資料",
+      "judgment_method": "比對無自有住宅",
+      "manual_confirm_point": "共有、拆遷等例外見第2條"
+    },
+    {
+      "condition_id": "C020-3",
+      "value": "已摘錄",
+      "source_excerpt": "家庭年所得按家庭成員人數平均分配，每人每月不超過最低生活費二點五倍，如附表二。",
+      "source_locator": "第6條第1款",
+      "required_input": "家庭年所得、人口數",
+      "data_source": "財稅資料",
+      "judgment_method": "對照當年度最低生活費二點五倍",
+      "manual_confirm_point": "直轄市、縣（市）得於範圍內自訂標準，須查各地公告",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070251"
+    },
+    {
+      "condition_id": "C020-4",
+      "value": "已摘錄",
+      "source_excerpt": "動產限額應低於中央、直轄市社政主管機關於計畫年度公告中低收入戶家庭財產之動產金額二倍，如附表二。",
+      "source_locator": "第6條第2款第1目",
+      "required_input": "家庭動產",
+      "data_source": "財稅資料",
+      "judgment_method": "對照附表二",
+      "manual_confirm_point": "具體金額在PDF附表，來源文字未含",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070251"
+    },
+    {
+      "condition_id": "C020-5",
+      "value": "已摘錄",
+      "source_excerpt": "不得為違法出租者。",
+      "source_locator": "第18條第2款",
+      "required_input": "租賃住宅合法性",
+      "data_source": "租賃契約、建物資料",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C020-6",
+      "value": "已摘錄",
+      "source_excerpt": "每月租金不得超過附表三之租金上限。",
+      "source_locator": "第18條第6款",
+      "required_input": "每月租金",
+      "data_source": "租賃契約",
+      "judgment_method": "對照附表三",
+      "manual_confirm_point": "附表為PDF，數值未取得"
+    },
+    {
+      "condition_id": "C020-7",
+      "value": "已摘錄",
+      "source_excerpt": "租賃契約之出租人或租賃房屋所有權人不得為承租人之家庭成員或直系親屬。",
+      "source_locator": "第18條第5款",
+      "required_input": "出租人身分",
+      "data_source": "租賃契約",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "申請租金補貼者，除應具備第九條第一款及第三款條件外，並應符合下列各款條件：",
+      "source_locator": "第16條"
+    },
+    {
+      "value": "已摘錄",
+      "source_excerpt": "申請時家庭成員均未接受政府其他住宅補貼；或家庭成員正接受政府其他租金補貼、為社會住宅或政府興辦之出租住宅承租戶，該家庭成員切結取得租金補貼資格之日起，自願放棄原租金補貼、承租社會住宅或政府興辦之出租住宅；",
+      "source_locator": "第16條第2款"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "本辦法所稱家庭成員，指下列經直轄市、縣（市）主管機關審認者：",
+    "source_locator": "自建自購住宅貸款利息及租金補貼辦法第2條第4項（成員列舉：申請人、配偶、戶籍內直系親屬等；一定所得標準另有同名定義）"
+  },
+  "validity_period": "每戶以一年為限（來源：第15條）",
+  "application_deadline": "於直轄市、縣（市）政府公告申請期間內（來源：第17條）",
+  "documents": [
+    "申請書",
+    "申請人及配偶戶口名簿影本、全戶戶籍謄本或家庭成員國民身分證正反面影本",
+    "申請人之郵政儲金簿封面影本",
+    "租賃契約影本",
+    "租賃住宅之建物登記謄本、所有權狀影本、建築物使用執照影本、測量成果圖影本或合法房屋證明"
+  ],
+  "application_method": "於公告申請期間內向租賃住宅所在地之直轄市、縣（市）主管機關申請；亦可經由內政部建置住宅補貼線上申請作業網站",
+  "contact": "未知",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070205",
+  "source_published_date": "2026-08-11",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "資料取自全國法規資料庫頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "辦理期間、戶數、補貼金額、評點由直轄市、縣（市）政府公告，須查各地公告；補貼金額表（附表二）、租金上限（附表三）為PDF，未取得數值。",
+    "一定所得及財產標準第6條僅摘錄租金補貼一項，各縣市可自訂；本筆未逐項摘錄 C020-3、C020-4 標準的附表金額。",
+    "部分條件的 source_url 為子法頁面，已於各項標註。"
+  ]
+}

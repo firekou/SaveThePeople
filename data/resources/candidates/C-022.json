@@ -1,0 +1,105 @@
+{
+  "resource_id": "C-022",
+  "name": "臨時工作津貼（就業促進津貼）",
+  "provider": "勞動部；公立就業服務機構",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "就業",
+    "生活/急難救助"
+  ],
+  "service_content": "公立就業服務機構受理第二條第一項所定人員之求職登記後，經就業諮詢並推介就業，有下列情形之一者，公立就業服務機構得指派其至用人單位從事臨時性工作，並發給臨時工作津貼：",
+  "eligibility": [
+    {
+      "condition_id": "C022-1",
+      "value": "已摘錄",
+      "source_excerpt": "本辦法之適用對象如下：",
+      "source_locator": "第2條第1項",
+      "required_input": "是否為非自願離職者或就業服務法第24條第1項各款失業者",
+      "data_source": "證明文件",
+      "judgment_method": "比對",
+      "manual_confirm_point": "具體身分類別（獨力負擔家計者、低收入戶等）見該款與就業服務法第24條"
+    },
+    {
+      "condition_id": "C022-2",
+      "value": "已摘錄",
+      "source_excerpt": "前項所定人員須具有工作能力及工作意願。",
+      "source_locator": "第2條第2項",
+      "required_input": "工作能力與意願",
+      "data_source": "本人",
+      "judgment_method": "自述＋就服員評估",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C022-3",
+      "value": "已摘錄",
+      "source_excerpt": "於求職登記日起十四日內未能推介就業。",
+      "source_locator": "第10條第1項第1款",
+      "required_input": "求職登記日",
+      "data_source": "公立就業服務機構",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C022-4",
+      "value": "已摘錄",
+      "source_excerpt": "有正當理由無法接受推介工作。",
+      "source_locator": "第10條第1項第2款",
+      "required_input": "推介工作條件",
+      "data_source": "公立就業服務機構",
+      "judgment_method": "比對",
+      "manual_confirm_point": "正當理由見第10條第2項"
+    },
+    {
+      "condition_id": "C022-5",
+      "value": "已摘錄",
+      "source_excerpt": "一、已領取公教人員保險養老給付或勞工保險老年給付。",
+      "source_locator": "第3條第1項第1款",
+      "required_input": "是否領取老年／養老給付",
+      "data_source": "保險資料",
+      "judgment_method": "若是則不適用",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C022-6",
+      "value": "已摘錄",
+      "source_excerpt": "第十條津貼發給基準，按中央主管機關公告之每小時最低工資核給，且一個月合計不超過月最低工資，最長六個月。",
+      "source_locator": "第12條",
+      "required_input": "—",
+      "data_source": "—",
+      "judgment_method": "給付基準參考，非資格",
+      "manual_confirm_point": "每小時最低工資金額須另查公告"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "依本辦法、就業保險促進就業實施辦法、失業中高齡者及高齡者就業促進辦法領取之臨時工作津貼及政府機關其他同性質之津貼或補助，二年內合併領取期間以六個月為限。",
+      "source_locator": "第25條"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": ""
+  },
+  "validity_period": "最長六個月（第12條）；中央主管機關得公告停止發給（第4條第3項）",
+  "application_deadline": "未知",
+  "documents": "身分證正反面影本、同意代為查詢保險資料委託書，及依身分別之證明文件（第5條）",
+  "application_method": "向公立就業服務機構辦理求職登記，經諮詢後由其指派至用人單位",
+  "contact": "未知",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0090025",
+  "source_published_date": "2025-09-01",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "資料取自全國法規資料庫頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "是否開辦由中央主管機關視經濟及經費而定（第4條），須確認目前是否仍發給。",
+    "臨時工作津貼之排除與限制尚有第16條（已就業、拒絕推介等停止給付）未逐條摘錄。"
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "resource_id": "C-021",
+  "name": "社會住宅（經濟或社會弱勢者保障比率）",
+  "provider": "內政部（住宅法）；直轄市、縣（市）主管機關／興辦人",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "居住"
+  ],
+  "service_content": "社會住宅：指由政府興辦或獎勵民間興辦，專供出租之用之住宅及其必要附屬設施。",
+  "eligibility": [
+    {
+      "condition_id": "C021-1",
+      "value": "已摘錄",
+      "source_excerpt": "主管機關及民間興辦之社會住宅，應以直轄市、縣（市）轄區為計算範圍，提供至少百分之四十比率出租予經濟或社會弱勢者",
+      "source_locator": "第4條第1項",
+      "required_input": "是否為經濟或社會弱勢者",
+      "data_source": "見後續條件",
+      "judgment_method": "比對",
+      "manual_confirm_point": "此為出租比率規定，非個別資格；實際招租條件由各社宅公告"
+    },
+    {
+      "condition_id": "C021-2",
+      "value": "已摘錄",
+      "source_excerpt": "前項經濟或社會弱勢者身分，指家庭總收入平均分配全家人口之金額及家庭財產，未超過主管機關公告之一定標準，且符合下列規定之一者：",
+      "source_locator": "第4條第2項",
+      "required_input": "家庭總收入、人口數、家庭財產",
+      "data_source": "財稅資料",
+      "judgment_method": "對照主管機關公告標準",
+      "manual_confirm_point": "標準金額來源未載明，由主管機關公告"
+    },
+    {
+      "condition_id": "C021-3",
+      "value": "已摘錄",
+      "source_excerpt": "低收入戶或中低收入戶。",
+      "source_locator": "第4條第2項第1款",
+      "required_input": "社會救助法身分",
+      "data_source": "社政機關證明",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C021-4",
+      "value": "已摘錄",
+      "source_excerpt": "育有未成年子女二人以上。",
+      "source_locator": "第4條第2項第3款",
+      "required_input": "未成年子女人數",
+      "data_source": "戶籍",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C021-5",
+      "value": "已摘錄",
+      "source_excerpt": "受家庭暴力或性侵害之受害者及其子女。",
+      "source_locator": "第4條第2項第6款",
+      "required_input": "受害者身分",
+      "data_source": "證明文件",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C021-6",
+      "value": "已摘錄",
+      "source_excerpt": "育有未成年子女之家庭，以未成年子女人數較多者先予承租，其辦法由主管機關定之。",
+      "source_locator": "第4條第3項",
+      "required_input": "未成年子女人數",
+      "data_source": "戶籍",
+      "judgment_method": "排序參考",
+      "manual_confirm_point": "辦法內容未取得"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "來源本頁未載明申請社宅與租金補貼等併領限制細節（租金補貼辦法有放棄社宅之切結規定，見 C-020）"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "家庭總收入平均分配全家人口之金額及家庭財產，未超過主管機關公告之一定標準",
+    "source_locator": "第4條第2項（家庭成員定義於各辦法，未於本條定義）"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知（由各主管機關／興辦人公告）",
+  "documents": "未知（來源未載明）",
+  "application_method": "中央主管機關應建置全國統一之申請登記平臺（第18條）；實際申請依各社會住宅招租公告",
+  "contact": "未知",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0070195",
+  "source_published_date": "2026-03-04",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "資料取自全國法規資料庫頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "住宅法第4條近期修訂（保障比率為百分之四十），舊文獻常見百分之三十，須以現行為準。",
+    "本條為「保障比率」而非個別核定資格；各縣市社宅實際招租條件、租金、名額由地方公告。",
+    "一定標準金額來源未載明，大部分實務條件需查各縣市公告。"
+  ]
+}

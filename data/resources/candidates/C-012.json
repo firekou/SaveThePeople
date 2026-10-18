@@ -1,0 +1,66 @@
+{
+  "resource_id": "C-012",
+  "name": "低收入戶／中低收入戶全民健康保險費補助",
+  "provider": "衛生福利部（編列預算補助）；詳細受理單位未於本來源載明",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "醫療/健康"
+  ],
+  "service_content": "低收入戶參加全民健康保險之保險費，由中央主管機關編列預算補助。",
+  "eligibility": [
+    {
+      "condition_id": "low",
+      "value": "已摘錄",
+      "source_excerpt": "低收入戶參加全民健康保險之保險費，由中央主管機關編列預算補助。",
+      "source_locator": "社會救助法第19條第1項",
+      "required_input": "低收入戶資格（C-001）、健保身分",
+      "data_source": "C-001結果、健保資料",
+      "judgment_method": "",
+      "manual_confirm_point": "實務由誰通報、是否自動補助，來源條文未載"
+    },
+    {
+      "condition_id": "mid",
+      "value": "已摘錄",
+      "source_excerpt": "中低收入戶參加全民健康保險應自付之保險費，由中央主管機關補助二分之一。",
+      "source_locator": "社會救助法第19條第2項",
+      "required_input": "中低收入戶資格（C-001）、應自付保費",
+      "data_source": "同上",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "其他法令有性質相同之補助規定者，不得重複補助。",
+      "source_locator": "社會救助法第19條第3項"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "第四條第一項及前條所定家庭，其應計算人口範圍，除申請人外，包括下列人員：一、配偶。二、一親等之直系血親。三、同一戶籍或共同生活之其他直系血親。四、前三款以外，認列綜合所得稅扶養親屬免稅額之納稅義務人。",
+    "source_locator": "社會救助法第5條第1項（資格認定之口徑）"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知",
+  "documents": [
+    "未知"
+  ],
+  "application_method": "未知（條文僅載補助責任；程序未載）",
+  "contact": "未知（建議洽戶籍地縣市政府社會局（處）或1957福利諮詢專線）",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078",
+  "source_published_date": "未標示",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "來源僅為法條，未取得實務辦理方式。",
+    "補助對象以社會救助法低收入戶／中低收入戶認定結果為準。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

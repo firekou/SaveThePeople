@@ -1,0 +1,78 @@
+{
+  "resource_id": "C-014",
+  "name": "食物銀行／實物給付（衛福部）",
+  "provider": "衛生福利部社會救助及社工司；直轄市、縣（市）政府辦理",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "食物/物資"
+  ],
+  "service_content": "政府積極推動實物給付（食物銀行），全國22縣市計建立203處實物存放點，107年度服務逾66萬人次，由直轄市、縣（市）政府辦理實物倉儲、資源媒合、結合民間資源設置食物站或發放食物券等方式協助弱勢家庭",
+  "eligibility": [
+    {
+      "condition_id": "target",
+      "value": "已摘錄",
+      "source_excerpt": "對於低收入戶、中低收入戶、經濟陷於貧窮的邊緣戶，或遭遇急難救助之個人及家庭，提供飲食及日常生活用品。",
+      "source_locator": "衛福部新聞稿（108-01-25）",
+      "required_input": "是否為低收入／中低收入、貧窮邊緣戶、急難",
+      "data_source": "社工評估",
+      "judgment_method": "社工評估",
+      "manual_confirm_point": "貧窮邊緣戶定義未載"
+    },
+    {
+      "condition_id": "assess",
+      "value": "已摘錄",
+      "source_excerpt": "經社工評估確有需求者，將即時提供所需物資，協助民眾渡過難關。",
+      "source_locator": "衛福部新聞稿（112-02-04）",
+      "required_input": "社工評估",
+      "data_source": "",
+      "judgment_method": "社工評估",
+      "manual_confirm_point": "",
+      "source_url": "https://mohw.gov.tw/cp-16-73453-1.html"
+    },
+    {
+      "condition_id": "local",
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "頁面未載統一資格",
+      "required_input": "",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "各縣市辦理方式（實物倉儲／食物券／資源媒合）與條件不同，須向各縣市實物銀行窗口確認"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "頁面未載併領限制"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": "頁面未載家庭計算口徑"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知（隨物資供應；歷史資料不代表目前可取得）",
+  "documents": [
+    "未知"
+  ],
+  "application_method": "可透過電話、網路或LINE管道撥打1957福利諮詢專線洽詢，亦可洽各縣(市)實物銀行窗口，提供最近的實(食)物銀行據點（112年新聞稿）。",
+  "contact": "1957福利諮詢專線；各縣市實物銀行窗口",
+  "source_url": "https://www.mohw.gov.tw/cp-16-46246-1.html",
+  "source_published_date": "2019-01-25",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "來源為2019及2023年新聞稿，據點數量與辦理方式可能已變動；物資即時供應須另向各據點確認。",
+    "非社會救助法法定給付項目（本次取得之條文無此規定），資格與給付內容完全依各縣市訂定。",
+    "第2條件來源：https://mohw.gov.tw/cp-16-73453-1.html（112-02-04）。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "resource_id": "C-011",
+  "name": "脫貧自立（家庭發展帳戶等脫貧方案；福利緩衝期）",
+  "provider": "衛生福利部（補助）；直轄市、縣（市）政府及民間團體（辦理）",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "生活/急難救助",
+    "就業"
+  ],
+  "service_content": "其中，資產累積模式多以「家庭發展帳戶」方式辦理。",
+  "eligibility": [
+    {
+      "condition_id": "target",
+      "value": "已摘錄",
+      "source_excerpt": "為協助低收入戶及中低收入戶自立向上，落實積極性社會救助精神，衛生福利部運用公益彩券回饋金，補助地方政府及民間團體辦理脫貧方案，以教育投資、資產累積及就業自立等多元模式，協助低收入及中低收入戶兒少脫離貧窮。",
+      "source_locator": "新聞稿首段",
+      "required_input": "低收入戶／中低收入戶資格（C-001）",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "實際參與資格由各縣市方案訂定"
+    },
+    {
+      "condition_id": "screen",
+      "value": "已摘錄",
+      "source_excerpt": "由社工人員對參與方案之低收入家庭，進行評估與篩選。",
+      "source_locator": "新聞稿",
+      "required_input": "社工評估",
+      "data_source": "",
+      "judgment_method": "社工評估",
+      "manual_confirm_point": "篩選標準未載"
+    },
+    {
+      "condition_id": "buffer",
+      "value": "已摘錄",
+      "source_excerpt": "其豁免期間最長以3年為限，經評估有必要者，得再延長1年",
+      "source_locator": "新聞稿",
+      "required_input": "",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "屬法規福利，見社會救助法第15-1條"
+    },
+    {
+      "condition_id": "law",
+      "value": "已摘錄",
+      "source_excerpt": "參與前項措施之低收入戶及中低收入戶，於一定期間及額度內因措施所增加之收入及存款，得免計入第四條第一項之家庭總收入及家庭財產，最長以三年為限，經評估有必要者，得延長一年；其增加收入及存款之認定、免計入之期間及額度之限制等事項之規定，由直轄市、縣（市）主管機關定之。",
+      "source_locator": "社會救助法第15-1條第2項",
+      "required_input": "",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "額度與期間由地方訂定",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "不願接受第一項之服務措施，或接受後不願工作者，直轄市、縣（市）主管機關不予扶助。其他法令有性質相同之補助規定者，不得重複領取。",
+      "source_locator": "社會救助法第15條第4項",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": "新聞稿未載家庭計算口徑"
+  },
+  "validity_period": "未知（各方案不同）",
+  "application_deadline": "未知",
+  "documents": [
+    "未知"
+  ],
+  "application_method": "由各縣（市）政府以方案方式辦理；請洽戶籍地縣市社會局（處）。",
+  "contact": "各直轄市、縣（市）政府社會局（處）；1957福利諮詢專線",
+  "source_url": "https://www.mohw.gov.tw/cp-2625-19290-1.html",
+  "source_published_date": "2016-03-01",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "來源為2016年新聞稿，內容可能已過時；其中金額（生活補助等）已不採用。",
+    "使用者指定「家庭發展帳戶」未找到現行統一的中央官方頁面，替代為「脫貧自立」資料；各縣市方案與提撥細節須逐一確認。",
+    "已有兒少教育發展帳戶見 C-007。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

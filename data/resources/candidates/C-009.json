@@ -1,0 +1,78 @@
+{
+  "resource_id": "C-009",
+  "name": "生育補助（每胎10萬元，國保被保險人／未參加社會保險之母親）",
+  "provider": "衛生福利部社會保險司；勞保局受理",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "生活/急難救助",
+    "醫療/健康"
+  ],
+  "service_content": "自115年起，生育補助每胎10萬元！",
+  "eligibility": [
+    {
+      "condition_id": "timing",
+      "value": "已摘錄",
+      "source_excerpt": "只要是115年1月1日以後生產或早產的媽咪，符合以下身分之一即可申請：",
+      "source_locator": "頁面「誰可以領？」",
+      "required_input": "分娩日期",
+      "data_source": "戶政／醫療",
+      "judgment_method": "日期比對",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "id1",
+      "value": "已摘錄",
+      "source_excerpt": "國民年金保險的被保險人。",
+      "source_locator": "頁面「誰可以領？」第1項",
+      "required_input": "國民年金投保身分",
+      "data_source": "勞保局資料",
+      "judgment_method": "",
+      "manual_confirm_point": "勞保、農保被保險人另有生育給付規定，本頁面未載，須另行確認"
+    },
+    {
+      "condition_id": "id2",
+      "value": "已摘錄",
+      "source_excerpt": "未參加相關社會保險的我國籍新生兒的母親（含外籍媽媽）。",
+      "source_locator": "頁面「誰可以領？」第2項",
+      "required_input": "母親是否參加相關社會保險、新生兒國籍",
+      "data_source": "勞保局資料",
+      "judgment_method": "",
+      "manual_confirm_point": "「相關社會保險」範圍須確認"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "雙胞胎領20萬元，三胞胎領30萬元，以此類推。",
+      "source_locator": "頁面「補助領多少？」"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": "頁面未載家庭計算口徑（無所得限制字樣）"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知（頁面僅載115年1月1日以後生產者適用）",
+  "documents": [
+    "未知（頁面未載文件清單）"
+  ],
+  "application_method": "三選一：戶政事務所一站式服務（辦理新生兒出生登記時併同申請）、線上申辦（勞保局 e 化服務）、郵寄或臨櫃至勞保局。",
+  "contact": "勞保局（頁面未載電話）；衛福部社會保險司",
+  "source_url": "https://dep.mohw.gov.tw/DOSI/cp-3544-86293-102.html",
+  "source_published_date": "2026-05-07",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "頁面標題「生育補助大紅包」為宣導頁，非法規原文；金額依頁面。",
+    "本頁面不涵蓋勞保被保險人的生育給付規定。",
+    "頁面載國保被保險人原有生育給付金額與加給補助金額，隨法令可能調整。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

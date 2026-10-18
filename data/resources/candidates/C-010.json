@@ -1,0 +1,90 @@
+{
+  "resource_id": "C-010",
+  "name": "發展遲緩兒童早期療育費用補助",
+  "provider": "衛生福利部社會及家庭署（政策）；各直轄市、縣（市）政府（受理與核定）",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "醫療/健康",
+    "兒少/就學",
+    "必要支持服務"
+  ],
+  "service_content": "發展遲緩兒童之父母、監護人、實際照顧者檢具申請表及相關文件，向兒童戶籍所在地申請早期療育費用補助。",
+  "eligibility": [
+    {
+      "condition_id": "who",
+      "value": "已摘錄",
+      "source_excerpt": "發展遲緩兒童之父母、監護人、實際照顧者檢具申請表及相關文件，向兒童戶籍所在地申請早期療育費用補助。",
+      "source_locator": "衛福部「發展遲緩兒童早期療育」頁面",
+      "required_input": "兒童發展遲緩證明、戶籍",
+      "data_source": "醫院診斷／通報轉介中心",
+      "judgment_method": "",
+      "manual_confirm_point": "證明文件種類頁面未載"
+    },
+    {
+      "condition_id": "local",
+      "value": "已摘錄",
+      "source_excerpt": "申請時間、受理申請單位、補助款之核撥及申請案件之核准與否等，由地方政府訂定之",
+      "source_locator": "同頁",
+      "required_input": "",
+      "data_source": "縣市規定",
+      "judgment_method": "",
+      "manual_confirm_point": "須向兒童戶籍地縣市取得現行規定"
+    },
+    {
+      "condition_id": "amount",
+      "value": "已摘錄",
+      "source_excerpt": "低收入戶以每人每月最高補助6,000元為原則，非低收入戶以每月最高補助4,000元為原則",
+      "source_locator": "同頁",
+      "required_input": "是否低收入戶（C-001）",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "金額為「原則」，地方實際可能不同"
+    },
+    {
+      "condition_id": "ch-eval",
+      "value": "已摘錄",
+      "source_excerpt": "四、全民健康保險未涵蓋之發展遲緩兒童評估費及療育訓練費：未滿六歲或已滿六歲，未達到就學年齡，或經評鑑可暫緩入學者，每人每次最高補助新臺幣五百元，每月最多八次為限。",
+      "source_locator": "弱勢兒童及少年生活扶助與托育及醫療費用補助辦法第10條第1項第4款",
+      "required_input": "兒童年齡、是否具第9條所列身分",
+      "data_source": "同辦法",
+      "judgment_method": "",
+      "manual_confirm_point": "此為另一法源之評估／訓練費補助，與地方早療費用補助不同，不宜合併",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050180"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "頁面未載併領或排除條件"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": "頁面未載家庭計算口徑"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知（由地方政府訂定）",
+  "documents": [
+    "申請表及相關文件（頁面未載清單）"
+  ],
+  "application_method": "檢具申請表及相關文件向兒童戶籍所在地申請；也可洽各縣市通報轉介中心。",
+  "contact": "各直轄市、縣（市）政府通報轉介中心／社會局（處）",
+  "source_url": "https://www.mohw.gov.tw/cp-190-238-1.html",
+  "source_published_date": "2026-09-29",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "頁面載金額為原則性，實際由地方政府訂定。",
+    "搜尋摘要曾顯示非低收入戶上限為3,000元，但本次擷取頁面為4,000元，以頁面為準，須人工確認。",
+    "第4項來源不同（法規頁面），已於條件中標註 source_url。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

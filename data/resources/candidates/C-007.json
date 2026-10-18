@@ -1,0 +1,103 @@
+{
+  "resource_id": "C-007",
+  "name": "兒童及少年未來教育與發展帳戶",
+  "provider": "衛生福利部（中央主管機關）；直轄市、縣（市）政府（受理、執行）",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "兒少/就學"
+  ],
+  "service_content": "為提升兒童及少年平等接受良好教育與生涯發展之機會，建立兒童及少年未來教育與發展帳戶制度，協助資產累積、教育投資及就業創業，以促進其自立發展，特制定本條例。",
+  "eligibility": [
+    {
+      "condition_id": "t1",
+      "value": "已摘錄",
+      "source_excerpt": "一、具社會救助法所定之低收入戶或中低收入戶資格，且於中華民國一百零五年一月一日以後出生者。",
+      "source_locator": "兒童及少年未來教育與發展帳戶條例第6條第1款",
+      "required_input": "低收入戶／中低收入戶資格、出生日期",
+      "data_source": "C-001結果、戶政",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "t2",
+      "value": "已摘錄",
+      "source_excerpt": "二、依據兒童及少年福利與權益保障法相關規定安置二年以上，由法院指定直轄市、縣（市）主管機關、兒童及少年福利機構負責人為監護人者。",
+      "source_locator": "兒童及少年未來教育與發展帳戶條例第6條第2款",
+      "required_input": "安置紀錄、監護人指定",
+      "data_source": "法院／主管機關",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "t3",
+      "value": "已摘錄",
+      "source_excerpt": "三、其他經中央主管機關公告指定者。",
+      "source_locator": "兒童及少年未來教育與發展帳戶條例第6條第3款",
+      "required_input": "",
+      "data_source": "中央公告",
+      "judgment_method": "",
+      "manual_confirm_point": "須查中央是否另有公告對象"
+    },
+    {
+      "condition_id": "apply",
+      "value": "已摘錄",
+      "source_excerpt": "前項申請，應填具申請書，並擇定每月自存款金額，向該管直轄市、縣（市）主管機關提出，經審查核准後，列冊報中央主管機關通知承辦機構於第十條第二項之總帳戶下開立兒少教育發展帳戶及撥入開戶金。",
+      "source_locator": "第11條第2項",
+      "required_input": "申請書、擇定每月自存款金額",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "自存款金額須由家庭決定"
+    },
+    {
+      "condition_id": "amount",
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "第11條第3項（開戶金及上限由中央主管機關公告）",
+      "required_input": "",
+      "data_source": "中央公告",
+      "judgment_method": "",
+      "manual_confirm_point": "開戶金與相對提撥上限條文未載金額，須查公告"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "開戶人於前項存入自存款之期間內，不得提領其兒少教育發展帳戶之儲金。但有第十七條、第十八條所定情形者，不在此限。",
+      "source_locator": "第12條第2項"
+    },
+    {
+      "value": "已摘錄",
+      "source_excerpt": "開戶人辦理帳戶結清後，未滿三年不得重行申請開立兒少教育發展帳戶。",
+      "source_locator": "第19條"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "開戶人之兒少教育發展帳戶儲金，均不計入其他法規所定之家庭總收入或家庭財產，且不得作為抵銷、扣押、供擔保或強制執行之標的。",
+    "source_locator": "第21條第1項（說明帳戶儲金不計入他法家庭收入財產）"
+  },
+  "validity_period": "開戶人滿十八歲前自行存款（第3條、第12條）；帳戶期間至滿十八歲辦理結清（第16條）",
+  "application_deadline": "直轄市、縣（市）主管機關知悉符合條件者，應自知悉之日起一個月內通知（第11條第1項）；申請期限另未載明",
+  "documents": [
+    "申請書（第11條第2項）",
+    "儲金用途證明（滿十八歲請領時，第16條）"
+  ],
+  "application_method": "由法定代理人或最近親屬任一人向直轄市、縣（市）主管機關申請，經審查核准後開立帳戶並撥入開戶金（第11條）。",
+  "contact": "戶籍所在地直轄市、縣（市）政府；諮詢可洽1957福利諮詢專線（見 https://www.mohw.gov.tw/cp-88-79005-1.html）",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050205",
+  "source_published_date": "未標示",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "家長需每月自存款，家庭財務能力須評估。",
+    "開戶金、每月自存款選項與年度上限由中央公告，條文未載金額。",
+    "第6條第1款限105年1月1日以後出生者，較早出生者不適用。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

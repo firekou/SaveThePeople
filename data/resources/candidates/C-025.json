@@ -1,0 +1,109 @@
+{
+  "resource_id": "C-025",
+  "name": "求職交通補助金（就業促進津貼，低收入戶等弱勢求職者）",
+  "provider": "勞動部；公立就業服務機構",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "就業"
+  ],
+  "service_content": "第二條第一項所定人員親自向公立就業服務機構辦理求職登記後，經公立就業服務機構諮詢並開立介紹卡推介就業，而有下列情形之一者，得發給求職交通補助金：",
+  "eligibility": [
+    {
+      "condition_id": "C025-1",
+      "value": "已摘錄",
+      "source_excerpt": "其推介地點與日常居住處所距離三十公里以上。",
+      "source_locator": "第6條第1款",
+      "required_input": "推介地點、居住地",
+      "data_source": "就業服務機構",
+      "judgment_method": "比對距離",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C025-2",
+      "value": "已摘錄",
+      "source_excerpt": "為低收入戶、中低收入戶或家庭暴力被害人。",
+      "source_locator": "第6條第2款",
+      "required_input": "低收入戶／中低收入戶／家庭暴力被害人身分",
+      "data_source": "證明文件（見第5條）",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C025-3",
+      "value": "已摘錄",
+      "source_excerpt": "本辦法之適用對象如下：",
+      "source_locator": "第2條第1項",
+      "required_input": "非自願離職者或就業服務法第24條第1項各款失業者",
+      "data_source": "證明文件",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C025-4",
+      "value": "已摘錄",
+      "source_excerpt": "前項所定人員須具有工作能力及工作意願。",
+      "source_locator": "第2條第2項",
+      "required_input": "工作能力與意願",
+      "data_source": "本人",
+      "judgment_method": "自述",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C025-5",
+      "value": "已摘錄",
+      "source_excerpt": "第六條補助金，每人每次得發給新臺幣五百元。但情形特殊者，得核實發給，每次不得超過新臺幣一千二百五十元。",
+      "source_locator": "第8條第1項",
+      "required_input": "—",
+      "data_source": "—",
+      "judgment_method": "給付基準，非資格",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C025-6",
+      "value": "已摘錄",
+      "source_excerpt": "前項補助金每人每年度以發給四次為限。",
+      "source_locator": "第8條第2項",
+      "required_input": "年度已領次數",
+      "data_source": "就業服務機構",
+      "judgment_method": "計次",
+      "manual_confirm_point": "—"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "一、已領取公教人員保險養老給付或勞工保險老年給付。",
+      "source_locator": "第3條第1項第1款"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": ""
+  },
+  "validity_period": "未知（中央主管機關得視情形發給，且得公告停止發給，第4條）",
+  "application_deadline": "領取者應於推介就業之次日起七日內填具回覆卡通知，逾期未通知者當年度不再發給（第9條）",
+  "documents": [
+    "國民身分證正反面影本及同意代為查詢保險資料委託書",
+    "低收入戶或中低收入戶證明文件影本（視身分）",
+    "補助金領取收據"
+  ],
+  "application_method": "親自向公立就業服務機構辦理求職登記，經諮詢並開立介紹卡推介就業後申請",
+  "contact": "未知",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0090025",
+  "source_published_date": "2025-09-01",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "資料取自全國法規資料庫頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "任務原題「就業服務免費諮詢與媒合／僱用獎助擇一」，以求職交通補助金為對低收入戶有直接幫助的現行方案；免費就業諮詢媒合本身未另建筆。",
+    "是否仍發給由中央主管機關公告，須確認。",
+    "資料同 C-022 來源頁面。"
+  ]
+}

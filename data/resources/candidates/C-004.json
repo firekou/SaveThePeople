@@ -1,0 +1,81 @@
+{
+  "resource_id": "C-004",
+  "name": "傷病醫療補助（社會救助法）",
+  "provider": "戶籍所在地直轄市、縣（市）主管機關；中央主管機關為衛生福利部",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "醫療/健康"
+  ],
+  "service_content": "具有下列情形之一者，得檢同有關證明，向戶籍所在地主管機關申請醫療補助：",
+  "eligibility": [
+    {
+      "condition_id": "low-income-ill",
+      "value": "已摘錄",
+      "source_excerpt": "一、低收入戶之傷、病患者。",
+      "source_locator": "社會救助法第18條第1項第1款",
+      "required_input": "低收入戶資格（C-001）、傷病證明",
+      "data_source": "C-001結果＋醫療證明",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "serious-ill",
+      "value": "已摘錄",
+      "source_excerpt": "二、患嚴重傷、病，所需醫療費用非其本人或扶養義務人所能負擔者。",
+      "source_locator": "社會救助法第18條第1項第2款",
+      "required_input": "病況證明、費用、本人及扶養義務人負擔能力",
+      "data_source": "診斷證明、費用收據",
+      "judgment_method": "主管機關認定",
+      "manual_confirm_point": "「嚴重傷病」及「無力負擔」認定基準未載；本條款未限定低收入戶，須向主管機關確認"
+    },
+    {
+      "condition_id": "standard",
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "社會救助法第20條（給付項目、方式及標準由中央、直轄市主管機關定之）",
+      "required_input": "",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "補助項目與標準未見於條文，須查中央或直轄市主管機關規定"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "參加全民健康保險可取得之醫療給付者，不得再依前項規定申請醫療補助。",
+      "source_locator": "社會救助法第18條第2項"
+    },
+    {
+      "value": "已摘錄",
+      "source_excerpt": "依本法或其他法令每人每月所領取政府核發之救助總金額，不得超過當年政府公告之基本工資。",
+      "source_locator": "社會救助法第8條"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": "本條未載家庭計算口徑；低收入戶資格口徑見第5條"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知（來源未載申請期限）",
+  "documents": [
+    "有關證明（社會救助法第18條：檢同有關證明）；具體清單未載"
+  ],
+  "application_method": "向戶籍所在地主管機關申請（社會救助法第18條第1項）。",
+  "contact": "戶籍所在地直轄市、縣（市）政府社會局（處）",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078",
+  "source_published_date": "未標示",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "給付項目與標準由中央、直轄市主管機關另定，本檔未取得。",
+    "特殊境遇家庭另有傷病醫療補助，見 C-005，兩者不同法源。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

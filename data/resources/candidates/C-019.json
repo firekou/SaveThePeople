@@ -1,0 +1,95 @@
+{
+  "resource_id": "C-019",
+  "name": "高級中等學校經濟弱勢學生就學費用補助",
+  "provider": "教育部",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "兒少/就學"
+  ],
+  "service_content": "本要點補助對象為經濟弱勢學生。",
+  "eligibility": [
+    {
+      "condition_id": "C019-1",
+      "value": "已摘錄",
+      "source_excerpt": "前項所稱經濟弱勢學生，指突遭變故或因其他特殊狀況，造成家庭經濟困難，致無法順利受學校教育之在學學生（以下簡稱學生）",
+      "source_locator": "二",
+      "required_input": "家庭是否突遭變故或特殊狀況、在學",
+      "data_source": "學校審核；證明文件",
+      "judgment_method": "比對所列七類情形之一",
+      "manual_confirm_point": "「其他經本部認定」須由教育部認定"
+    },
+    {
+      "condition_id": "C019-2",
+      "value": "已摘錄",
+      "source_excerpt": "戶內人口死亡、遭受意外傷害或罹患重病。",
+      "source_locator": "二、(一)",
+      "required_input": "戶內人口事故",
+      "data_source": "證明文件",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C019-3",
+      "value": "已摘錄",
+      "source_excerpt": "負擔家庭主要生計責任者，失業、失蹤、應徵集、召集入營服兵役或替代役現役、入獄服刑、因案羈押、依法拘禁或其他原因，無法工作。",
+      "source_locator": "二、(二)",
+      "required_input": "主要生計負擔者狀況",
+      "data_source": "證明文件",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C019-4",
+      "value": "已摘錄",
+      "source_excerpt": "但不包括低收入戶、中低收入戶及本辦法第三條第二項所定已享有政府其他各類就學所需相關費用（包括學費）補助或減免之學生。",
+      "source_locator": "二",
+      "required_input": "是否低收入戶／中低收入戶、是否已享其他補助",
+      "data_source": "學校",
+      "judgment_method": "若屬之則不適用本要點（另循低收入戶規定）",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C019-5",
+      "value": "已摘錄",
+      "source_excerpt": "就讀公立學校者，每學期不得超過新臺幣五千元，就讀私立學校者，每學期不得超過新臺幣二萬元",
+      "source_locator": "四、(一)1",
+      "required_input": "就讀學校公私立",
+      "data_source": "學校",
+      "judgment_method": "作為補助上限參考",
+      "manual_confirm_point": "實際補助視學校實際需要與財政而定"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "但不包括低收入戶、中低收入戶及本辦法第三條第二項所定已享有政府其他各類就學所需相關費用（包括學費）補助或減免之學生。",
+      "source_locator": "二"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": ""
+  },
+  "validity_period": "未知",
+  "application_deadline": "於就讀學校所定申請期限內（來源：四、(一)1）",
+  "documents": "申請表（附件）及證明文件、資料（種類來源未逐項載明）",
+  "application_method": "向就讀學校提出申請，填具申請表並檢附證明文件",
+  "contact": "未知",
+  "source_url": "https://edu.law.moe.gov.tw/LawContent.aspx?id=GL001337",
+  "source_published_date": "2014-08-08",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "原題「高級中等學校弱勢學生助學金」，以教育部現行「補助高級中等學校經濟弱勢學生就學費用作業要點」替代（助學金性質為就學費用補助）。",
+    "資料取自教育部主管法規共用系統頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "要點發布於2014年且頁面未標示修正日期，須確認是否仍現行。",
+    "家庭收入門檻來源未載明，由學校審核。"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "resource_id": "C-027",
+  "name": "弱勢兒童及少年生活扶助與托育及醫療費用補助",
+  "provider": "衛生福利部（辦法）；縣（市）主管機關審核核撥",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "生活/急難救助",
+    "兒少/就學",
+    "醫療/健康"
+  ],
+  "service_content": "本辦法所定補助，包括生活扶助、托育費用及醫療費用（含全民健康保險保險費）補助。",
+  "eligibility": [
+    {
+      "condition_id": "C027-1",
+      "value": "已摘錄",
+      "source_excerpt": "遭遇困境之中低收入戶內兒童、少年。",
+      "source_locator": "第3條第1款",
+      "required_input": "中低收入戶身分、是否遭遇困境",
+      "data_source": "社政",
+      "judgment_method": "比對",
+      "manual_confirm_point": "「遭遇困境」認定標準來源未載明"
+    },
+    {
+      "condition_id": "C027-2",
+      "value": "已摘錄",
+      "source_excerpt": "因懷孕或生育而遭遇困境之兒童、少年及其子女。",
+      "source_locator": "第3條第2款",
+      "required_input": "身分",
+      "data_source": "社政",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C027-3",
+      "value": "已摘錄",
+      "source_excerpt": "其他經縣（市）主管機關評估無力撫育及無扶養義務人或撫養義務人無力維持其生活之兒童及少年。",
+      "source_locator": "第3條第3款",
+      "required_input": "家庭狀況",
+      "data_source": "縣市評估",
+      "judgment_method": "由縣（市）主管機關評估",
+      "manual_confirm_point": "評估標準未載明"
+    },
+    {
+      "condition_id": "C027-4",
+      "value": "已摘錄",
+      "source_excerpt": "領取生活扶助者，每人每月補助新臺幣一千九百元。",
+      "source_locator": "第4條第1項",
+      "required_input": "—",
+      "data_source": "—",
+      "judgment_method": "給付金額，非資格",
+      "manual_confirm_point": "金額依第4條第2項可調整，須查最新公告"
+    },
+    {
+      "condition_id": "C027-5",
+      "value": "已摘錄",
+      "source_excerpt": "前項補助及其審核認定與核撥事宜，由縣（市）主管機關辦理。",
+      "source_locator": "第2條第2項",
+      "required_input": "戶籍所在縣市",
+      "data_source": "戶政",
+      "judgment_method": "確認受理機關",
+      "manual_confirm_point": "直轄市另有自訂辦法，本辦法未涵蓋"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "已接受政府公費安置或領取政府其他相同性質之生活類補助或津貼者，不予重複扶助；其他法令另有規定者，從優辦理；其額度低於生活扶助者，得補助其差額。",
+      "source_locator": "第5條第1項"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "家庭總收入之計算方式，依社會救助法相關規定辦理。",
+    "source_locator": "第11條第3項（限醫療費用補助）"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知（托育費用補助需於托育事實發生日起十五日內申請，第8條；醫療費用補助需於六個月內，第12條）",
+  "documents": [
+    "申請表及相關證明文件（生活扶助，第3條第2項）"
+  ],
+  "application_method": "應備齊申請表及相關證明文件向戶籍所在地縣（市）主管機關申請（第3條第2項）",
+  "contact": "未知",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050180",
+  "source_published_date": "2026-01-07",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "資料取自全國法規資料庫頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "本辦法由縣（市）辦理，直轄市另依自訂辦法，須確認申請者戶籍地。",
+    "任務原題為兒少保護／家庭暴力經濟扶助，經查無明確中央現金方案，改以兒少福利法授權的本辦法替代。",
+    "生活扶助補助金額頁面載為1,900元，依辦法每四年可調整，須查最新公告。"
+  ]
+}

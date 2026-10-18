@@ -1,0 +1,98 @@
+{
+  "resource_id": "C-006",
+  "name": "弱勢兒童及少年生活扶助（辦法所定生活扶助；緊急生活扶助未取得中央原文）",
+  "provider": "縣（市）主管機關辦理；中央主管機關為衛生福利部",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "生活/急難救助",
+    "兒少/就學"
+  ],
+  "service_content": "本辦法所定補助，包括生活扶助、托育費用及醫療費用（含全民健康保險保險費）補助。",
+  "eligibility": [
+    {
+      "condition_id": "t1",
+      "value": "已摘錄",
+      "source_excerpt": "一、遭遇困境之中低收入戶內兒童、少年。",
+      "source_locator": "弱勢兒童及少年生活扶助與托育及醫療費用補助辦法第3條第1項第1款",
+      "required_input": "中低收入戶資格（C-001）、兒少年齡、困境事實",
+      "data_source": "C-001結果、社工評估",
+      "judgment_method": "",
+      "manual_confirm_point": "「遭遇困境」認定標準未載"
+    },
+    {
+      "condition_id": "t2",
+      "value": "已摘錄",
+      "source_excerpt": "二、因懷孕或生育而遭遇困境之兒童、少年及其子女。",
+      "source_locator": "同辦法第3條第1項第2款",
+      "required_input": "兒少年齡、懷孕或生育事實",
+      "data_source": "醫療／戶政",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "t3",
+      "value": "已摘錄",
+      "source_excerpt": "三、其他經縣（市）主管機關評估無力撫育及無扶養義務人或撫養義務人無力維持其生活之兒童及少年。",
+      "source_locator": "同辦法第3條第1項第3款",
+      "required_input": "扶養義務人狀況",
+      "data_source": "社工評估",
+      "judgment_method": "縣（市）主管機關評估",
+      "manual_confirm_point": "評估由主管機關為之"
+    },
+    {
+      "condition_id": "amount",
+      "value": "已摘錄",
+      "source_excerpt": "領取生活扶助者，每人每月補助新臺幣一千九百元。",
+      "source_locator": "同辦法第4條第1項",
+      "required_input": "",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "金額依第4條第2項可能經公告調整，須查最新金額"
+    },
+    {
+      "condition_id": "emergency",
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "（本來源不含緊急生活扶助）",
+      "required_input": "兒少年齡、父母失業／入獄／重大傷病等情形",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "「弱勢家庭兒童及少年緊急生活扶助」之全國計畫原文本次未取得，其金額、期間與財產門檻須向衛福部社家署或縣市取得"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "已接受政府公費安置或領取政府其他相同性質之生活類補助或津貼者，不予重複扶助；其他法令另有規定者，從優辦理；其額度低於生活扶助者，得補助其差額。",
+      "source_locator": "同辦法第5條第1項"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "前項家庭應計算人口範圍，包含兒童及少年之一親等直系血親及實際共同生活之兄弟姊妹。但未與單親家庭未成年子女共同生活、無扶養事實，且未行使、負擔其對未成年子女權利義務之父或母，得不列入。",
+    "source_locator": "同辦法第11條第2項（該項為醫療費用補助之計算口徑，不一定適用於生活扶助）"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知（生活扶助條文未載申請期限）",
+  "documents": [
+    "申請表及相關證明文件（辦法第3條第2項）；清單未載"
+  ],
+  "application_method": "應備齊申請表及相關證明文件向戶籍所在地縣（市）主管機關申請（辦法第3條第2項）。",
+  "contact": "戶籍所在地縣（市）政府社會局（處）",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050180",
+  "source_published_date": "未標示",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "辦法條文所稱「縣（市）主管機關」，直轄市是否另有規定未確認。",
+    "使用者所列「緊急生活扶助」未取得官方中央原文（僅見地方版本與搜尋摘要，未採用），故本檔僅涵蓋辦法所定生活扶助。",
+    "第4條金額自105年起依物價指數調整，條文所載數額可能已不是現行額。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

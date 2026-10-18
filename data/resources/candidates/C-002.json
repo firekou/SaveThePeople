@@ -1,0 +1,82 @@
+{
+  "resource_id": "C-002",
+  "name": "低收入戶生活扶助（含兒童生活補助之法源說明）",
+  "provider": "戶籍所在地直轄市、縣（市）政府；中央主管機關為衛生福利部",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "生活/急難救助"
+  ],
+  "service_content": "生活扶助以現金給付為原則。但因實際需要，得委託適當之社會救助機構、社會福利機構或其他家庭予以收容。",
+  "eligibility": [
+    {
+      "condition_id": "qualify",
+      "value": "已摘錄",
+      "source_excerpt": "低收入戶得向戶籍所在地直轄市、縣（市）主管機關申請生活扶助。",
+      "source_locator": "社會救助法第10條第1項",
+      "required_input": "是否具低收入戶資格（見 C-001）",
+      "data_source": "C-001 認定結果",
+      "judgment_method": "確認具資格後申請",
+      "manual_confirm_point": "資格須先經認定"
+    },
+    {
+      "condition_id": "work-service",
+      "value": "已摘錄",
+      "source_excerpt": "不願接受第一項之服務措施，或接受後不願工作者，直轄市、縣（市）主管機關不予扶助。",
+      "source_locator": "社會救助法第15條第4項",
+      "required_input": "家庭成員工作能力與就業服務配合情形",
+      "data_source": "主管機關訪視",
+      "judgment_method": "由主管機關認定",
+      "manual_confirm_point": "「有工作能力」定義見第5-3條，須由主管機關判斷"
+    },
+    {
+      "condition_id": "child-allowance-amount",
+      "value": "未知",
+      "source_excerpt": "",
+      "source_locator": "社會救助法第11條（僅載現金給付原則與調整機制）",
+      "required_input": "兒童年齡、就學狀態",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "兒童生活補助／就學生活補助之名稱與金額未見於本法條文；須向衛福部或戶籍地縣市取得現行標準"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "其他法令有性質相同之補助規定者，不得重複領取。",
+      "source_locator": "社會救助法第15條第4項"
+    },
+    {
+      "value": "已摘錄",
+      "source_excerpt": "依本法或其他法令每人每月所領取政府核發之救助總金額，不得超過當年政府公告之基本工資。",
+      "source_locator": "社會救助法第8條"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "已摘錄",
+    "source_excerpt": "第四條第一項及前條所定家庭，其應計算人口範圍，除申請人外，包括下列人員：一、配偶。二、一親等之直系血親。三、同一戶籍或共同生活之其他直系血親。四、前三款以外，認列綜合所得稅扶養親屬免稅額之納稅義務人。",
+    "source_locator": "社會救助法第5條第1項"
+  },
+  "validity_period": "前項申請生活扶助經核准者，溯自備齊文件之當月生效。",
+  "application_deadline": "未知（來源未載申請期限）",
+  "documents": [
+    "未知（社會救助法第10條第3項：應檢附文件由直轄市、縣（市）主管機關定之）"
+  ],
+  "application_method": "向戶籍所在地直轄市、縣（市）主管機關申請；主管機關應自受理申請之日起五日內，派員調查申請人家庭環境、經濟狀況等項目後核定（社會救助法第10條第1-2項）。",
+  "contact": "戶籍所在地直轄市、縣（市）政府社會局（處）",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050078",
+  "source_published_date": "未標示",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "來源條文未載兒童生活補助之金額；舊版官方新聞（105年）曾載金額但已過時，未採用。",
+    "核定、金額標準及申請文件多由直轄市、縣（市）政府訂定，各地實際作法與數額可能不同，須向戶籍所在地主管機關確認。",
+    "現金給付金額每四年依物價調整（第11條第3項），須查最新公告。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

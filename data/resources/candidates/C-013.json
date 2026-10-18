@@ -1,0 +1,100 @@
+{
+  "resource_id": "C-013",
+  "name": "未滿2歲托育補助（準公共托育）",
+  "provider": "衛生福利部社會及家庭署；直轄市、縣（市）政府",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "兒少/就學",
+    "必要支持服務"
+  ],
+  "service_content": "衛福部為提供優質、負擔得起且近便性的托育服務，除加速布建公共化托育機構外，同步也啟動托育準公共化服務，透過與優質居家托育人員及托嬰中心簽約合作，由政府依家庭經濟條件協助補助托育費用，並將托育費用支出控制在家庭可支配所得的5-10%(約3,500元至8,000元)，以實質減輕家長托育負擔，並逐年提升家外送托率。",
+  "eligibility": [
+    {
+      "condition_id": "amount",
+      "value": "已摘錄",
+      "source_excerpt": "自113年1月起提高托育費用補助額度，公共化托育補助每月7,000元起、準公共托育補助每月1萬3,000元起，提前自第2名子女加發、取消不得與育嬰留職停薪津貼、其他弱勢生活補助同時領取之限制。",
+      "source_locator": "衛福部專區「托育補助(113年1月1日起適用)」",
+      "required_input": "幼兒年齡、托育機構是否簽約",
+      "data_source": "托育媒合平臺／縣市名單",
+      "judgment_method": "",
+      "manual_confirm_point": "實際補助額依家庭條件，須向縣市確認"
+    },
+    {
+      "condition_id": "age3",
+      "value": "已摘錄",
+      "source_excerpt": "對於滿2歲兒童續留準公共居家托育人員或準公共托嬰中心照顧者，延長托育費用補助至未滿3歲",
+      "source_locator": "同頁",
+      "required_input": "幼兒年齡",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": ""
+    },
+    {
+      "condition_id": "sign",
+      "value": "已摘錄",
+      "source_excerpt": "由政府依家庭經濟條件協助補助托育費用",
+      "source_locator": "同頁",
+      "required_input": "家庭經濟條件",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "「家庭經濟條件」具體區分標準本頁未載，須查補助作業要點"
+    },
+    {
+      "condition_id": "ch6",
+      "value": "已摘錄",
+      "source_excerpt": "法定代理人或實際照顧兒童之人，就家中未滿二歲幼兒，送請與縣（市）政府簽訂合作契約之下列人員或場所照顧者，得依中央主管機關所定未滿二歲兒童托育準公共化服務與費用申報及支付相關規定，申請托育費用補助：",
+      "source_locator": "弱勢兒少辦法第6條第1項（低收入戶等之托育補助）",
+      "required_input": "幼兒年齡、托育人員／機構是否簽約",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "此為弱勢身分托育費用補助之另一法源",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050180"
+    },
+    {
+      "condition_id": "ch6-2",
+      "value": "已摘錄",
+      "source_excerpt": "一、低收入戶。二、中低收入戶。三、因懷孕或生育而遭遇困境之未成年人。四、其他經縣（市）主管機關評估無力撫育及無扶養義務人或撫養義務人無力維持其生活之幼兒。",
+      "source_locator": "同辦法第6條第2項",
+      "required_input": "",
+      "data_source": "",
+      "judgment_method": "",
+      "manual_confirm_point": "",
+      "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050180"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "補助資格：112年1月起取消排富限制，只要是未滿2歲之幼兒，在我國完成出生登記或初設戶籍登記；且未同時請領托育補助、公費安置，都具備資格。",
+      "source_locator": "衛福部專區（說明育兒津貼與托育補助不可同時請領）"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": "頁面未載家庭計算口徑"
+  },
+  "validity_period": "未知",
+  "application_deadline": "未知（弱勢身分托育補助依辦法第8條須自托育事實發生日起十五日內申請）",
+  "documents": [
+    "未知（見未滿2歲兒童托育補助問答集）"
+  ],
+  "application_method": "未知（頁面提供線上申辦與托育媒合平臺連結，細節未取得）",
+  "contact": "1957福利諮詢專線（每日早上8點至晚上10點）",
+  "source_url": "https://www.mohw.gov.tw/cp-5130-58003-1.html",
+  "source_published_date": "2026-07-13",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "替代說明：使用者指定「幼兒就學補助或準公共托育津貼擇一」，本檔選未滿2歲托育補助（準公共）。2至5歲就學補助另案。",
+    "不同家庭經濟條件的補助金額表本次未取得。",
+    "育兒津貼與托育補助不得同時請領（見資格說明）。",
+    "本檔為桌面蒐集之候選資料，非人工現場查核；法規頁面可能已修正，使用前須重新比對來源。"
+  ]
+}

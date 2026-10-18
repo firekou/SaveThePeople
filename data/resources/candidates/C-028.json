@@ -1,0 +1,96 @@
+{
+  "resource_id": "C-028",
+  "name": "兒童及少年未來教育與發展帳戶（兒少教育發展帳戶）",
+  "provider": "衛生福利部；直轄市、縣（市）主管機關",
+  "level": "中央",
+  "regions": [
+    "全國"
+  ],
+  "need_categories": [
+    "兒少/就學",
+    "生活/急難救助"
+  ],
+  "service_content": "為提升兒童及少年平等接受良好教育與生涯發展之機會，建立兒童及少年未來教育與發展帳戶制度，協助資產累積、教育投資及就業創業，以促進其自立發展，特制定本條例。",
+  "eligibility": [
+    {
+      "condition_id": "C028-1",
+      "value": "已摘錄",
+      "source_excerpt": "具社會救助法所定之低收入戶或中低收入戶資格，且於中華民國一百零五年一月一日以後出生者。",
+      "source_locator": "第6條第1款",
+      "required_input": "低收入戶／中低收入戶資格、出生日期",
+      "data_source": "社政、戶政",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C028-2",
+      "value": "已摘錄",
+      "source_excerpt": "依據兒童及少年福利與權益保障法相關規定安置二年以上，由法院指定直轄市、縣（市）主管機關、兒童及少年福利機構負責人為監護人者。",
+      "source_locator": "第6條第2款",
+      "required_input": "安置年限、監護人",
+      "data_source": "法院、社政",
+      "judgment_method": "比對",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C028-3",
+      "value": "已摘錄",
+      "source_excerpt": "其他經中央主管機關公告指定者。",
+      "source_locator": "第6條第3款",
+      "required_input": "—",
+      "data_source": "中央公告",
+      "judgment_method": "須查公告",
+      "manual_confirm_point": "—"
+    },
+    {
+      "condition_id": "C028-4",
+      "value": "已摘錄",
+      "source_excerpt": "政府相對提撥款：指政府依兒少教育發展帳戶開戶人自存款金額，相對撥付存入之款項。",
+      "source_locator": "第3條第5款",
+      "required_input": "每月自存款",
+      "data_source": "家庭",
+      "judgment_method": "—",
+      "manual_confirm_point": "自存款金額由中央公告可擇定金額"
+    },
+    {
+      "condition_id": "C028-5",
+      "value": "已摘錄",
+      "source_excerpt": "開戶人、其法定代理人或最近親屬，應每月依擇定之自存款金額存入兒少教育發展帳戶，至開戶人滿十八歲止。",
+      "source_locator": "第12條第1項",
+      "required_input": "是否有餘力每月存款",
+      "data_source": "家庭",
+      "judgment_method": "—",
+      "manual_confirm_point": "—"
+    }
+  ],
+  "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "開戶人之兒少教育發展帳戶儲金，均不計入其他法規所定之家庭總收入或家庭財產，且不得作為抵銷、扣押、供擔保或強制執行之標的。",
+      "source_locator": "第21條第1項"
+    }
+  ],
+  "household_calculation_basis": {
+    "value": "未知",
+    "source_excerpt": "",
+    "source_locator": ""
+  },
+  "validity_period": "至開戶人滿十八歲止（第12條）",
+  "application_deadline": "直轄市、縣（市）主管機關知悉符合條件者應於一個月內通知其申請（第11條）",
+  "documents": "申請書",
+  "application_method": "填具申請書，擇定每月自存款金額，向直轄市、縣（市）主管機關提出（第11條第2項）",
+  "contact": "未知",
+  "source_url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0050205",
+  "source_published_date": "2018-06-06",
+  "last_checked_date": "2026-10-18",
+  "checked_by": "Claude Sonnet 5.5 (桌面蒐集，非人工現場查核)",
+  "version": "v1-2026-10-18",
+  "status": "候選",
+  "capacity_confirmation": "未確認",
+  "uncertainty_notes": [
+    "資料取自全國法規資料庫頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
+    "原題「法律扶助」：法律扶助法由法務部／法律扶助基金會（財團法人）辦理，且屬司法救濟性質，非中央現金／服務方案，故改為本方案（衛福部）。",
+    "公布日期2018-06-06，頁面未標示修正日期；開戶金與自存款上限金額由中央公告，本頁未載明。",
+    "需家庭有存款能力，對極度困難家庭實用性須人工評估。"
+  ]
+}
