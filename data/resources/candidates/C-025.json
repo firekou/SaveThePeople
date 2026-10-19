@@ -32,19 +32,9 @@
       "manual_confirm_point": "—"
     },
     {
-      "condition_id": "C025-3",
-      "value": "已摘錄",
-      "source_excerpt": "本辦法之適用對象如下：",
-      "source_locator": "第2條第1項",
-      "required_input": "非自願離職者或就業服務法第24條第1項各款失業者",
-      "data_source": "證明文件",
-      "judgment_method": "比對",
-      "manual_confirm_point": "—"
-    },
-    {
       "condition_id": "C025-7",
       "value": "已摘錄",
-      "source_excerpt": "一、非自願離職者。",
+      "source_excerpt": "本辦法之適用對象如下： 一、非自願離職者。",
       "source_locator": "第2條第1項第1款",
       "required_input": "非自願離職事實",
       "data_source": "非自願離職證明文件（見第5條第8款）",
@@ -95,12 +85,7 @@
   "exclusions_cumulation": [
     {
       "value": "已摘錄",
-      "source_excerpt": "前條第一項所定人員有下列情事之一者，不適用本辦法：",
-      "source_locator": "第3條第1項（首段）"
-    },
-    {
-      "value": "已摘錄",
-      "source_excerpt": "一、已領取公教人員保險養老給付或勞工保險老年給付。",
+      "source_excerpt": "前條第一項所定人員有下列情事之一者，不適用本辦法： 一、已領取公教人員保險養老給付或勞工保險老年給付。",
       "source_locator": "第3條第1項第1款"
     },
     {

@@ -25,31 +25,11 @@
     {
       "condition_id": "C027-2",
       "value": "已摘錄",
-      "source_excerpt": "前項補助對象，應具備下列資格之一：",
-      "source_locator": "第6條第2項（首段）",
+      "source_excerpt": "前項補助對象，應具備下列資格之一： 一、低收入戶。 二、中低收入戶。",
+      "source_locator": "第6條第2項（首段、第1款、第2款）",
       "required_input": "弱勢身分",
       "data_source": "社政",
       "judgment_method": "比對下列四款之一",
-      "manual_confirm_point": ""
-    },
-    {
-      "condition_id": "C027-2-1",
-      "value": "已摘錄",
-      "source_excerpt": "一、低收入戶。",
-      "source_locator": "第6條第2項第1款",
-      "required_input": "低收入戶資格（C-001）",
-      "data_source": "社政",
-      "judgment_method": "比對",
-      "manual_confirm_point": ""
-    },
-    {
-      "condition_id": "C027-2-2",
-      "value": "已摘錄",
-      "source_excerpt": "二、中低收入戶。",
-      "source_locator": "第6條第2項第2款",
-      "required_input": "中低收入戶資格（C-001）",
-      "data_source": "社政",
-      "judgment_method": "比對",
       "manual_confirm_point": ""
     },
     {
@@ -123,19 +103,9 @@
       "manual_confirm_point": "臨時托育補助金額"
     },
     {
-      "condition_id": "C027-8",
-      "value": "已摘錄",
-      "source_excerpt": "醫療費用補助之對象如下：",
-      "source_locator": "第9條（首段）",
-      "required_input": "兒少身分",
-      "data_source": "社政、醫療",
-      "judgment_method": "比對下列十款之一",
-      "manual_confirm_point": ""
-    },
-    {
       "condition_id": "C027-9-1",
       "value": "已摘錄",
-      "source_excerpt": "一、低收入戶及中低收入戶內兒童及少年。",
+      "source_excerpt": "醫療費用補助之對象如下： 一、低收入戶及中低收入戶內兒童及少年。",
       "source_locator": "第9條第1款",
       "required_input": "兒少身分",
       "data_source": "社政、醫療",
@@ -185,18 +155,8 @@
     {
       "condition_id": "C027-9-6",
       "value": "已摘錄",
-      "source_excerpt": "六、發展遲緩兒童。",
-      "source_locator": "第9條第6款",
-      "required_input": "兒少身分",
-      "data_source": "社政、醫療",
-      "judgment_method": "比對",
-      "manual_confirm_point": "第11條依款別區分補助比率"
-    },
-    {
-      "condition_id": "C027-9-7",
-      "value": "已摘錄",
-      "source_excerpt": "七、早產兒。",
-      "source_locator": "第9條第7款",
+      "source_excerpt": "六、發展遲緩兒童。 七、早產兒。",
+      "source_locator": "第9條第6、7款",
       "required_input": "兒少身分",
       "data_source": "社政、醫療",
       "judgment_method": "比對",
@@ -243,20 +203,10 @@
       "manual_confirm_point": "同款後段列有不補助項目，須讀原文"
     },
     {
-      "condition_id": "C027-11",
-      "value": "已摘錄",
-      "source_excerpt": "四、全民健康保險未涵蓋之發展遲緩兒童評估費及療育訓練費：未滿六歲或已滿六歲，未達到就學年齡，或經評鑑可暫緩入學者，每人每次最高補助新臺幣五百元，每月最多八次為限。",
-      "source_locator": "第10條第1項第4款",
-      "required_input": "發展遲緩評估費及療育訓練費",
-      "data_source": "收據",
-      "judgment_method": "給付項目，非資格",
-      "manual_confirm_point": "與 C-010 發展遲緩早療補助可能相關，須人工確認併領"
-    },
-    {
       "condition_id": "C027-12",
       "value": "已摘錄",
-      "source_excerpt": "一、依第九條第六款至第十款規定申請前條第一項各款補助者，得依收入訂定補助比率如下：",
-      "source_locator": "第11條第1項第1款（首段）",
+      "source_excerpt": "一、依第九條第六款至第十款規定申請前條第一項各款補助者，得依收入訂定補助比率如下： （一）家庭總收入平均未達當年度當地區每人每月最低生活費二倍，或未達臺灣地區平均每人每月消費支出者，補助百分之七十五。",
+      "source_locator": "第11條第1項第1款（首段、第（一）目）",
       "required_input": "家庭總收入、家庭人口",
       "data_source": "稅務資料",
       "judgment_method": "依下列比率",
@@ -330,6 +280,6 @@
     "資料取自全國法規資料庫頁面文字，僅代表蒐集當日版本；法規可能再修正，須人工比對主管機關公布版本。",
     "本辦法由縣（市）辦理（第2條第2項，摘錄見 C-006），直轄市另依自訂辦法，須確認申請者戶籍地。",
     "托育費用補助金額表（附表）為PDF，未取得數值；醫療費用補助比率與上限見第10、11條原文，本檔僅摘錄部分款項。",
-    "任務原題為兒少保護／家庭暴力經濟扶助，經查無明確中央現金方案，改以兒少福利法授權的本辦法替代。"
+    "第10條第1項第4款（發展遲緩兒童評估費及療育訓練費）與 C-010（早期療育費用補助）重疊，本檔不重複摘錄，請見 C-010。C-006 與本檔為同一辦法的不同條次（第3–5條 生活扶助；第6–14條 托育與醫療費用補助），給付項目、對象與金額不同，故分檔；同一辦法的共同排除（第14條）只列在本檔。"
   ]
 }

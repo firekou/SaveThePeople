@@ -55,7 +55,7 @@
     {
       "condition_id": "C026-5",
       "value": "已摘錄",
-      "source_excerpt": "低收入戶。",
+      "source_excerpt": "四、符合下列規定之一： （一）低收入戶。",
       "source_locator": "第2條第1項第4款第1目",
       "required_input": "低收入戶身分",
       "data_source": "社政",

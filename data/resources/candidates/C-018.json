@@ -133,16 +133,6 @@
       "manual_confirm_point": "此為加給，非資格門檻"
     },
     {
-      "condition_id": "C018-13",
-      "value": "已摘錄",
-      "source_excerpt": "申請急難慰問金者之家庭總收入，依第二項計算最近一年綜合所得總額達一百四十八萬元以上，或不動產價值合計達一千萬元以上，不予核給。",
-      "source_locator": "四",
-      "required_input": "家庭總收入、不動產價值",
-      "data_source": "財稅資料",
-      "judgment_method": "是否未達門檻",
-      "manual_confirm_point": "門檻可能修正"
-    },
-    {
       "condition_id": "C018-14",
       "value": "已摘錄",
       "source_excerpt": "應於事實發生之日起六個月內，向所屬學校或教保服務機構申請。",
@@ -154,6 +144,11 @@
     }
   ],
   "exclusions_cumulation": [
+    {
+      "value": "已摘錄",
+      "source_excerpt": "申請急難慰問金者之家庭總收入，依第二項計算最近一年綜合所得總額達一百四十八萬元以上，或不動產價值合計達一千萬元以上，不予核給。",
+      "source_locator": "四"
+    },
     {
       "value": "已摘錄",
       "source_excerpt": "但發生意外或重大傷病之原因事實，係可歸責於學生之故意違法行為，而該學生年齡在十八歲以上者，不予核給。",
